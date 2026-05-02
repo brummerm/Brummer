@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.local
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Databases
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Render
+.render-buildcache/
+
+# Session handoff docs
+CLAUDE_CODE_HANDOFF.md
+
+# Local images uploaded by user
+server/images/custom/*
+!server/images/custom/.gitkeep

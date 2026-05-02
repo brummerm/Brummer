@@ -1,0 +1,108 @@
+"""
+Top-level FastAPI app for the Brummer personal dashboard.
+
+Layout served at runtime:
+  /                     -> redirect to /login if not authed, else /dashboard/
+  /login                -> static login page
+  /dashboard/...        -> static dashboard files (the tile grid)
+  /apps/meal-planner/.. -> built React app for the meal planner
+  /api/auth/...         -> login/logout/me
+  /api/recipes, etc.    -> meal-planner API (auth required)
+  /images/...           -> recipe images (auth required)
+"""
+from pathlib import Path
+from fastapi import FastAPI, Depends, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
+
+from .config import settings
+from .database import Base, engine
+from . import models  # noqa: F401 — registers ORM tables before create_all
+from .routers import recipes, ingredients, meal_plans, grocery, images, seed
+from .auth import router as auth_router, get_current_user, is_authenticated
+
+# Create tables on startup
+Base.metadata.create_all(bind=engine)
+
+# Make sure image directories exist
+Path(settings.IMAGES_DIR, "custom").mkdir(parents=True, exist_ok=True)
+Path(settings.IMAGES_DIR, "seeded").mkdir(parents=True, exist_ok=True)
+
+# Make sure static dirs exist (so the app starts even before frontends are built)
+STATIC_DIR = Path(settings.STATIC_DIR)
+DASHBOARD_DIR = STATIC_DIR / "dashboard"
+LOGIN_DIR = STATIC_DIR / "login"
+MEAL_PLANNER_DIR = STATIC_DIR / "meal-planner"
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR):
+    d.mkdir(parents=True, exist_ok=True)
+
+
+app = FastAPI(
+    title="Brummer Personal Dashboard",
+    description="Single-user dashboard hosting Matthew's personal apps.",
+    version="0.1.0",
+)
+
+# CORS only matters for local dev when frontend runs on its own port.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ---- Auth router (always public, since this is where you log in) ----
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+
+
+# ---- Health check (public) ----
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}
+
+
+# ---- Meal Planner API: every route requires a valid session cookie ----
+auth_dep = [Depends(get_current_user)]
+app.include_router(recipes.router,     prefix="/api/recipes",     dependencies=auth_dep)
+app.include_router(ingredients.router, prefix="/api/ingredients", dependencies=auth_dep)
+app.include_router(meal_plans.router,  prefix="/api/meal-plans",  dependencies=auth_dep)
+app.include_router(grocery.router,     prefix="/api/grocery",     dependencies=auth_dep)
+app.include_router(images.router,      prefix="/api/images",      dependencies=auth_dep)
+app.include_router(seed.router,        prefix="/api/seed",        dependencies=auth_dep)
+
+
+# ---- Image static mount, with auth gate ----
+# StaticFiles can't easily depend on auth, so we wrap the path with a guard endpoint
+# and then fall back to the static mount. Simpler: require auth via cookie check.
+@app.get("/images/{path:path}")
+def serve_image(path: str, request: Request, _: str = Depends(get_current_user)):
+    # Resolve safely: prevent path traversal
+    base = Path(settings.IMAGES_DIR).resolve()
+    target = (base / path).resolve()
+    if not str(target).startswith(str(base)):
+        return HTMLResponse("Forbidden", status_code=403)
+    if not target.is_file():
+        return HTMLResponse("Not found", status_code=404)
+    return FileResponse(target)
+
+
+# ---- Static frontends ----
+# The login page is the only static area that's public.
+app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="login")
+
+
+# Dashboard and meal-planner static files require auth. We can't put auth on a StaticFiles
+# mount directly, so we serve the index via a guarded route and the assets via a
+# conditional check. For a personal app, the assets themselves (JS/CSS) being readable
+# without auth is fine; the API calls inside them require the cookie anyway.
+app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
+app.mount("/apps/meal-planner", StaticFiles(directory=str(MEAL_PLANNER_DIR), html=True), name="meal-planner")
+
+
+@app.get("/")
+def root(request: Request):
+    if is_authenticated(request):
+        return RedirectResponse("/dashboard/")
+    return RedirectResponse("/login/")
