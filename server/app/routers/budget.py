@@ -18,7 +18,6 @@ router = APIRouter(tags=["budget"])
 
 @router.get("/income", response_model=list[IncomeItemOut])
 def list_income(db: Session = Depends(get_db)):
-    crud.seed_defaults(db)
     return crud.get_income(db)
 
 
@@ -50,7 +49,6 @@ def remove_income(item_id: int, db: Session = Depends(get_db)):
 
 @router.get("/expenses", response_model=list[ExpenseItemOut])
 def list_expenses(db: Session = Depends(get_db)):
-    crud.seed_defaults(db)
     return crud.get_expenses(db)
 
 
@@ -82,7 +80,6 @@ def remove_expense(item_id: int, db: Session = Depends(get_db)):
 
 @router.get("/allocations", response_model=list[SurplusAllocationOut])
 def list_allocations(db: Session = Depends(get_db)):
-    crud.seed_defaults(db)
     return crud.get_allocations(db)
 
 
@@ -99,7 +96,6 @@ def edit_allocation(item_id: int, data: SurplusAllocationUpdate, db: Session = D
 
 @router.get("/retirement", response_model=list[RetirementEntryOut])
 def list_retirement(db: Session = Depends(get_db)):
-    crud.seed_defaults(db)
     return crud.get_retirement(db)
 
 
@@ -122,5 +118,4 @@ def remove_retirement(entry_id: int, db: Session = Depends(get_db)):
 
 @router.get("/summary", response_model=BudgetSummary)
 def get_summary(db: Session = Depends(get_db)):
-    crud.seed_defaults(db)
     return crud.get_summary(db)

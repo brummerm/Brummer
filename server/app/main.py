@@ -14,6 +14,7 @@ Layout served at runtime:
   /api/fitness/...      -> fitness tracker API (auth required)
   /images/...           -> recipe images (auth required)
 """
+from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,13 +22,24 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 
 from .config import settings
-from .database import Base, engine
+from .database import Base, engine, SessionLocal
 from . import models  # noqa: F401 — registers ORM tables before create_all
 from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness
+from .crud import budget as budget_crud
 from .auth import router as auth_router, get_current_user, is_authenticated
 
 # Create tables on startup
 Base.metadata.create_all(bind=engine)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = SessionLocal()
+    try:
+        budget_crud.seed_defaults(db)
+    finally:
+        db.close()
+    yield
 
 # Make sure image directories exist
 Path(settings.IMAGES_DIR, "custom").mkdir(parents=True, exist_ok=True)
@@ -48,6 +60,7 @@ app = FastAPI(
     title="Brummer Personal Dashboard",
     description="Single-user dashboard hosting Matthew's personal apps.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # CORS only matters for local dev when frontend runs on its own port.

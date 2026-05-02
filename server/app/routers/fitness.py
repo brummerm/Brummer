@@ -11,7 +11,7 @@ from ..schemas.fitness import (
 from ..crud import fitness as crud
 from ..services.fitness_plan import PLAN
 
-router = APIRouter(prefix="/fitness", tags=["fitness"])
+router = APIRouter(tags=["fitness"])
 
 
 # ── Config ──────────────────────────────────────────────────────────────────
