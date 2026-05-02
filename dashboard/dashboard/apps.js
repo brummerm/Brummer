@@ -9,5 +9,20 @@ window.APPS = [
     href: "/apps/meal-planner/",
     enabled: true,
   },
-  // Future apps go here. Set enabled: false to render a placeholder tile.
+  {
+    id: "budget",
+    title: "Budget Tracker",
+    desc: "Monthly budget, surplus allocation, and retirement balances.",
+    icon: "💰",
+    href: "/apps/budget/",
+    enabled: true,
+  },
+  {
+    id: "fitness",
+    title: "Fitness Tracker",
+    desc: "12-week training plan with workout logging.",
+    icon: "🏋️",
+    href: "/apps/fitness/",
+    enabled: true,
+  },
 ];

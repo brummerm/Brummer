@@ -6,8 +6,12 @@ Layout served at runtime:
   /login                -> static login page
   /dashboard/...        -> static dashboard files (the tile grid)
   /apps/meal-planner/.. -> built React app for the meal planner
+  /apps/budget/...      -> built React app for the budget tracker
+  /apps/fitness/...     -> built React app for the fitness tracker
   /api/auth/...         -> login/logout/me
   /api/recipes, etc.    -> meal-planner API (auth required)
+  /api/budget/...       -> budget tracker API (auth required)
+  /api/fitness/...      -> fitness tracker API (auth required)
   /images/...           -> recipe images (auth required)
 """
 from pathlib import Path
@@ -19,7 +23,7 @@ from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from .config import settings
 from .database import Base, engine
 from . import models  # noqa: F401 — registers ORM tables before create_all
-from .routers import recipes, ingredients, meal_plans, grocery, images, seed
+from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness
 from .auth import router as auth_router, get_current_user, is_authenticated
 
 # Create tables on startup
@@ -34,7 +38,9 @@ STATIC_DIR = Path(settings.STATIC_DIR)
 DASHBOARD_DIR = STATIC_DIR / "dashboard"
 LOGIN_DIR = STATIC_DIR / "login"
 MEAL_PLANNER_DIR = STATIC_DIR / "meal-planner"
-for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR):
+BUDGET_DIR = STATIC_DIR / "budget"
+FITNESS_DIR = STATIC_DIR / "fitness"
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -72,6 +78,12 @@ app.include_router(grocery.router,     prefix="/api/grocery",     dependencies=a
 app.include_router(images.router,      prefix="/api/images",      dependencies=auth_dep)
 app.include_router(seed.router,        prefix="/api/seed",        dependencies=auth_dep)
 
+# ---- Budget API ----
+app.include_router(budget.router,  prefix="/api/budget",  dependencies=auth_dep, tags=["budget"])
+
+# ---- Fitness API ----
+app.include_router(fitness.router, prefix="/api/fitness", dependencies=auth_dep, tags=["fitness"])
+
 
 # ---- Image static mount, with auth gate ----
 # StaticFiles can't easily depend on auth, so we wrap the path with a guard endpoint
@@ -99,6 +111,8 @@ app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="logi
 # without auth is fine; the API calls inside them require the cookie anyway.
 app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
 app.mount("/apps/meal-planner", StaticFiles(directory=str(MEAL_PLANNER_DIR), html=True), name="meal-planner")
+app.mount("/apps/budget",       StaticFiles(directory=str(BUDGET_DIR),       html=True), name="budget")
+app.mount("/apps/fitness",      StaticFiles(directory=str(FITNESS_DIR),       html=True), name="fitness")
 
 
 @app.get("/")

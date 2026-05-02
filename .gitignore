@@ -33,6 +33,9 @@ Thumbs.db
 # Session handoff docs
 CLAUDE_CODE_HANDOFF.md
 
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
 # Local images uploaded by user
 server/images/custom/*
 !server/images/custom/.gitkeep

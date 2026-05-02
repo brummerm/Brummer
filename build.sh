@@ -18,6 +18,20 @@ echo "==> Building meal planner frontend"
 npm run build
 cd ../..
 
+echo "==> Installing Node deps for budget tracker"
+cd apps/budget
+npm ci
+echo "==> Building budget tracker frontend"
+npm run build
+cd ../..
+
+echo "==> Installing Node deps for fitness tracker"
+cd apps/fitness
+npm ci
+echo "==> Building fitness tracker frontend"
+npm run build
+cd ../..
+
 echo "==> Copying dashboard static files"
 mkdir -p server/static/dashboard server/static/login
 cp -r dashboard/dashboard/. server/static/dashboard/
