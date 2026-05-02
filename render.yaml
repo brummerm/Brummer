@@ -3,17 +3,15 @@
 #
 # What this provisions:
 #   - One web service running FastAPI (uvicorn) on Render's free tier
-#   - One persistent disk mounted at /var/data so the SQLite DB and uploaded
-#     images survive deploys (free tier has ephemeral disk by default)
+#
+# NOTE: Persistent disk is disabled (free tier doesn't support it). The SQLite
+# DB and uploaded images live on ephemeral storage and will reset on each deploy.
+# To enable persistence, upgrade the plan to Starter and restore the disk block
+# and the /var/data paths for DATABASE_URL and IMAGES_DIR.
 #
 # Required env vars (set these in the Render dashboard, NOT in this file):
 #   - AUTH_PASSWORD_HASH  : bcrypt hash of the login password
 #   - JWT_SECRET          : long random string used to sign session cookies
-#   - SESSION_COOKIE_SECURE : set to "true" once the app is on HTTPS (Render gives you HTTPS by default)
-#
-# The build step installs Python deps, installs Node deps for the meal planner,
-# builds the React app into server/static/meal-planner, and copies the static
-# dashboard files into server/static/{dashboard,login}.
 
 services:
   - type: web
@@ -29,11 +27,6 @@ services:
         value: 3.11.9
       - key: NODE_VERSION
         value: 20.11.1
-      # Point SQLite and image storage at the persistent disk so they survive deploys.
-      - key: DATABASE_URL
-        value: sqlite:////var/data/meal_planner.db
-      - key: IMAGES_DIR
-        value: /var/data/images
       - key: AUTH_USERNAME
         value: brummerm
       - key: SESSION_COOKIE_SECURE
@@ -43,7 +36,3 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
-    disk:
-      name: data
-      mountPath: /var/data
-      sizeGB: 1
