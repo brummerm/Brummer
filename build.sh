@@ -40,4 +40,9 @@ cp -r dashboard/login/.     server/static/login/
 echo "==> Ensuring persistent dirs exist"
 mkdir -p /var/data/images/custom /var/data/images/seeded || true
 
+echo "==> Seeding bundled images (skips existing files)"
+if [ -d server/images/seeded ]; then
+  rsync -a --ignore-existing server/images/seeded/ /var/data/images/seeded/ || true
+fi
+
 echo "==> Build complete"

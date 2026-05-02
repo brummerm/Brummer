@@ -2,12 +2,8 @@
 # https://render.com/docs/yaml-spec
 #
 # What this provisions:
-#   - One web service running FastAPI (uvicorn) on Render's free tier
-#
-# NOTE: Persistent disk is disabled (free tier doesn't support it). The SQLite
-# DB and uploaded images live on ephemeral storage and will reset on each deploy.
-# To enable persistence, upgrade the plan to Starter and restore the disk block
-# and the /var/data paths for DATABASE_URL and IMAGES_DIR.
+#   - One web service running FastAPI (uvicorn) on Render's Starter plan
+#   - One persistent disk mounted at /var/data (SQLite DB + uploaded images)
 #
 # Required env vars (set these in the Render dashboard, NOT in this file):
 #   - AUTH_PASSWORD_HASH  : bcrypt hash of the login password
@@ -17,11 +13,15 @@ services:
   - type: web
     name: brummer
     runtime: python
-    plan: free
+    plan: starter
     region: oregon
     rootDir: .
     buildCommand: ./build.sh
     startCommand: cd server && python run.py
+    disk:
+      name: brummer-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
@@ -31,6 +31,10 @@ services:
         value: brummerm
       - key: SESSION_COOKIE_SECURE
         value: "true"
+      - key: DATABASE_URL
+        value: sqlite:////var/data/brummer.db
+      - key: IMAGES_DIR
+        value: /var/data/images
       # Set these in the Render dashboard:
       - key: AUTH_PASSWORD_HASH
         sync: false
