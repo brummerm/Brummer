@@ -36,6 +36,9 @@ export default function Navbar() {
             <NavLink to="/history" className={linkClass}>
               History
             </NavLink>
+            <NavLink to="/body-weight" className={linkClass}>
+              Weight
+            </NavLink>
           </div>
         </div>
       </div>

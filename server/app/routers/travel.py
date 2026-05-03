@@ -41,6 +41,14 @@ def update_trip(trip_id: int, data: TripUpdate, db: Session = Depends(get_db)):
     return crud.update_trip(db, trip, data)
 
 
+@router.post("/trips/{trip_id}/duplicate", response_model=TripOut)
+def duplicate_trip(trip_id: int, db: Session = Depends(get_db)):
+    trip = crud.duplicate_trip(db, trip_id)
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return trip
+
+
 @router.delete("/trips/{trip_id}", status_code=204)
 def delete_trip(trip_id: int, db: Session = Depends(get_db)):
     trip = crud.get_trip(db, trip_id)

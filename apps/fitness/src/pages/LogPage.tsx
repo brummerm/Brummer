@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getPlanDay, getLogByDay, createLog, updateLog, deleteLog } from '../api/fitness'
+import { format } from 'date-fns'
 import type { ExerciseSetCreate, RunEntryCreate } from '../api/fitnessTypes'
 
 const DAY_TYPE_COLORS: Record<string, string> = {
@@ -112,7 +113,7 @@ export default function LogPage() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const loggedDate = new Date().toISOString().split('T')[0]
+      const loggedDate = format(new Date(), 'yyyy-MM-dd')
 
       const exPayload: ExerciseSetCreate[] = exercises.map((ex, i) => ({
         exercise_name: ex.exercise_name,

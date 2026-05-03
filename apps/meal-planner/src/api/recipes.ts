@@ -54,12 +54,21 @@ export async function getIngredients(q?: string): Promise<{ id: number; name: st
   return data
 }
 
+export async function updateIngredientCategory(id: number, category: string): Promise<{ id: number; name: string; category?: string }> {
+  const { data } = await client.patch(`/ingredients/${id}`, { category })
+  return data
+}
+
 function toPayload(form: Partial<RecipeFormData>) {
   return {
     ...form,
     servings: Number(form.servings) || 4,
     prep_time_mins: form.prep_time_mins ? Number(form.prep_time_mins) : null,
     cook_time_mins: form.cook_time_mins ? Number(form.cook_time_mins) : null,
+    calories: form.calories !== '' && form.calories != null ? Number(form.calories) : null,
+    protein_g: form.protein_g !== '' && form.protein_g != null ? Number(form.protein_g) : null,
+    carbs_g: form.carbs_g !== '' && form.carbs_g != null ? Number(form.carbs_g) : null,
+    fat_g: form.fat_g !== '' && form.fat_g != null ? Number(form.fat_g) : null,
     ingredients: (form.ingredients || []).map((ing, i) => ({
       ...ing,
       sort_order: i,

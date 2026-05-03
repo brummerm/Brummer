@@ -7,7 +7,7 @@ from ..crud import journal as crud
 from ..models.journal import Tag
 from ..schemas.journal import (
     NoteCreate, NoteUpdate, NoteOut,
-    TagCreate, TagUpdate, TagOut,
+    TagCreate, TagUpdate, TagOut, TagWithCount,
 )
 
 router = APIRouter(tags=["journal"])
@@ -15,9 +15,14 @@ router = APIRouter(tags=["journal"])
 
 # ── Tags ──────────────────────────────────────────────────────────────────────
 
-@router.get("/tags", response_model=list[TagOut])
+@router.get("/tags", response_model=list[TagWithCount])
 def list_tags(db: Session = Depends(get_db)):
-    return crud.get_tags(db)
+    tags = crud.get_tags(db)
+    counts = crud.get_tag_note_counts(db)
+    return [
+        TagWithCount(id=t.id, name=t.name, color=t.color, note_count=counts.get(t.id, 0))
+        for t in tags
+    ]
 
 
 @router.post("/tags", response_model=TagOut, status_code=201)

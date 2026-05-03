@@ -1,10 +1,22 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import type { ReactNode } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { format } from 'date-fns'
 import { getNotes, createNote, updateNote, deleteNote, getTags, createTag } from '../api/journal'
 import type { Note, Tag } from '../types/journal'
+
+function highlight(text: string, query: string): ReactNode {
+  if (!query) return text
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  const parts = text.split(regex)
+  return parts.map((part, i) =>
+    regex.test(part)
+      ? <mark key={i} className="bg-yellow-200 rounded-sm px-0.5">{part}</mark>
+      : part
+  )
+}
 
 type EditorTab = 'write' | 'preview'
 type Draft = Partial<Note> & { tag_ids?: number[] }
@@ -160,9 +172,9 @@ export default function NotesPage() {
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   {note.pinned && <span className="text-xs">📌</span>}
-                  <p className="text-sm font-medium text-gray-900 truncate">{note.title || 'Untitled'}</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">{highlight(note.title || 'Untitled', search)}</p>
                 </div>
-                <p className="text-xs text-gray-400 truncate">{note.content.slice(0, 60)}</p>
+                <p className="text-xs text-gray-400 truncate">{highlight(note.content.slice(0, 60), search)}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <span className="text-xs text-gray-300">{format(new Date(note.updated_at), 'MMM d')}</span>
                   {note.tags.map(t => (

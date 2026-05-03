@@ -151,12 +151,31 @@ export default function MealPlannerPage() {
                             slot={slot}
                             planId={plan.id}
                             weekKey={weekStart}
+                            allSlots={plan.slots}
                           />
                         )
                       })}
                     </div>
                   </div>
                 ))}
+
+                {/* Daily calorie totals */}
+                <div className="grid grid-cols-7 gap-2 mt-1">
+                  {Array.from({ length: 7 }, (_, day) => {
+                    const daySlots = plan.slots.filter((s) => s.day_of_week === day && s.slot_type === 'recipe')
+                    const total = daySlots.reduce((sum, s) => {
+                      const cal = (s.recipe as any)?.calories as number | undefined
+                      return cal != null ? sum + cal : sum
+                    }, 0)
+                    return (
+                      <div key={day} className="text-center">
+                        {total > 0 && (
+                          <p className="text-[10px] text-gray-400">~{Math.round(total)} cal</p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           )}

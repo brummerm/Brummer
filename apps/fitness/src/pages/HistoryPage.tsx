@@ -2,7 +2,44 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { format, parseISO, differenceInDays } from 'date-fns'
 import { getLogs, getPlan } from '../api/fitness'
-import type { WorkoutLog, PlanDay } from '../types/fitness'
+import type { WorkoutLog, PlanDay, ExerciseSet } from '../types/fitness'
+
+interface PREntry {
+  exerciseName: string
+  maxWeight: number
+  originalString: string
+  date: string
+}
+
+function parseWeight(weightStr: string | null): number | null {
+  if (!weightStr) return null
+  const num = parseFloat(weightStr)
+  if (isNaN(num)) return null
+  return num
+}
+
+function computePRs(logs: WorkoutLog[]): PREntry[] {
+  const prMap = new Map<string, { maxWeight: number; originalString: string; date: string }>()
+
+  for (const log of logs) {
+    for (const ex of log.exercises as ExerciseSet[]) {
+      const parsed = parseWeight(ex.weight)
+      if (parsed === null) continue
+      const existing = prMap.get(ex.exercise_name)
+      if (!existing || parsed > existing.maxWeight) {
+        prMap.set(ex.exercise_name, {
+          maxWeight: parsed,
+          originalString: ex.weight!,
+          date: log.logged_date,
+        })
+      }
+    }
+  }
+
+  return Array.from(prMap.entries())
+    .map(([exerciseName, data]) => ({ exerciseName, ...data }))
+    .sort((a, b) => a.exerciseName.localeCompare(b.exerciseName))
+}
 
 const DAY_TYPE_COLORS: Record<string, string> = {
   lift: 'bg-blue-100 text-blue-800',
@@ -74,6 +111,7 @@ export default function HistoryPage() {
   // Stats
   const totalMiles = logs.reduce((acc, l) => acc + (l.run?.distance_miles ?? 0), 0)
   const streak = computeStreak(logs)
+  const prs = computePRs(logs)
 
   if (isLoading) {
     return <div className="text-center py-16 text-gray-500">Loading…</div>
@@ -82,6 +120,33 @@ export default function HistoryPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="font-display text-3xl font-bold text-gray-900 mb-6">History</h1>
+
+      {/* Personal Records */}
+      {prs.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-8">
+          <h2 className="font-display text-lg font-semibold text-gray-800 mb-4">Personal Records</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left border-b border-gray-100">
+                  <th className="pb-2 pr-4 font-medium text-gray-500">Exercise</th>
+                  <th className="pb-2 pr-4 font-medium text-gray-500">Max Weight</th>
+                  <th className="pb-2 font-medium text-gray-500">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {prs.map((pr) => (
+                  <tr key={pr.exerciseName} className="border-b border-gray-50 last:border-0">
+                    <td className="py-2 pr-4 font-medium text-gray-900">{pr.exerciseName}</td>
+                    <td className="py-2 pr-4 text-brand-600 font-semibold">{pr.originalString}</td>
+                    <td className="py-2 text-gray-500">{format(parseISO(pr.date), 'MMM d, yyyy')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">

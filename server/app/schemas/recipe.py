@@ -43,6 +43,10 @@ class RecipeCreate(BaseModel):
     image_filename: Optional[str] = None
     source_url: Optional[str] = None
     tags: Optional[str] = None
+    calories: Optional[float] = None
+    protein_g: Optional[float] = None
+    carbs_g: Optional[float] = None
+    fat_g: Optional[float] = None
     ingredients: list[IngredientInRecipe] = []
 
     @field_validator("title")
@@ -65,6 +69,10 @@ class RecipeUpdate(BaseModel):
     image_filename: Optional[str] = None
     source_url: Optional[str] = None
     tags: Optional[str] = None
+    calories: Optional[float] = None
+    protein_g: Optional[float] = None
+    carbs_g: Optional[float] = None
+    fat_g: Optional[float] = None
     ingredients: Optional[list[IngredientInRecipe]] = None
 
 
@@ -98,6 +106,10 @@ class RecipeResponse(BaseModel):
     is_custom: bool
     external_id: Optional[str] = None
     tags: Optional[str] = None
+    calories: Optional[float] = None
+    protein_g: Optional[float] = None
+    carbs_g: Optional[float] = None
+    fat_g: Optional[float] = None
     created_at: datetime
     updated_at: datetime
     ingredients: list[IngredientInRecipeResponse] = []
@@ -111,3 +123,7 @@ class PaginatedRecipes(BaseModel):
     page: int
     per_page: int
     pages: int
+
+
+class IngredientCategoryUpdate(BaseModel):
+    category: str

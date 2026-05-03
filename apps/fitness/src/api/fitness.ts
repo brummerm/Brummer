@@ -59,3 +59,15 @@ export async function updateLog(id: number, data: WorkoutLogPayload): Promise<Wo
 export async function deleteLog(id: number): Promise<void> {
   await client.delete(`/fitness/logs/${id}`)
 }
+
+export interface BodyWeightEntry {
+  id: number
+  date: string
+  weight_lbs: number
+  notes: string | null
+}
+
+export const getBodyWeights = () => client.get<BodyWeightEntry[]>('/body-weight').then(r => r.data)
+export const logBodyWeight = (data: { date: string; weight_lbs: number; notes?: string }) =>
+  client.post<BodyWeightEntry>('/body-weight', data).then(r => r.data)
+export const deleteBodyWeight = (id: number) => client.delete(`/body-weight/${id}`)

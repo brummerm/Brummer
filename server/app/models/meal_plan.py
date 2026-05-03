@@ -46,9 +46,11 @@ class MealSlot(Base):
     )
     servings_override = Column(Integer)
     notes = Column(Text)
+    source_slot_id = Column(Integer, ForeignKey("meal_slots.id"), nullable=True)
 
     week_plan = relationship("WeekPlan", back_populates="slots")
     recipe = relationship("Recipe", back_populates="meal_slots")
+    source_slot = relationship("MealSlot", foreign_keys=[source_slot_id], remote_side="MealSlot.id")
 
     __table_args__ = (
         UniqueConstraint("week_plan_id", "day_of_week", "meal_type"),

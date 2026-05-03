@@ -26,6 +26,10 @@ export interface Recipe extends RecipeListItem {
   instructions: string
   source_url?: string
   external_id?: string
+  calories?: number
+  protein_g?: number
+  carbs_g?: number
+  fat_g?: number
   created_at: string
   updated_at: string
   ingredients: IngredientInRecipe[]
@@ -61,5 +65,9 @@ export interface RecipeFormData {
   image_filename: string
   source_url: string
   tags: string
+  calories: number | ''
+  protein_g: number | ''
+  carbs_g: number | ''
+  fat_g: number | ''
   ingredients: IngredientInRecipe[]
 }

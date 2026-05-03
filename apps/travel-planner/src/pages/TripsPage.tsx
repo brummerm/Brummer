@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
-import { getTrips, createTrip, deleteTrip } from '../api/travel'
+import { getTrips, createTrip, deleteTrip, duplicateTrip } from '../api/travel'
 import type { Trip, TripStatus } from '../types/travel'
 
 const STATUS_COLORS: Record<TripStatus, string> = {
@@ -34,6 +34,11 @@ export default function TripsPage() {
 
   const deleteMut = useMutation({
     mutationFn: deleteTrip,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['trips'] }),
+  })
+
+  const duplicateMut = useMutation({
+    mutationFn: duplicateTrip,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['trips'] }),
   })
 
@@ -90,7 +95,13 @@ export default function TripsPage() {
                   <p>💰 {trip.currency} {trip.budget.toLocaleString()}</p>
                 )}
               </div>
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex justify-end gap-3">
+                <button
+                  onClick={e => { e.stopPropagation(); duplicateMut.mutate(trip.id) }}
+                  className="text-xs text-blue-400 hover:text-blue-600 transition-colors"
+                >
+                  Duplicate
+                </button>
                 <button
                   onClick={e => { e.stopPropagation(); if (confirm('Delete this trip?')) deleteMut.mutate(trip.id) }}
                   className="text-xs text-red-400 hover:text-red-600 transition-colors"

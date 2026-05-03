@@ -27,7 +27,15 @@ UNIT_NORM: dict[str, str] = {
     "": "",
 }
 
-CATEGORY_ORDER = ["Produce", "Meat", "Dairy", "Pantry", "Other"]
+CATEGORY_ORDER = ["Produce", "Meat & Seafood", "Dairy & Eggs", "Bakery", "Frozen", "Pantry", "Beverages", "Other"]
+
+# Map legacy/variant category names to canonical names in CATEGORY_ORDER
+CATEGORY_ALIASES: dict[str, str] = {
+    "Meat": "Meat & Seafood",
+    "Seafood": "Meat & Seafood",
+    "Dairy": "Dairy & Eggs",
+    "Eggs": "Dairy & Eggs",
+}
 
 # Common pantry staples excluded from the grocery list
 STAPLES: frozenset[str] = frozenset({
@@ -270,7 +278,7 @@ def build_grocery_list(db: Session, week_plan_id: int) -> GroceryListResponse:
     if not plan:
         raise ValueError(f"Week plan {week_plan_id} not found")
 
-    # Collect all recipe slots for this week
+    # Collect all recipe slots for this week (skip leftovers — already counted from source)
     recipe_slots = (
         db.query(MealSlot)
         .filter(
@@ -327,14 +335,16 @@ def build_grocery_list(db: Session, week_plan_id: int) -> GroceryListResponse:
             # First time seeing this ingredient: record id/category
             if bucket["ingredient_id"] == 0:
                 bucket["ingredient_id"] = ing.id
-                bucket["ingredient_category"] = ing.category or "Other"
+                raw_cat = ing.category or "Other"
+                bucket["ingredient_category"] = CATEGORY_ALIASES.get(raw_cat, raw_cat)
 
             # Keep the shortest clean display name seen so far
             candidate = _clean_name(ing.name)
             if not bucket["ingredient_name"] or len(candidate) < len(bucket["ingredient_name"]):
                 bucket["ingredient_name"] = candidate
                 if ing.category:
-                    bucket["ingredient_category"] = ing.category
+                    raw_cat = ing.category
+                    bucket["ingredient_category"] = CATEGORY_ALIASES.get(raw_cat, raw_cat)
 
             if recipe.title not in bucket["source_recipes"]:
                 bucket["source_recipes"].append(recipe.title)

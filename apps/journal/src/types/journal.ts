@@ -2,6 +2,7 @@ export interface Tag {
   id: number
   name: string
   color: string
+  note_count?: number
 }
 
 export interface Note {

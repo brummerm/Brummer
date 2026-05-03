@@ -12,6 +12,7 @@ export interface MealSlot {
   recipe?: RecipeListItem
   servings_override?: number
   notes?: string
+  source_slot_id?: number
 }
 
 export interface WeekPlan {
@@ -34,4 +35,5 @@ export interface MealSlotUpdate {
   recipe_id?: number
   servings_override?: number
   notes?: string
+  source_slot_id?: number
 }

@@ -8,6 +8,7 @@ export const createTrip = (data: Omit<Trip, 'id' | 'created_at'>) =>
 export const updateTrip = (id: number, data: Partial<Trip>) =>
   client.put<Trip>(`/travel/trips/${id}`, data).then(r => r.data)
 export const deleteTrip = (id: number) => client.delete(`/travel/trips/${id}`)
+export const duplicateTrip = (id: number) => client.post<Trip>(`/travel/trips/${id}/duplicate`).then(r => r.data)
 
 export const addItineraryItem = (data: Omit<ItineraryItem, 'id' | 'created_at'>) =>
   client.post<ItineraryItem>('/travel/itinerary', data).then(r => r.data)

@@ -19,6 +19,10 @@ const DEFAULT_FORM: RecipeFormData = {
   image_filename: '',
   source_url: '',
   tags: '',
+  calories: '',
+  protein_g: '',
+  carbs_g: '',
+  fat_g: '',
   ingredients: [],
 }
 
@@ -134,6 +138,10 @@ export default function RecipeFormPage() {
         image_filename: existing.image_filename || '',
         source_url: existing.source_url || '',
         tags: existing.tags || '',
+        calories: existing.calories ?? '',
+        protein_g: existing.protein_g ?? '',
+        carbs_g: existing.carbs_g ?? '',
+        fat_g: existing.fat_g ?? '',
         ingredients: existing.ingredients.map((ing, i) => ({
           ingredient_id: ing.ingredient_id,
           name: ing.name,
@@ -277,6 +285,54 @@ export default function RecipeFormPage() {
           <Button type="button" variant="secondary" size="sm" onClick={addIngredient}>
             + Add Ingredient
           </Button>
+        </div>
+
+        {/* Nutrition */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+          <h2 className="font-semibold text-gray-700">Nutrition <span className="text-gray-400 font-normal text-sm">(optional)</span></h2>
+          <p className="text-xs text-gray-400">Per serving</p>
+          <div className="grid grid-cols-4 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Calories</label>
+              <input
+                type="number" min={0} step="any"
+                value={form.calories}
+                onChange={(e) => setField('calories', e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none"
+                placeholder="e.g. 450"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label>
+              <input
+                type="number" min={0} step="any"
+                value={form.protein_g}
+                onChange={(e) => setField('protein_g', e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none"
+                placeholder="e.g. 30"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label>
+              <input
+                type="number" min={0} step="any"
+                value={form.carbs_g}
+                onChange={(e) => setField('carbs_g', e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none"
+                placeholder="e.g. 50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fat (g)</label>
+              <input
+                type="number" min={0} step="any"
+                value={form.fat_g}
+                onChange={(e) => setField('fat_g', e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none"
+                placeholder="e.g. 15"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Instructions */}

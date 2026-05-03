@@ -17,4 +17,6 @@ export const deleteNote = (id: number) => client.delete(`/journal/notes/${id}`)
 export const getTags = () => client.get<Tag[]>('/journal/tags').then(r => r.data)
 export const createTag = (data: { name: string; color?: string }) =>
   client.post<Tag>('/journal/tags', data).then(r => r.data)
+export const updateTag = (id: number, data: { name?: string; color?: string }) =>
+  client.put<Tag>(`/journal/tags/${id}`, data).then(r => r.data)
 export const deleteTag = (id: number) => client.delete(`/journal/tags/${id}`)

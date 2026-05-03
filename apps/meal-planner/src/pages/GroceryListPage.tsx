@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getGroceryList } from '../api/grocery'
 import { getWeekPlanByDate } from '../api/mealPlan'
+import { updateIngredientCategory } from '../api/recipes'
 import { useUIStore } from '../store/uiStore'
 import type { GroceryLineItem } from '../types/grocery'
 import { weekLabel } from '../utils/weekDates'
@@ -12,11 +13,18 @@ import clsx from 'clsx'
 
 const CATEGORY_ICONS: Record<string, string> = {
   Produce: '🥦',
+  'Meat & Seafood': '🥩',
   Meat: '🥩',
+  'Dairy & Eggs': '🥛',
   Dairy: '🥛',
+  Bakery: '🍞',
+  Frozen: '🧊',
   Pantry: '🥫',
+  Beverages: '🥤',
   Other: '🛒',
 }
+
+const STORE_SECTIONS = ['Produce', 'Meat & Seafood', 'Dairy & Eggs', 'Bakery', 'Frozen', 'Pantry', 'Beverages', 'Other']
 
 interface CustomItem {
   id: string
@@ -25,26 +33,37 @@ interface CustomItem {
   unit: string
 }
 
-function GroceryItem({ item, checked, onToggle }: {
+function GroceryItem({ item, checked, onToggle, planId }: {
   item: GroceryLineItem
   checked: boolean
   onToggle: () => void
+  planId?: number
 }) {
+  const queryClient = useQueryClient()
+  const categoryMutation = useMutation({
+    mutationFn: (category: string) => updateIngredientCategory(item.ingredient_id, category),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['grocery', planId] })
+    },
+  })
+
   return (
     <li
       className={clsx(
-        'flex items-center gap-3 py-2 cursor-pointer select-none',
+        'flex items-center gap-3 py-2 select-none',
         checked && 'opacity-40 line-through'
       )}
-      onClick={onToggle}
     >
-      <div className={clsx(
-        'w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors',
-        checked ? 'bg-green-500 border-green-500' : 'border-gray-300'
-      )}>
+      <div
+        className={clsx(
+          'w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors cursor-pointer',
+          checked ? 'bg-green-500 border-green-500' : 'border-gray-300'
+        )}
+        onClick={onToggle}
+      >
         {checked && <span className="text-white text-xs">✓</span>}
       </div>
-      <div className="flex-1">
+      <div className="flex-1 cursor-pointer" onClick={onToggle}>
         <span className="font-medium text-gray-800">{item.ingredient_name}</span>
         {item.source_recipes.length > 0 && (
           <p className="text-xs text-gray-400 mt-0.5">
@@ -52,6 +71,21 @@ function GroceryItem({ item, checked, onToggle }: {
           </p>
         )}
       </div>
+      {item.ingredient_category === 'Other' && (
+        <select
+          value=""
+          onChange={(e) => { if (e.target.value) categoryMutation.mutate(e.target.value) }}
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs border border-gray-200 rounded px-1 py-0.5 text-gray-500 bg-white focus:ring-1 focus:ring-brand-400"
+          title="Move to section"
+          disabled={categoryMutation.isPending}
+        >
+          <option value="">Move to…</option>
+          {STORE_SECTIONS.filter((s) => s !== 'Other').map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      )}
     </li>
   )
 }
@@ -279,6 +313,7 @@ export default function GroceryListPage() {
                     item={item}
                     checked={checkedGroceryItems.has(item.ingredient_id)}
                     onToggle={() => toggleGroceryItem(item.ingredient_id)}
+                    planId={planId}
                   />
                 ))}
               </ul>

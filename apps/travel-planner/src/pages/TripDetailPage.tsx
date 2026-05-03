@@ -1,12 +1,54 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { format, parseISO, addDays } from 'date-fns'
+import { format, addDays } from 'date-fns'
+
+// parseISO on a date-only string returns midnight UTC, which shifts the day
+// backward in any US timezone. Appending T12:00:00 forces local-noon parsing.
+const parseDate = (s: string) => new Date(s + 'T12:00:00')
 import {
-  getTrip, updateTrip, addItineraryItem, deleteItineraryItem,
+  getTrip, updateTrip, addItineraryItem, deleteItineraryItem, updateItineraryItem,
   addPackingItem, updatePackingItem, deletePackingItem,
 } from '../api/travel'
 import type { TripStatus } from '../types/travel'
+
+const TEMPLATES: Record<string, { name: string; category: string }[]> = {
+  'Weekend Trip': [
+    { name: 'Phone charger', category: 'Electronics' },
+    { name: 'Change of clothes', category: 'Clothing' },
+    { name: 'Toiletries', category: 'Toiletries' },
+    { name: 'Wallet & ID', category: 'Documents' },
+    { name: 'Snacks', category: 'Food' },
+  ],
+  'International Flight': [
+    { name: 'Passport', category: 'Documents' },
+    { name: 'Travel insurance docs', category: 'Documents' },
+    { name: 'Neck pillow', category: 'Comfort' },
+    { name: 'Noise-canceling headphones', category: 'Electronics' },
+    { name: 'Eye mask', category: 'Comfort' },
+    { name: 'Portable charger', category: 'Electronics' },
+    { name: 'Snacks', category: 'Food' },
+  ],
+  'Beach Vacation': [
+    { name: 'Sunscreen SPF 50+', category: 'Toiletries' },
+    { name: 'Swimsuit', category: 'Clothing' },
+    { name: 'Beach towel', category: 'Gear' },
+    { name: 'Sunglasses', category: 'Accessories' },
+    { name: 'Flip flops', category: 'Clothing' },
+    { name: 'Waterproof phone case', category: 'Electronics' },
+    { name: 'After-sun lotion', category: 'Toiletries' },
+  ],
+  'Hiking Trip': [
+    { name: 'Trail map / GPS', category: 'Navigation' },
+    { name: 'Water bottle (2L)', category: 'Gear' },
+    { name: 'Trail snacks', category: 'Food' },
+    { name: 'First aid kit', category: 'Safety' },
+    { name: 'Hiking boots', category: 'Clothing' },
+    { name: 'Rain jacket', category: 'Clothing' },
+    { name: 'Sunscreen', category: 'Toiletries' },
+    { name: 'Headlamp', category: 'Gear' },
+  ],
+}
 
 const STATUS_COLORS: Record<TripStatus, string> = {
   planning:  'bg-blue-100 text-blue-700',
@@ -29,6 +71,7 @@ export default function TripDetailPage() {
   const [newTime, setNewTime] = useState('')
   const [newLoc, setNewLoc] = useState('')
   const [newCost, setNewCost] = useState(0)
+  const [showTemplates, setShowTemplates] = useState(false)
 
   const { data: trip, isLoading } = useQuery({
     queryKey: ['trip', tripId],
@@ -39,6 +82,10 @@ export default function TripDetailPage() {
 
   const addItinMut = useMutation({ mutationFn: addItineraryItem, onSuccess: invalidate })
   const delItinMut = useMutation({ mutationFn: deleteItineraryItem, onSuccess: invalidate })
+  const moveItinMut = useMutation({
+    mutationFn: ({ id, day_offset }: { id: number; day_offset: number }) => updateItineraryItem(id, { day_offset }),
+    onSuccess: invalidate,
+  })
 
   const addPackMut = useMutation({ mutationFn: addPackingItem, onSuccess: invalidate })
   const togglePackMut = useMutation({ mutationFn: ({ id: itemId, packed }: { id: number; packed: boolean }) =>
@@ -71,8 +118,8 @@ export default function TripDetailPage() {
           <h1 className="font-display text-3xl font-bold text-gray-900">{trip.title}</h1>
           <p className="text-gray-500 mt-1">
             {trip.destination}{trip.country ? `, ${trip.country}` : ''}
-            {trip.start_date && ` · ${format(parseISO(trip.start_date), 'MMM d')}`}
-            {trip.end_date && ` – ${format(parseISO(trip.end_date), 'MMM d, yyyy')}`}
+            {trip.start_date && ` · ${format(parseDate(trip.start_date), 'MMM d')}`}
+            {trip.end_date && ` – ${format(parseDate(trip.end_date), 'MMM d, yyyy')}`}
           </p>
         </div>
         <select
@@ -103,6 +150,28 @@ export default function TripDetailPage() {
         </div>
       </div>
 
+      {/* Timeline */}
+      {days > 0 && (
+        <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
+          {Array.from({ length: days }, (_, d) => {
+            const count = trip.itinerary.filter(i => i.day_offset === d).length
+            return (
+              <button
+                key={d}
+                onClick={() => { setTab('itinerary') }}
+                className="flex-shrink-0 flex flex-col items-center bg-white border border-gray-100 rounded-lg px-3 py-2 min-w-[52px] hover:border-brand-300 transition-colors"
+              >
+                <span className="text-xs font-semibold text-brand-600">Day {d + 1}</span>
+                {trip.start_date && (
+                  <span className="text-xs text-gray-400">{format(addDays(parseDate(trip.start_date), d), 'MMM d')}</span>
+                )}
+                <span className="text-xs text-gray-500 mt-0.5">{count} {count === 1 ? 'activity' : 'activities'}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
         {(['itinerary', 'packing', 'overview'] as Tab[]).map(t => (
@@ -118,28 +187,50 @@ export default function TripDetailPage() {
         <div className="space-y-6">
           {Array.from({ length: days }, (_, d) => {
             const dayItems = trip.itinerary.filter(i => i.day_offset === d)
+            const isFirstDay = d === 0
+            const isLastDay = d === days - 1
             return (
               <div key={d}>
                 <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                   <span className="bg-brand-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">{d + 1}</span>
                   Day {d + 1}
-                  {trip.start_date && <span className="text-xs text-gray-400">{format(addDays(parseISO(trip.start_date), d), 'EEE, MMM d')}</span>}
+                  {trip.start_date && <span className="text-xs text-gray-400">{format(addDays(parseDate(trip.start_date), d), 'EEE, MMM d')}</span>}
                 </h3>
                 <div className="space-y-2 ml-8">
-                  {dayItems.map(item => (
-                    <div key={item.id} className="bg-white rounded-lg border border-gray-100 p-3 flex items-start gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          {item.time_label && <span className="text-xs text-gray-400">{item.time_label}</span>}
-                          <span className="font-medium text-sm">{item.title}</span>
+                  {dayItems.map((item, idx) => {
+                    const isFirstItem = idx === 0
+                    const isLastItem = idx === dayItems.length - 1
+                    const canMoveUp = !(isFirstItem && isFirstDay)
+                    const canMoveDown = !(isLastItem && isLastDay)
+                    return (
+                      <div key={item.id} className="bg-white rounded-lg border border-gray-100 p-3 flex items-start gap-3">
+                        <div className="flex flex-col gap-0.5 mt-0.5">
+                          <button
+                            disabled={!canMoveUp || moveItinMut.isPending}
+                            onClick={() => moveItinMut.mutate({ id: item.id, day_offset: d - 1 })}
+                            className="text-gray-300 hover:text-brand-500 disabled:opacity-20 text-xs leading-none transition-colors"
+                            title="Move to previous day"
+                          >↑</button>
+                          <button
+                            disabled={!canMoveDown || moveItinMut.isPending}
+                            onClick={() => moveItinMut.mutate({ id: item.id, day_offset: d + 1 })}
+                            className="text-gray-300 hover:text-brand-500 disabled:opacity-20 text-xs leading-none transition-colors"
+                            title="Move to next day"
+                          >↓</button>
                         </div>
-                        {item.location && <p className="text-xs text-gray-500 mt-0.5">📍 {item.location}</p>}
-                        {item.description && <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>}
-                        {item.estimated_cost > 0 && <p className="text-xs text-brand-600 mt-0.5">💰 {trip.currency} {item.estimated_cost}</p>}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {item.time_label && <span className="text-xs text-gray-400">{item.time_label}</span>}
+                            <span className="font-medium text-sm">{item.title}</span>
+                          </div>
+                          {item.location && <p className="text-xs text-gray-500 mt-0.5">📍 {item.location}</p>}
+                          {item.description && <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>}
+                          {item.estimated_cost > 0 && <p className="text-xs text-brand-600 mt-0.5">💰 {trip.currency} {item.estimated_cost}</p>}
+                        </div>
+                        <button onClick={() => delItinMut.mutate(item.id)} className="text-gray-300 hover:text-red-400 text-xs transition-colors">✕</button>
                       </div>
-                      <button onClick={() => delItinMut.mutate(item.id)} className="text-gray-300 hover:text-red-400 text-xs transition-colors">✕</button>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )
@@ -199,7 +290,37 @@ export default function TripDetailPage() {
           ))}
 
           <div className="bg-white rounded-xl border border-dashed border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Add item</h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium text-gray-700">Add item</h4>
+              <button
+                onClick={() => setShowTemplates(s => !s)}
+                className="text-xs text-brand-500 hover:text-brand-700 font-medium transition-colors"
+              >
+                {showTemplates ? 'Hide templates' : 'From Template'}
+              </button>
+            </div>
+            {showTemplates && (
+              <div className="mb-3">
+                <select
+                  defaultValue=""
+                  onChange={e => {
+                    const templateName = e.target.value
+                    if (!templateName) return
+                    const items = TEMPLATES[templateName]
+                    items.forEach(item => {
+                      addPackMut.mutate({ trip_id: tripId, name: item.name, category: item.category, packed: false })
+                    })
+                    setShowTemplates(false)
+                  }}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+                >
+                  <option value="">— select a template —</option>
+                  {Object.keys(TEMPLATES).map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="flex gap-2">
               <input className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                 placeholder="Item name" value={newItem} onChange={e => setNewItem(e.target.value)}
@@ -223,8 +344,8 @@ export default function TripDetailPage() {
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div><span className="text-gray-500">Destination:</span> <span className="font-medium ml-2">{trip.destination}</span></div>
             <div><span className="text-gray-500">Country:</span> <span className="font-medium ml-2">{trip.country || '—'}</span></div>
-            <div><span className="text-gray-500">Start:</span> <span className="font-medium ml-2">{trip.start_date ? format(parseISO(trip.start_date), 'MMM d, yyyy') : '—'}</span></div>
-            <div><span className="text-gray-500">End:</span> <span className="font-medium ml-2">{trip.end_date ? format(parseISO(trip.end_date), 'MMM d, yyyy') : '—'}</span></div>
+            <div><span className="text-gray-500">Start:</span> <span className="font-medium ml-2">{trip.start_date ? format(parseDate(trip.start_date), 'MMM d, yyyy') : '—'}</span></div>
+            <div><span className="text-gray-500">End:</span> <span className="font-medium ml-2">{trip.end_date ? format(parseDate(trip.end_date), 'MMM d, yyyy') : '—'}</span></div>
             <div><span className="text-gray-500">Budget:</span> <span className="font-medium ml-2">{trip.budget > 0 ? `${trip.currency} ${trip.budget.toLocaleString()}` : '—'}</span></div>
             <div><span className="text-gray-500">Planned spend:</span> <span className="font-medium ml-2">{totalItinCost > 0 ? `${trip.currency} ${totalItinCost.toFixed(0)}` : '—'}</span></div>
           </div>

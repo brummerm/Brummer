@@ -80,6 +80,7 @@ def get_slot(db: Session, slot_id: int) -> MealSlot | None:
 def update_slot(db: Session, slot: MealSlot, data: MealSlotUpdate) -> MealSlot:
     slot.slot_type = data.slot_type
     slot.recipe_id = data.recipe_id if data.slot_type == "recipe" else None
+    slot.source_slot_id = data.source_slot_id if data.slot_type == "leftovers" else None
     slot.servings_override = data.servings_override
     slot.notes = data.notes
     db.commit()
@@ -90,6 +91,7 @@ def update_slot(db: Session, slot: MealSlot, data: MealSlotUpdate) -> MealSlot:
 def clear_slot(db: Session, slot: MealSlot) -> MealSlot:
     slot.slot_type = "empty"
     slot.recipe_id = None
+    slot.source_slot_id = None
     slot.servings_override = None
     slot.notes = None
     db.commit()

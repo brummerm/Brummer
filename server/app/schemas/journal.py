@@ -23,6 +23,14 @@ class TagOut(TagBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class TagWithCount(BaseModel):
+    id: int
+    name: str
+    color: str
+    note_count: int
+    model_config = ConfigDict(from_attributes=True)
+
+
 class NoteBase(BaseModel):
     title: str = "Untitled"
     content: str = ""

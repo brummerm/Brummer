@@ -5,6 +5,7 @@ import TodayPage from './pages/TodayPage'
 import PlanPage from './pages/PlanPage'
 import LogPage from './pages/LogPage'
 import HistoryPage from './pages/HistoryPage'
+import BodyWeightPage from './pages/BodyWeightPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/plan" element={<PlanPage />} />
             <Route path="/log/:dayIndex" element={<LogPage />} />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/body-weight" element={<BodyWeightPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

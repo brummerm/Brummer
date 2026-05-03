@@ -27,12 +27,39 @@ from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from .config import settings
 from .database import Base, engine, SessionLocal
 from . import models  # noqa: F401 — registers ORM tables before create_all
+from .models import body_weight  # noqa: F401 — registers body_weights table
 from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness, travel, grades, journal
+from .routers import body_weight as body_weight_router
 from .crud import budget as budget_crud
 from .auth import router as auth_router, get_current_user, is_authenticated
+from sqlalchemy.orm import Session
 
 # Create tables on startup
 Base.metadata.create_all(bind=engine)
+
+
+def migrate_recipe_nutrition(db: Session):
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.bind)
+    cols = {c['name'] for c in inspector.get_columns('recipes')}
+    if 'calories' not in cols:
+        db.execute(text("ALTER TABLE recipes ADD COLUMN calories REAL"))
+    if 'protein_g' not in cols:
+        db.execute(text("ALTER TABLE recipes ADD COLUMN protein_g REAL"))
+    if 'carbs_g' not in cols:
+        db.execute(text("ALTER TABLE recipes ADD COLUMN carbs_g REAL"))
+    if 'fat_g' not in cols:
+        db.execute(text("ALTER TABLE recipes ADD COLUMN fat_g REAL"))
+    db.commit()
+
+
+def migrate_meal_slot_source(db: Session):
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.bind)
+    cols = {c['name'] for c in inspector.get_columns('meal_slots')}
+    if 'source_slot_id' not in cols:
+        db.execute(text("ALTER TABLE meal_slots ADD COLUMN source_slot_id INTEGER REFERENCES meal_slots(id)"))
+        db.commit()
 
 
 @asynccontextmanager
@@ -41,6 +68,8 @@ async def lifespan(app: FastAPI):
     try:
         budget_crud.seed_defaults(db)
         budget_crud.migrate_data(db)
+        migrate_recipe_nutrition(db)
+        migrate_meal_slot_source(db)
     except Exception:
         db.rollback()
         raise
@@ -115,6 +144,9 @@ app.include_router(grades.router,  prefix="/api/grades",  dependencies=auth_dep,
 
 # ---- Journal API ----
 app.include_router(journal.router, prefix="/api/journal", dependencies=auth_dep, tags=["journal"])
+
+# ---- Body Weight API ----
+app.include_router(body_weight_router.router, prefix="/api", dependencies=auth_dep)
 
 
 # ---- Image static mount, with auth gate ----

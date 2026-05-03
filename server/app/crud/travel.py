@@ -40,6 +40,45 @@ def delete_trip(db: Session, trip: Trip) -> None:
     db.commit()
 
 
+def duplicate_trip(db: Session, trip_id: int) -> Trip | None:
+    original = get_trip(db, trip_id)
+    if not original:
+        return None
+    new_trip = Trip(
+        title=f"{original.title} (Copy)",
+        destination=original.destination,
+        country=original.country,
+        start_date=original.start_date,
+        end_date=original.end_date,
+        status="planning",
+        budget=original.budget,
+        currency=original.currency,
+        notes=original.notes,
+    )
+    db.add(new_trip)
+    db.flush()
+    for item in original.itinerary:
+        db.add(ItineraryItem(
+            trip_id=new_trip.id,
+            day_offset=item.day_offset,
+            time_label=item.time_label,
+            title=item.title,
+            description=item.description,
+            location=item.location,
+            estimated_cost=item.estimated_cost,
+        ))
+    for item in original.packing_items:
+        db.add(PackingItem(
+            trip_id=new_trip.id,
+            name=item.name,
+            category=item.category,
+            packed=False,
+        ))
+    db.commit()
+    db.refresh(new_trip)
+    return new_trip
+
+
 # ── Itinerary ─────────────────────────────────────────────────────────────────
 
 def create_itinerary_item(db: Session, data: ItineraryItemCreate) -> ItineraryItem:

@@ -33,6 +33,13 @@ def delete_tag(db: Session, tag: Tag) -> None:
     db.commit()
 
 
+def get_tag_note_counts(db: Session) -> dict[int, int]:
+    from sqlalchemy import func
+    from ..models.journal import note_tags_table
+    rows = db.query(note_tags_table.c.tag_id, func.count(note_tags_table.c.note_id)).group_by(note_tags_table.c.tag_id).all()
+    return {tag_id: count for tag_id, count in rows}
+
+
 # ── Notes ─────────────────────────────────────────────────────────────────────
 
 def get_notes(db: Session, search: str | None = None, tag_id: int | None = None) -> list[Note]:

@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, Text, Boolean, DateTime, ForeignKey,
+    Column, Integer, Float, Text, Boolean, DateTime, ForeignKey,
     UniqueConstraint, Index, func,
 )
 from sqlalchemy.orm import relationship
@@ -38,6 +38,10 @@ class Recipe(Base):
     is_custom = Column(Boolean, nullable=False, default=True)
     external_id = Column(Text, unique=True)
     tags = Column(Text)
+    calories = Column(Float, nullable=True)
+    protein_g = Column(Float, nullable=True)
+    carbs_g = Column(Float, nullable=True)
+    fat_g = Column(Float, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

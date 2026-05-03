@@ -10,6 +10,7 @@ class MealSlotUpdate(BaseModel):
     recipe_id: Optional[int] = None
     servings_override: Optional[int] = None
     notes: Optional[str] = None
+    source_slot_id: Optional[int] = None
 
 
 class MealSlotResponse(BaseModel):
@@ -21,6 +22,7 @@ class MealSlotResponse(BaseModel):
     recipe: Optional[RecipeListItem] = None
     servings_override: Optional[int] = None
     notes: Optional[str] = None
+    source_slot_id: Optional[int] = None
 
     model_config = {"from_attributes": True}
 
