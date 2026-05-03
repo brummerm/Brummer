@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from ..models.budget import (
     IncomeItem, ExpenseItem, SurplusAllocation, RetirementEntry,
-    MonthSnapshot, ActualSpending, DebtAccount,
+    MonthSnapshot, ActualSpending, DebtAccount, SavingsAccount,
 )
 from ..schemas.budget import (
     IncomeItemCreate, IncomeItemUpdate,
@@ -13,6 +13,7 @@ from ..schemas.budget import (
     SurplusAllocationCreate, SurplusAllocationUpdate,
     RetirementEntryCreate,
     ActualSpendingBatch,
+    SavingsAccountCreate, SavingsAccountUpdate,
     DebtAccountCreate, DebtAccountUpdate,
     BudgetSummary,
 )
@@ -239,6 +240,28 @@ def _compute_snapshot_values(
     }
 
 
+def get_savings(db: Session) -> list[SavingsAccount]:
+    return db.query(SavingsAccount).order_by(SavingsAccount.created_at).all()
+
+def create_savings(db: Session, data: SavingsAccountCreate) -> SavingsAccount:
+    item = SavingsAccount(**data.model_dump())
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+def update_savings(db: Session, item: SavingsAccount, data: SavingsAccountUpdate) -> SavingsAccount:
+    for k, v in data.model_dump(exclude_unset=True).items():
+        setattr(item, k, v)
+    db.commit()
+    db.refresh(item)
+    return item
+
+def delete_savings(db: Session, item: SavingsAccount) -> None:
+    db.delete(item)
+    db.commit()
+
+
 def _get_net_worth_parts(db: Session) -> tuple[float, float]:
     """Return (assets, liabilities) without calling get_retirement to avoid an extra query."""
     entries = (db.query(RetirementEntry)
@@ -248,7 +271,9 @@ def _get_net_worth_parts(db: Session) -> tuple[float, float]:
     for e in entries:
         if e.account_name not in latest:
             latest[e.account_name] = e.balance
-    assets = sum(latest.values())
+    retirement_assets = sum(latest.values())
+    savings_assets = sum(s.balance for s in db.query(SavingsAccount).all())
+    assets = retirement_assets + savings_assets
     liabilities = sum(d.balance for d in db.query(DebtAccount).all())
     return assets, liabilities
 

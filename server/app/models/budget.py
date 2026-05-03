@@ -62,6 +62,16 @@ class ActualSpending(Base):
     __table_args__ = (UniqueConstraint("month", "category", name="uq_actual_month_cat"),)
 
 
+class SavingsAccount(Base):
+    __tablename__ = "savings_accounts"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    account_type = Column(String, nullable=False, default="savings")  # checking | savings | money_market | cd | other
+    balance = Column(Float, default=0.0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 class DebtAccount(Base):
     __tablename__ = "debt_accounts"
     id = Column(Integer, primary_key=True, autoincrement=True)

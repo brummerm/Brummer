@@ -132,7 +132,7 @@ export default function DashboardPage() {
           <p className={`text-3xl font-bold font-display mt-1 ${(summary?.net_worth ?? 0) >= 0 ? 'text-brand-600' : 'text-red-600'}`}>
             {fmt(summary?.net_worth ?? 0)}
           </p>
-          <p className="text-xs text-gray-400 mt-1">Retirement assets − total debt balances</p>
+          <p className="text-xs text-gray-400 mt-1">Retirement + savings − total debt</p>
         </div>
         <div className="text-5xl">📈</div>
       </div>

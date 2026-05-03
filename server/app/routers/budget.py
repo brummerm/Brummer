@@ -11,11 +11,12 @@ from ..schemas.budget import (
     MonthSnapshotOut,
     ActualSpendingBatch, ActualSpendingOut,
     DebtAccountCreate, DebtAccountUpdate, DebtAccountOut,
+    SavingsAccountCreate, SavingsAccountUpdate, SavingsAccountOut,
     BudgetSummary,
 )
 from ..models.budget import (
     IncomeItem, ExpenseItem, SurplusAllocation, RetirementEntry,
-    MonthSnapshot, DebtAccount,
+    MonthSnapshot, DebtAccount, SavingsAccount,
 )
 
 router = APIRouter(tags=["budget"])
@@ -169,6 +170,35 @@ def get_actuals(
 def save_actuals(batch: ActualSpendingBatch, db: Session = Depends(get_db)):
     crud.save_actuals(db, batch)
     return {"ok": True}
+
+
+# ── Savings Accounts ──────────────────────────────────────────────────────────
+
+@router.get("/savings", response_model=list[SavingsAccountOut])
+def list_savings(db: Session = Depends(get_db)):
+    return crud.get_savings(db)
+
+
+@router.post("/savings", response_model=SavingsAccountOut, status_code=201)
+def add_savings(data: SavingsAccountCreate, db: Session = Depends(get_db)):
+    return crud.create_savings(db, data)
+
+
+@router.put("/savings/{item_id}", response_model=SavingsAccountOut)
+def edit_savings(item_id: int, data: SavingsAccountUpdate, db: Session = Depends(get_db)):
+    item = db.query(SavingsAccount).filter(SavingsAccount.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Savings account not found")
+    return crud.update_savings(db, item, data)
+
+
+@router.delete("/savings/{item_id}", status_code=204)
+def remove_savings(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(SavingsAccount).filter(SavingsAccount.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Savings account not found")
+    crud.delete_savings(db, item)
+    return Response(status_code=204)
 
 
 # ── Debt Accounts ─────────────────────────────────────────────────────────────

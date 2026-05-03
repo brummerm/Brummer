@@ -23,6 +23,7 @@ export default function Navbar() {
             <NavLink to="/" end className={linkClass}>Overview</NavLink>
             <NavLink to="/budget" className={linkClass}>Budget</NavLink>
             <NavLink to="/debt" className={linkClass}>Debt</NavLink>
+            <NavLink to="/savings" className={linkClass}>Savings</NavLink>
             <NavLink to="/retirement" className={linkClass}>Retirement</NavLink>
           </div>
         </div>

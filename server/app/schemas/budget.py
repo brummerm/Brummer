@@ -126,6 +126,28 @@ class ActualSpendingBatch(BaseModel):
     items: list[ActualSpendingItem]
 
 
+# ── Savings Accounts ──────────────────────────────────────────────────────────
+
+class SavingsAccountBase(BaseModel):
+    name: str
+    account_type: str = "savings"
+    balance: float = Field(..., ge=0)
+
+class SavingsAccountCreate(SavingsAccountBase):
+    pass
+
+class SavingsAccountUpdate(BaseModel):
+    name: Optional[str] = None
+    account_type: Optional[str] = None
+    balance: Optional[float] = None
+
+class SavingsAccountOut(SavingsAccountBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
 # ── Debt Accounts ─────────────────────────────────────────────────────────────
 
 class DebtAccountBase(BaseModel):

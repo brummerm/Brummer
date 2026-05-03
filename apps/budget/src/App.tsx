@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import BudgetPage from './pages/BudgetPage'
 import DebtPage from './pages/DebtPage'
 import RetirementPage from './pages/RetirementPage'
+import SavingsPage from './pages/SavingsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 1000 * 30, retry: 1 } },
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/budget" element={<BudgetPage />} />
             <Route path="/debt" element={<DebtPage />} />
             <Route path="/retirement" element={<RetirementPage />} />
+            <Route path="/savings" element={<SavingsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

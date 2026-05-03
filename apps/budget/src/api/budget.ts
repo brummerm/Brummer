@@ -49,6 +49,15 @@ export interface ActualSpendingRow {
   actual: number
 }
 
+export interface SavingsAccount {
+  id: number
+  name: string
+  account_type: string
+  balance: number
+  created_at: string
+  updated_at: string
+}
+
 export interface DebtAccount {
   id: number
   name: string
@@ -127,6 +136,17 @@ export const getActuals = (month: string) =>
   client.get<ActualSpendingRow[]>(`/budget/actuals/${month}`).then(r => r.data)
 export const saveActuals = (month: string, items: { category: string; budgeted: number; actual: number }[]) =>
   client.post('/budget/actuals', { month, items }).then(r => r.data)
+
+// ── Savings Accounts ──────────────────────────────────────────────────────────
+
+export const getSavings = () =>
+  client.get<SavingsAccount[]>('/budget/savings').then(r => r.data)
+export const createSavings = (data: Omit<SavingsAccount, 'id' | 'created_at' | 'updated_at'>) =>
+  client.post<SavingsAccount>('/budget/savings', data).then(r => r.data)
+export const updateSavings = (id: number, data: Partial<Omit<SavingsAccount, 'id' | 'created_at' | 'updated_at'>>) =>
+  client.put<SavingsAccount>(`/budget/savings/${id}`, data).then(r => r.data)
+export const deleteSavings = (id: number) =>
+  client.delete(`/budget/savings/${id}`)
 
 // ── Debt Accounts ─────────────────────────────────────────────────────────────
 
