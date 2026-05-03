@@ -132,18 +132,34 @@ def serve_image(path: str, request: Request, _: str = Depends(get_current_user))
 # The login page is the only static area that's public.
 app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="login")
 
-
-# Dashboard and meal-planner static files require auth. We can't put auth on a StaticFiles
-# mount directly, so we serve the index via a guarded route and the assets via a
-# conditional check. For a personal app, the assets themselves (JS/CSS) being readable
-# without auth is fine; the API calls inside them require the cookie anyway.
+# Dashboard uses StaticFiles (no deep client-side routes).
 app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
-app.mount("/apps/meal-planner", StaticFiles(directory=str(MEAL_PLANNER_DIR), html=True), name="meal-planner")
-app.mount("/apps/budget",          StaticFiles(directory=str(BUDGET_DIR),   html=True), name="budget")
-app.mount("/apps/fitness",         StaticFiles(directory=str(FITNESS_DIR),  html=True), name="fitness")
-app.mount("/apps/travel-planner",  StaticFiles(directory=str(TRAVEL_DIR),   html=True), name="travel-planner")
-app.mount("/apps/grades",          StaticFiles(directory=str(GRADES_DIR),   html=True), name="grades")
-app.mount("/apps/journal",         StaticFiles(directory=str(JOURNAL_DIR),  html=True), name="journal")
+
+
+# SPA helper: serve a real file if it exists, otherwise fall back to index.html.
+# This makes hard-refresh and direct URL navigation work for React Router apps.
+def _spa(static_dir: Path):
+    def handler(full_path: str):
+        base = static_dir.resolve()
+        target = (base / full_path).resolve()
+        if str(target).startswith(str(base)) and target.is_file():
+            return FileResponse(target)
+        return FileResponse(base / "index.html")
+    return handler
+
+
+app.add_route("/apps/meal-planner/{full_path:path}", _spa(MEAL_PLANNER_DIR))
+app.add_route("/apps/meal-planner/",                 _spa(MEAL_PLANNER_DIR))
+app.add_route("/apps/budget/{full_path:path}",        _spa(BUDGET_DIR))
+app.add_route("/apps/budget/",                        _spa(BUDGET_DIR))
+app.add_route("/apps/fitness/{full_path:path}",       _spa(FITNESS_DIR))
+app.add_route("/apps/fitness/",                       _spa(FITNESS_DIR))
+app.add_route("/apps/travel-planner/{full_path:path}", _spa(TRAVEL_DIR))
+app.add_route("/apps/travel-planner/",                _spa(TRAVEL_DIR))
+app.add_route("/apps/grades/{full_path:path}",        _spa(GRADES_DIR))
+app.add_route("/apps/grades/",                        _spa(GRADES_DIR))
+app.add_route("/apps/journal/{full_path:path}",       _spa(JOURNAL_DIR))
+app.add_route("/apps/journal/",                       _spa(JOURNAL_DIR))
 
 
 @app.get("/")
