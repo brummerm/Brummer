@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import {
-  getTrip, updateTrip, addItineraryItem, updateItineraryItem, deleteItineraryItem,
+  getTrip, updateTrip, addItineraryItem, deleteItineraryItem,
   addPackingItem, updatePackingItem, deletePackingItem,
 } from '../api/travel'
 import type { TripStatus } from '../types/travel'
@@ -38,8 +38,6 @@ export default function TripDetailPage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ['trip', tripId] })
 
   const addItinMut = useMutation({ mutationFn: addItineraryItem, onSuccess: invalidate })
-  const toggleItinMut = useMutation({ mutationFn: ({ id: itemId, ...data }: { id: number; estimated_cost?: number }) =>
-    updateItineraryItem(itemId, data), onSuccess: invalidate })
   const delItinMut = useMutation({ mutationFn: deleteItineraryItem, onSuccess: invalidate })
 
   const addPackMut = useMutation({ mutationFn: addPackingItem, onSuccess: invalidate })
