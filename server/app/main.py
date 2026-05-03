@@ -136,30 +136,29 @@ app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="logi
 app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
 
 
-# SPA helper: serve a real file if it exists, otherwise fall back to index.html.
-# This makes hard-refresh and direct URL navigation work for React Router apps.
-def _spa(static_dir: Path):
-    def handler(full_path: str):
-        base = static_dir.resolve()
-        target = (base / full_path).resolve()
-        if str(target).startswith(str(base)) and target.is_file():
-            return FileResponse(target)
-        return FileResponse(base / "index.html")
-    return handler
+# Serve React SPA apps: return the real file if it exists, otherwise index.html.
+# This makes hard-refresh and direct URL navigation work with React Router.
+_SPA_DIRS = {
+    "meal-planner":  MEAL_PLANNER_DIR,
+    "budget":        BUDGET_DIR,
+    "fitness":       FITNESS_DIR,
+    "travel-planner": TRAVEL_DIR,
+    "grades":        GRADES_DIR,
+    "journal":       JOURNAL_DIR,
+}
 
 
-app.add_route("/apps/meal-planner/{full_path:path}", _spa(MEAL_PLANNER_DIR))
-app.add_route("/apps/meal-planner/",                 _spa(MEAL_PLANNER_DIR))
-app.add_route("/apps/budget/{full_path:path}",        _spa(BUDGET_DIR))
-app.add_route("/apps/budget/",                        _spa(BUDGET_DIR))
-app.add_route("/apps/fitness/{full_path:path}",       _spa(FITNESS_DIR))
-app.add_route("/apps/fitness/",                       _spa(FITNESS_DIR))
-app.add_route("/apps/travel-planner/{full_path:path}", _spa(TRAVEL_DIR))
-app.add_route("/apps/travel-planner/",                _spa(TRAVEL_DIR))
-app.add_route("/apps/grades/{full_path:path}",        _spa(GRADES_DIR))
-app.add_route("/apps/grades/",                        _spa(GRADES_DIR))
-app.add_route("/apps/journal/{full_path:path}",       _spa(JOURNAL_DIR))
-app.add_route("/apps/journal/",                       _spa(JOURNAL_DIR))
+@app.get("/apps/{app_name}/{full_path:path}")
+@app.get("/apps/{app_name}/")
+def serve_spa(app_name: str, full_path: str = ""):
+    static_dir = _SPA_DIRS.get(app_name)
+    if static_dir is None:
+        return HTMLResponse("Not found", status_code=404)
+    base = static_dir.resolve()
+    target = (base / full_path).resolve()
+    if str(target).startswith(str(base)) and target.is_file():
+        return FileResponse(target)
+    return FileResponse(base / "index.html")
 
 
 @app.get("/")
