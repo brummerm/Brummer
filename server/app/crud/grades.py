@@ -1,6 +1,6 @@
 from __future__ import annotations
 import json
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..models.grades import Rubric, RubricCriterion, GradeEntry
 from ..schemas.grades import (
@@ -79,16 +79,25 @@ def delete_criterion(db: Session, item: RubricCriterion) -> None:
 # ── Grade Entries ─────────────────────────────────────────────────────────────
 
 def get_grade_entries(db: Session) -> list[GradeEntry]:
-    return db.query(GradeEntry).order_by(GradeEntry.created_at.desc()).all()
+    return (
+        db.query(GradeEntry)
+        .options(joinedload(GradeEntry.rubric))
+        .order_by(GradeEntry.created_at.desc())
+        .all()
+    )
 
 
 def create_grade_entry(db: Session, data: GradeEntryCreate) -> GradeEntry:
     rubric = db.query(Rubric).filter(Rubric.id == data.rubric_id).first()
-    total_possible = sum(c.max_points for c in rubric.criteria) if rubric else 0.0
+    if not rubric:
+        raise ValueError(f"Rubric {data.rubric_id} not found")
+    valid_criteria = {str(c.id): c.max_points for c in rubric.criteria}
+    total_possible = sum(valid_criteria.values())
     total_earned = sum(
-        min(float(v), next((c.max_points for c in rubric.criteria if str(c.id) == k), float(v)))
+        min(float(v), valid_criteria[k])
         for k, v in data.scores.items()
-    ) if rubric else 0.0
+        if k in valid_criteria
+    )
     pct = (total_earned / total_possible * 100) if total_possible > 0 else 0.0
 
     entry = GradeEntry(

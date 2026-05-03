@@ -4,6 +4,7 @@ from typing import Optional
 
 from ..database import get_db
 from ..crud import journal as crud
+from ..models.journal import Tag
 from ..schemas.journal import (
     NoteCreate, NoteUpdate, NoteOut,
     TagCreate, TagUpdate, TagOut,
@@ -26,7 +27,6 @@ def create_tag(data: TagCreate, db: Session = Depends(get_db)):
 
 @router.put("/tags/{tag_id}", response_model=TagOut)
 def update_tag(tag_id: int, data: TagUpdate, db: Session = Depends(get_db)):
-    from ..models.journal import Tag
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")
@@ -35,7 +35,6 @@ def update_tag(tag_id: int, data: TagUpdate, db: Session = Depends(get_db)):
 
 @router.delete("/tags/{tag_id}", status_code=204)
 def delete_tag(tag_id: int, db: Session = Depends(get_db)):
-    from ..models.journal import Tag
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..models.fitness import WorkoutLog
 from ..schemas.fitness import (
     PlanConfigOut,
     PlanConfigCreate,
@@ -65,9 +66,6 @@ def create_log(body: WorkoutLogCreate, db: Session = Depends(get_db)):
 
 @router.put("/logs/{log_id}", response_model=WorkoutLogOut)
 def update_log(log_id: int, body: WorkoutLogCreate, db: Session = Depends(get_db)):
-    log = crud.get_log_by_day(db, body.plan_day_index)
-    # fall back to id lookup
-    from ..models.fitness import WorkoutLog
     log = db.query(WorkoutLog).filter(WorkoutLog.id == log_id).first()
     if not log:
         raise HTTPException(status_code=404, detail="Log not found")
@@ -76,7 +74,6 @@ def update_log(log_id: int, body: WorkoutLogCreate, db: Session = Depends(get_db
 
 @router.delete("/logs/{log_id}", status_code=204)
 def delete_log(log_id: int, db: Session = Depends(get_db)):
-    from ..models.fitness import WorkoutLog
     log = db.query(WorkoutLog).filter(WorkoutLog.id == log_id).first()
     if not log:
         raise HTTPException(status_code=404, detail="Log not found")

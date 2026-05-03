@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..crud import grades as crud
+from ..models.grades import RubricCriterion, GradeEntry
 from ..schemas.grades import (
     RubricCreate, RubricUpdate, RubricOut, RubricWithCriteria,
     RubricCriterionCreate, RubricCriterionUpdate, RubricCriterionOut,
@@ -58,7 +59,6 @@ def add_criterion(data: RubricCriterionCreate, db: Session = Depends(get_db)):
 
 @router.put("/criteria/{criterion_id}", response_model=RubricCriterionOut)
 def update_criterion(criterion_id: int, data: RubricCriterionUpdate, db: Session = Depends(get_db)):
-    from ..models.grades import RubricCriterion
     item = db.query(RubricCriterion).filter(RubricCriterion.id == criterion_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Criterion not found")
@@ -67,7 +67,6 @@ def update_criterion(criterion_id: int, data: RubricCriterionUpdate, db: Session
 
 @router.delete("/criteria/{criterion_id}", status_code=204)
 def delete_criterion(criterion_id: int, db: Session = Depends(get_db)):
-    from ..models.grades import RubricCriterion
     item = db.query(RubricCriterion).filter(RubricCriterion.id == criterion_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Criterion not found")
@@ -80,9 +79,8 @@ def delete_criterion(criterion_id: int, db: Session = Depends(get_db)):
 @router.get("/entries", response_model=list[GradeEntryOut])
 def list_grade_entries(db: Session = Depends(get_db)):
     entries = crud.get_grade_entries(db)
-    result = []
-    for e in entries:
-        d = {
+    return [
+        {
             "id": e.id, "rubric_id": e.rubric_id,
             "rubric_name": e.rubric.name if e.rubric else "",
             "label": e.label, "scores_json": e.scores_json,
@@ -90,16 +88,19 @@ def list_grade_entries(db: Session = Depends(get_db)):
             "percentage": e.percentage, "letter_grade": e.letter_grade,
             "created_at": e.created_at,
         }
-        result.append(d)
-    return result
+        for e in entries
+    ]
 
 
 @router.post("/entries", response_model=GradeEntryOut, status_code=201)
 def save_grade_entry(data: GradeEntryCreate, db: Session = Depends(get_db)):
+    rubric = crud.get_rubric(db, data.rubric_id)
+    if not rubric:
+        raise HTTPException(status_code=404, detail="Rubric not found")
     entry = crud.create_grade_entry(db, data)
     return {
         "id": entry.id, "rubric_id": entry.rubric_id,
-        "rubric_name": entry.rubric.name if entry.rubric else "",
+        "rubric_name": rubric.name,
         "label": entry.label, "scores_json": entry.scores_json,
         "total_earned": entry.total_earned, "total_possible": entry.total_possible,
         "percentage": entry.percentage, "letter_grade": entry.letter_grade,
@@ -109,7 +110,6 @@ def save_grade_entry(data: GradeEntryCreate, db: Session = Depends(get_db)):
 
 @router.delete("/entries/{entry_id}", status_code=204)
 def delete_grade_entry(entry_id: int, db: Session = Depends(get_db)):
-    from ..models.grades import GradeEntry
     entry = db.query(GradeEntry).filter(GradeEntry.id == entry_id).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Grade entry not found")

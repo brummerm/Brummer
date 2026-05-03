@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..crud import travel as crud
+from ..models.travel import ItineraryItem, PackingItem
 from ..schemas.travel import (
     TripCreate, TripUpdate, TripOut, TripWithDetails,
     ItineraryItemCreate, ItineraryItemUpdate, ItineraryItemOut,
@@ -53,12 +54,13 @@ def delete_trip(trip_id: int, db: Session = Depends(get_db)):
 
 @router.post("/itinerary", response_model=ItineraryItemOut, status_code=201)
 def add_itinerary_item(data: ItineraryItemCreate, db: Session = Depends(get_db)):
+    if not crud.get_trip(db, data.trip_id):
+        raise HTTPException(status_code=404, detail="Trip not found")
     return crud.create_itinerary_item(db, data)
 
 
 @router.put("/itinerary/{item_id}", response_model=ItineraryItemOut)
 def update_itinerary_item(item_id: int, data: ItineraryItemUpdate, db: Session = Depends(get_db)):
-    from ..models.travel import ItineraryItem
     item = db.query(ItineraryItem).filter(ItineraryItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Itinerary item not found")
@@ -67,7 +69,6 @@ def update_itinerary_item(item_id: int, data: ItineraryItemUpdate, db: Session =
 
 @router.delete("/itinerary/{item_id}", status_code=204)
 def delete_itinerary_item(item_id: int, db: Session = Depends(get_db)):
-    from ..models.travel import ItineraryItem
     item = db.query(ItineraryItem).filter(ItineraryItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Itinerary item not found")
@@ -79,12 +80,13 @@ def delete_itinerary_item(item_id: int, db: Session = Depends(get_db)):
 
 @router.post("/packing", response_model=PackingItemOut, status_code=201)
 def add_packing_item(data: PackingItemCreate, db: Session = Depends(get_db)):
+    if not crud.get_trip(db, data.trip_id):
+        raise HTTPException(status_code=404, detail="Trip not found")
     return crud.create_packing_item(db, data)
 
 
 @router.put("/packing/{item_id}", response_model=PackingItemOut)
 def update_packing_item(item_id: int, data: PackingItemUpdate, db: Session = Depends(get_db)):
-    from ..models.travel import PackingItem
     item = db.query(PackingItem).filter(PackingItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Packing item not found")
@@ -93,7 +95,6 @@ def update_packing_item(item_id: int, data: PackingItemUpdate, db: Session = Dep
 
 @router.delete("/packing/{item_id}", status_code=204)
 def delete_packing_item(item_id: int, db: Session = Depends(get_db)):
-    from ..models.travel import PackingItem
     item = db.query(PackingItem).filter(PackingItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Packing item not found")

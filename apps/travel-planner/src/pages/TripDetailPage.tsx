@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { format } from 'date-fns'
+import { format, parseISO, addDays } from 'date-fns'
 import {
   getTrip, updateTrip, addItineraryItem, deleteItineraryItem,
   addPackingItem, updatePackingItem, deletePackingItem,
@@ -51,7 +51,9 @@ export default function TripDetailPage() {
   if (isLoading) return <div className="flex justify-center py-20"><div className="animate-spin h-8 w-8 border-4 border-brand-500 border-t-transparent rounded-full" /></div>
   if (!trip) return <p className="text-center py-20 text-gray-500">Trip not found.</p>
 
-  const days = Math.max(...(trip.itinerary.map(i => i.day_offset) ?? [0]), 0) + 1
+  const days = trip.itinerary.length > 0
+    ? Math.max(...trip.itinerary.map(i => i.day_offset)) + 1
+    : 0
   const totalItinCost = trip.itinerary.reduce((s, i) => s + i.estimated_cost, 0)
   const packedCount = trip.packing_items.filter(i => i.packed).length
 
@@ -69,8 +71,8 @@ export default function TripDetailPage() {
           <h1 className="font-display text-3xl font-bold text-gray-900">{trip.title}</h1>
           <p className="text-gray-500 mt-1">
             {trip.destination}{trip.country ? `, ${trip.country}` : ''}
-            {trip.start_date && ` · ${format(new Date(trip.start_date), 'MMM d')}`}
-            {trip.end_date && ` – ${format(new Date(trip.end_date), 'MMM d, yyyy')}`}
+            {trip.start_date && ` · ${format(parseISO(trip.start_date), 'MMM d')}`}
+            {trip.end_date && ` – ${format(parseISO(trip.end_date), 'MMM d, yyyy')}`}
           </p>
         </div>
         <select
@@ -121,7 +123,7 @@ export default function TripDetailPage() {
                 <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                   <span className="bg-brand-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">{d + 1}</span>
                   Day {d + 1}
-                  {trip.start_date && <span className="text-xs text-gray-400">{format(new Date(new Date(trip.start_date).getTime() + d * 86400000), 'EEE, MMM d')}</span>}
+                  {trip.start_date && <span className="text-xs text-gray-400">{format(addDays(parseISO(trip.start_date), d), 'EEE, MMM d')}</span>}
                 </h3>
                 <div className="space-y-2 ml-8">
                   {dayItems.map(item => (
@@ -221,8 +223,8 @@ export default function TripDetailPage() {
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div><span className="text-gray-500">Destination:</span> <span className="font-medium ml-2">{trip.destination}</span></div>
             <div><span className="text-gray-500">Country:</span> <span className="font-medium ml-2">{trip.country || '—'}</span></div>
-            <div><span className="text-gray-500">Start:</span> <span className="font-medium ml-2">{trip.start_date ? format(new Date(trip.start_date), 'MMM d, yyyy') : '—'}</span></div>
-            <div><span className="text-gray-500">End:</span> <span className="font-medium ml-2">{trip.end_date ? format(new Date(trip.end_date), 'MMM d, yyyy') : '—'}</span></div>
+            <div><span className="text-gray-500">Start:</span> <span className="font-medium ml-2">{trip.start_date ? format(parseISO(trip.start_date), 'MMM d, yyyy') : '—'}</span></div>
+            <div><span className="text-gray-500">End:</span> <span className="font-medium ml-2">{trip.end_date ? format(parseISO(trip.end_date), 'MMM d, yyyy') : '—'}</span></div>
             <div><span className="text-gray-500">Budget:</span> <span className="font-medium ml-2">{trip.budget > 0 ? `${trip.currency} ${trip.budget.toLocaleString()}` : '—'}</span></div>
             <div><span className="text-gray-500">Planned spend:</span> <span className="font-medium ml-2">{totalItinCost > 0 ? `${trip.currency} ${totalItinCost.toFixed(0)}` : '—'}</span></div>
           </div>

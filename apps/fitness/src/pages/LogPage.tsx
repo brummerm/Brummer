@@ -60,6 +60,17 @@ export default function LogPage() {
   const [runNotes, setRunNotes] = useState('')
   const [initialized, setInitialized] = useState(false)
 
+  // Reset form when navigating to a different day
+  useEffect(() => {
+    setInitialized(false)
+    setSessionNotes('')
+    setExercises([])
+    setRunDistance('')
+    setRunMin('')
+    setRunSec('')
+    setRunNotes('')
+  }, [dayIndex])
+
   useEffect(() => {
     if (logLoading || initialized) return
     setInitialized(true)

@@ -69,7 +69,12 @@ def delete_week_plan(db: Session, plan: WeekPlan):
 
 
 def get_slot(db: Session, slot_id: int) -> MealSlot | None:
-    return db.query(MealSlot).filter(MealSlot.id == slot_id).first()
+    return (
+        db.query(MealSlot)
+        .options(joinedload(MealSlot.recipe))
+        .filter(MealSlot.id == slot_id)
+        .first()
+    )
 
 
 def update_slot(db: Session, slot: MealSlot, data: MealSlotUpdate) -> MealSlot:

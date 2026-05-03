@@ -25,7 +25,7 @@ export default function TodayPage() {
   })
 
   const configMissing =
-    !configLoading && (!config || (configError as { response?: { status?: number } } | null)?.response?.status === 404)
+    !configLoading && (configError as { response?: { status?: number } } | null)?.response?.status === 404
 
   const dayIndex = config
     ? differenceInDays(today, parseISO(config.start_date))

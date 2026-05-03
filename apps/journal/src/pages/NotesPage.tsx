@@ -31,6 +31,7 @@ export default function NotesPage() {
   const selectedNote = notes.find(n => n.id === selectedId) ?? null
 
   useEffect(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current)
     if (selectedNote) {
       setDraft({ title: selectedNote.title, content: selectedNote.content, tag_ids: selectedNote.tags.map(t => t.id) })
       setIsDirty(false)

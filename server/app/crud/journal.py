@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 
 from ..models.journal import Note, Tag
@@ -36,7 +36,7 @@ def delete_tag(db: Session, tag: Tag) -> None:
 # ── Notes ─────────────────────────────────────────────────────────────────────
 
 def get_notes(db: Session, search: str | None = None, tag_id: int | None = None) -> list[Note]:
-    q = db.query(Note)
+    q = db.query(Note).options(joinedload(Note.tags))
     if search:
         q = q.filter(or_(Note.title.ilike(f"%{search}%"), Note.content.ilike(f"%{search}%")))
     if tag_id:

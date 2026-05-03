@@ -71,7 +71,6 @@ def create_log(db: Session, data: WorkoutLogCreate) -> WorkoutLog:
         db.add(run)
 
     db.commit()
-    db.refresh(log)
     return (
         db.query(WorkoutLog)
         .options(joinedload(WorkoutLog.exercises), joinedload(WorkoutLog.run))
