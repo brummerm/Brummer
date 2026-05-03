@@ -7,6 +7,7 @@ import { getNotes, createNote, updateNote, deleteNote, getTags, createTag } from
 import type { Note, Tag } from '../types/journal'
 
 type EditorTab = 'write' | 'preview'
+type Draft = Partial<Note> & { tag_ids?: number[] }
 
 export default function NotesPage() {
   const qc = useQueryClient()
@@ -14,7 +15,7 @@ export default function NotesPage() {
   const [activeTagId, setActiveTagId] = useState<number | null>(null)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [editorTab, setEditorTab] = useState<EditorTab>('write')
-  const [draft, setDraft] = useState<Partial<Note>>({})
+  const [draft, setDraft] = useState<Draft>({})
   const [isDirty, setIsDirty] = useState(false)
   const [newTagName, setNewTagName] = useState('')
   const [showTagInput, setShowTagInput] = useState(false)
@@ -82,7 +83,7 @@ export default function NotesPage() {
 
   const toggleTag = (tag: Tag) => {
     const current = draft.tag_ids ?? []
-    const next = current.includes(tag.id) ? current.filter(id => id !== tag.id) : [...current, tag.id]
+    const next = current.includes(tag.id) ? current.filter((id: number) => id !== tag.id) : [...current, tag.id]
     setDraft(d => ({ ...d, tag_ids: next }))
     setIsDirty(true)
     autoSave({ title: draft.title, content: draft.content, tag_ids: next })
