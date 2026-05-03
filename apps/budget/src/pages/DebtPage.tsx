@@ -26,7 +26,12 @@ function monthsToPayoff(balance: number, annualRate: number, monthlyPayment: num
   const r = annualRate / 12
   if (r === 0) return Math.ceil(balance / monthlyPayment)
   if (monthlyPayment <= balance * r) return null   // payment doesn't cover interest
-  return Math.ceil(-Math.log(1 - (balance * r) / monthlyPayment) / Math.log(1 + r))
+  const ratio = (balance * r) / monthlyPayment
+  // Guard floating-point edge case: ratio ≈ 1 causes log(0) → -Infinity → negative months
+  if (ratio >= 1 - 1e-9) return null
+  const months = -Math.log(1 - ratio) / Math.log(1 + r)
+  if (!isFinite(months) || months <= 0) return null
+  return Math.ceil(months)
 }
 
 function payoffDate(months: number): string {
@@ -284,7 +289,7 @@ export default function DebtPage() {
       )}
 
       {/* Strategy note */}
-      {debts.length > 1 && (
+      {debts.length > 1 && debts.some(d => d.interest_rate > 0) && (
         <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 text-sm text-blue-700">
           <strong>Avalanche strategy:</strong> Put extra payments toward the highest-rate debt first to minimize total interest paid.
           Highest rate account: <strong>{debts.slice().sort((a, b) => b.interest_rate - a.interest_rate)[0]?.name}</strong>.

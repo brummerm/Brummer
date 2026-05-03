@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import {
@@ -25,6 +25,9 @@ function EditableText({ value, onSave, className = '' }: { value: string; onSave
   const [val, setVal] = useState(value)
   const ref = useRef<HTMLInputElement>(null)
 
+  // Sync local state when the prop updates (e.g., after a re-fetch) and we're not mid-edit
+  useEffect(() => { if (!editing) setVal(value) }, [value, editing])
+
   const commit = () => { setEditing(false); if (val.trim() !== value) onSave(val.trim()) }
 
   return editing ? (
@@ -42,6 +45,8 @@ function EditableAmount({ value, onSave }: { value: number; onSave: (v: number) 
   const [val, setVal] = useState(String(value))
   const ref = useRef<HTMLInputElement>(null)
 
+  useEffect(() => { if (!editing) setVal(String(value)) }, [value, editing])
+
   const commit = () => {
     setEditing(false)
     const n = parseFloat(val)
@@ -57,6 +62,33 @@ function EditableAmount({ value, onSave }: { value: number; onSave: (v: number) 
   ) : (
     <span className="cursor-text hover:text-brand-700 font-medium"
       onClick={() => { setEditing(true); setTimeout(() => ref.current?.select(), 10) }}>{fmt(value)}</span>
+  )
+}
+
+function EditablePercent({ value, onSave }: { value: number; onSave: (v: number) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [val, setVal] = useState(value.toFixed(1))
+  const ref = useRef<HTMLInputElement>(null)
+
+  useEffect(() => { if (!editing) setVal(value.toFixed(1)) }, [value, editing])
+
+  const commit = () => {
+    setEditing(false)
+    const n = parseFloat(val)
+    if (!isNaN(n) && n !== value) onSave(n)
+    else setVal(value.toFixed(1))
+  }
+
+  return editing ? (
+    <input ref={ref} type="number" step="0.1" min="0" max="100"
+      className="w-16 border border-brand-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-brand-400"
+      value={val} onChange={e => setVal(e.target.value)}
+      onBlur={commit} onKeyDown={e => e.key === 'Enter' && commit()} autoFocus />
+  ) : (
+    <span className="cursor-text hover:text-brand-700 font-medium"
+      onClick={() => { setEditing(true); setTimeout(() => ref.current?.select(), 10) }}>
+      {value.toFixed(1)}
+    </span>
   )
 }
 
@@ -160,9 +192,13 @@ function ExpensesTab() {
 
   const total = items.reduce((a, b) => a + b.amount, 0)
 
+  // Include any categories that exist in the DB but aren't in the hardcoded list
+  const extraCats = Object.keys(byCategory).filter(c => !EXPENSE_CATEGORIES.includes(c)).sort()
+  const allCats = [...EXPENSE_CATEGORIES, ...extraCats]
+
   return (
     <div className="space-y-4">
-      {EXPENSE_CATEGORIES.filter(cat => byCategory[cat]?.length || addingCat === cat).map(cat => {
+      {allCats.filter(cat => byCategory[cat]?.length || addingCat === cat).map(cat => {
         const catItems = byCategory[cat] ?? []
         const catTotal = catItems.reduce((a, b) => a + b.amount, 0)
         return (
@@ -282,7 +318,7 @@ function AllocationsTab() {
                 <EditableText value={a.label} onSave={v => updateMut.mutate({ id: a.id, data: { label: v } })} className="w-full" />
               </td>
               <td className="px-5 py-3 text-right">
-                <EditableAmount value={parseFloat((a.percentage * 100).toFixed(0))} onSave={v => updateMut.mutate({ id: a.id, data: { percentage: v / 100 } })} />
+                <EditablePercent value={parseFloat((a.percentage * 100).toFixed(1))} onSave={v => updateMut.mutate({ id: a.id, data: { percentage: v / 100 } })} />
                 <span className="text-gray-500 ml-1">%</span>
               </td>
               <td className="px-5 py-3 text-right font-medium text-brand-700">{fmt(surplus * a.percentage)}</td>
@@ -341,14 +377,17 @@ function ActualsTab() {
   })
 
   const [edits, setEdits] = useState<Record<string, number>>({})
+  const [justSaved, setJustSaved] = useState(false)
 
+  type SavePayload = { month: string; items: { category: string; budgeted: number; actual: number }[] }
   const saveMut = useMutation({
-    mutationFn: () => saveActuals(month, rows.map(r => ({
-      category: r.category,
-      budgeted: r.budgeted,
-      actual: edits[r.category] ?? r.actual,
-    }))),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['actuals', month] }); setEdits({}) },
+    mutationFn: (payload: SavePayload) => saveActuals(payload.month, payload.items),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['actuals', month] })
+      setEdits({})
+      setJustSaved(true)
+      setTimeout(() => setJustSaved(false), 2000)
+    },
   })
 
   const fmt2 = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
@@ -412,9 +451,18 @@ function ActualsTab() {
         </div>
       )}
 
-      <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}
+      <button
+        onClick={() => saveMut.mutate({
+          month,
+          items: rows.map(r => ({
+            category: r.category,
+            budgeted: r.budgeted,
+            actual: edits[r.category] ?? r.actual,
+          })),
+        })}
+        disabled={saveMut.isPending}
         className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-60 transition-colors">
-        {saveMut.isPending ? 'Saving…' : saveMut.isSuccess ? '✓ Saved' : 'Save Actuals'}
+        {saveMut.isPending ? 'Saving…' : justSaved ? '✓ Saved' : 'Save Actuals'}
       </button>
     </div>
   )

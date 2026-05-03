@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Path
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -9,12 +9,18 @@ from ..schemas.budget import (
     SurplusAllocationCreate, SurplusAllocationUpdate, SurplusAllocationOut,
     RetirementEntryCreate, RetirementEntryOut,
     MonthSnapshotOut,
-    ActualSpendingBatch,
+    ActualSpendingBatch, ActualSpendingOut,
     DebtAccountCreate, DebtAccountUpdate, DebtAccountOut,
     BudgetSummary,
 )
+from ..models.budget import (
+    IncomeItem, ExpenseItem, SurplusAllocation, RetirementEntry,
+    MonthSnapshot, DebtAccount,
+)
 
 router = APIRouter(tags=["budget"])
+
+_MONTH_PATTERN = r'^\d{4}-\d{2}$'
 
 
 # ── Income ────────────────────────────────────────────────────────────────────
@@ -31,7 +37,6 @@ def add_income(data: IncomeItemCreate, db: Session = Depends(get_db)):
 
 @router.put("/income/{item_id}", response_model=IncomeItemOut)
 def edit_income(item_id: int, data: IncomeItemUpdate, db: Session = Depends(get_db)):
-    from ..models.budget import IncomeItem
     item = db.query(IncomeItem).filter(IncomeItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Income item not found")
@@ -40,7 +45,6 @@ def edit_income(item_id: int, data: IncomeItemUpdate, db: Session = Depends(get_
 
 @router.delete("/income/{item_id}", status_code=204)
 def remove_income(item_id: int, db: Session = Depends(get_db)):
-    from ..models.budget import IncomeItem
     item = db.query(IncomeItem).filter(IncomeItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Income item not found")
@@ -62,7 +66,6 @@ def add_expense(data: ExpenseItemCreate, db: Session = Depends(get_db)):
 
 @router.put("/expenses/{item_id}", response_model=ExpenseItemOut)
 def edit_expense(item_id: int, data: ExpenseItemUpdate, db: Session = Depends(get_db)):
-    from ..models.budget import ExpenseItem
     item = db.query(ExpenseItem).filter(ExpenseItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Expense item not found")
@@ -71,7 +74,6 @@ def edit_expense(item_id: int, data: ExpenseItemUpdate, db: Session = Depends(ge
 
 @router.delete("/expenses/{item_id}", status_code=204)
 def remove_expense(item_id: int, db: Session = Depends(get_db)):
-    from ..models.budget import ExpenseItem
     item = db.query(ExpenseItem).filter(ExpenseItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Expense item not found")
@@ -93,7 +95,6 @@ def add_allocation(data: SurplusAllocationCreate, db: Session = Depends(get_db))
 
 @router.put("/allocations/{item_id}", response_model=SurplusAllocationOut)
 def edit_allocation(item_id: int, data: SurplusAllocationUpdate, db: Session = Depends(get_db)):
-    from ..models.budget import SurplusAllocation
     item = db.query(SurplusAllocation).filter(SurplusAllocation.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Surplus allocation not found")
@@ -102,7 +103,6 @@ def edit_allocation(item_id: int, data: SurplusAllocationUpdate, db: Session = D
 
 @router.delete("/allocations/{item_id}", status_code=204)
 def remove_allocation(item_id: int, db: Session = Depends(get_db)):
-    from ..models.budget import SurplusAllocation
     item = db.query(SurplusAllocation).filter(SurplusAllocation.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Surplus allocation not found")
@@ -124,7 +124,6 @@ def add_retirement(data: RetirementEntryCreate, db: Session = Depends(get_db)):
 
 @router.delete("/retirement/{entry_id}", status_code=204)
 def remove_retirement(entry_id: int, db: Session = Depends(get_db)):
-    from ..models.budget import RetirementEntry
     entry = db.query(RetirementEntry).filter(RetirementEntry.id == entry_id).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Retirement entry not found")
@@ -139,14 +138,16 @@ def list_snapshots(db: Session = Depends(get_db)):
     return crud.get_snapshots(db)
 
 
-@router.post("/snapshots/{month}", response_model=MonthSnapshotOut, status_code=201)
-def save_snapshot(month: str, db: Session = Depends(get_db)):
+@router.post("/snapshots/{month}", response_model=MonthSnapshotOut, status_code=200)
+def save_snapshot(
+    month: str = Path(..., pattern=_MONTH_PATTERN),
+    db: Session = Depends(get_db),
+):
     return crud.save_snapshot(db, month)
 
 
 @router.delete("/snapshots/{snap_id}", status_code=204)
 def remove_snapshot(snap_id: int, db: Session = Depends(get_db)):
-    from ..models.budget import MonthSnapshot
     snap = db.query(MonthSnapshot).filter(MonthSnapshot.id == snap_id).first()
     if not snap:
         raise HTTPException(status_code=404, detail="Snapshot not found")
@@ -156,8 +157,11 @@ def remove_snapshot(snap_id: int, db: Session = Depends(get_db)):
 
 # ── Actual Spending ───────────────────────────────────────────────────────────
 
-@router.get("/actuals/{month}")
-def get_actuals(month: str, db: Session = Depends(get_db)):
+@router.get("/actuals/{month}", response_model=list[ActualSpendingOut])
+def get_actuals(
+    month: str = Path(..., pattern=_MONTH_PATTERN),
+    db: Session = Depends(get_db),
+):
     return crud.get_actuals(db, month)
 
 
@@ -181,7 +185,6 @@ def add_debt(data: DebtAccountCreate, db: Session = Depends(get_db)):
 
 @router.put("/debt/{item_id}", response_model=DebtAccountOut)
 def edit_debt(item_id: int, data: DebtAccountUpdate, db: Session = Depends(get_db)):
-    from ..models.budget import DebtAccount
     item = db.query(DebtAccount).filter(DebtAccount.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Debt account not found")
@@ -190,7 +193,6 @@ def edit_debt(item_id: int, data: DebtAccountUpdate, db: Session = Depends(get_d
 
 @router.delete("/debt/{item_id}", status_code=204)
 def remove_debt(item_id: int, db: Session = Depends(get_db)):
-    from ..models.budget import DebtAccount
     item = db.query(DebtAccount).filter(DebtAccount.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Debt account not found")

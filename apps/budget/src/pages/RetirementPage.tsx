@@ -42,6 +42,7 @@ export default function RetirementPage() {
       setSaveStatus('saved')
       setBalance('')
       setDate(todayISO())
+      setCustomAccount('')
       setTimeout(() => setSaveStatus('idle'), 2000)
     },
     onError: () => setSaveStatus('idle'),
@@ -52,11 +53,17 @@ export default function RetirementPage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['retirement'] }); qc.invalidateQueries({ queryKey: ['budget-summary'] }) },
   })
 
-  // Latest balance per account
-  const latestPerAccount: Record<string, number> = {}
+  // Latest balance per account — compare recorded_date explicitly rather than relying on API sort order
+  const latestMeta: Record<string, { balance: number; date: string }> = {}
   for (const e of entries) {
-    if (!(e.account_name in latestPerAccount)) latestPerAccount[e.account_name] = e.balance
+    const cur = latestMeta[e.account_name]
+    if (!cur || e.recorded_date > cur.date) {
+      latestMeta[e.account_name] = { balance: e.balance, date: e.recorded_date }
+    }
   }
+  const latestPerAccount: Record<string, number> = Object.fromEntries(
+    Object.entries(latestMeta).map(([k, v]) => [k, v.balance])
+  )
   const retirementTotal = Object.values(latestPerAccount).reduce((a, b) => a + b, 0)
 
   // Chart data: group entries by date, sum all accounts per date point
@@ -81,7 +88,7 @@ export default function RetirementPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const n = parseFloat(balance)
-    if (!n || !date || !effectiveAccount) return
+    if (isNaN(n) || !date || !effectiveAccount) return
     createMut.mutate({ account_name: effectiveAccount, balance: n, recorded_date: date })
   }
 

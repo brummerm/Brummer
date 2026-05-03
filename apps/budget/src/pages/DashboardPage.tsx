@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import {
@@ -52,10 +53,13 @@ export default function DashboardPage() {
   const { data: summary } = useQuery<BudgetSummary>({ queryKey: ['budget-summary'], queryFn: getSummary })
   const { data: snapshots = [] } = useQuery<MonthSnapshot[]>({ queryKey: ['snapshots'], queryFn: getSnapshots })
 
+  const [justSaved, setJustSaved] = useState(false)
   const saveMut = useMutation({
     mutationFn: () => saveSnapshot(currentMonth()),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['snapshots'] })
+      setJustSaved(true)
+      setTimeout(() => setJustSaved(false), 2000)
     },
   })
   const deleteMut = useMutation({
@@ -69,7 +73,10 @@ export default function DashboardPage() {
   const srColor = srValue >= 0.2 ? 'text-emerald-600' : srValue >= 0.1 ? 'text-yellow-600' : 'text-red-600'
 
   // Pie chart data from expenses_by_category
+  // pieData order is fixed — Cell fill assignments depend on index matching Pie data order.
+  // For the legend we sort by value descending without mutating pieData.
   const pieData = Object.entries(summary?.expenses_by_category ?? {}).map(([name, value]) => ({ name, value }))
+  const sortedPieData = [...pieData].sort((a, b) => b.value - a.value)
 
   // Snapshot chart data
   const barData = snapshots.map(s => ({
@@ -101,7 +108,7 @@ export default function DashboardPage() {
           disabled={saveMut.isPending}
           className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-60 transition-colors"
         >
-          {saveMut.isPending ? 'Saving…' : saveMut.isSuccess ? '✓ Saved' : '💾 Save This Month'}
+          {saveMut.isPending ? 'Saving…' : justSaved ? '✓ Saved' : '💾 Save This Month'}
         </button>
       </div>
 
@@ -170,7 +177,7 @@ export default function DashboardPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex-1 space-y-1.5">
-                {pieData.sort((a, b) => b.value - a.value).map(entry => (
+                {sortedPieData.map(entry => (
                   <div key={entry.name} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CATEGORY_COLORS[entry.name] ?? '#94a3b8' }} />

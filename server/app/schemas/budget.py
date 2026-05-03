@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import date, datetime
 from typing import Optional
 
@@ -56,7 +56,7 @@ class ExpenseItemOut(ExpenseItemBase):
 
 class SurplusAllocationBase(BaseModel):
     label: str
-    percentage: float
+    percentage: float = Field(..., ge=0, le=1)
     sort_order: int = 0
 
 
@@ -116,7 +116,7 @@ class ActualSpendingItem(BaseModel):
 
 
 class ActualSpendingOut(ActualSpendingItem):
-    id: int
+    id: Optional[int] = None
     month: str
     model_config = ConfigDict(from_attributes=True)
 
@@ -131,10 +131,10 @@ class ActualSpendingBatch(BaseModel):
 class DebtAccountBase(BaseModel):
     name: str
     account_type: str
-    balance: float
-    interest_rate: float
-    minimum_payment: float
-    extra_payment: float = 0.0
+    balance: float = Field(..., ge=0)
+    interest_rate: float = Field(..., ge=0, le=10)
+    minimum_payment: float = Field(..., ge=0)
+    extra_payment: float = Field(0.0, ge=0)
 
 
 class DebtAccountCreate(DebtAccountBase):
