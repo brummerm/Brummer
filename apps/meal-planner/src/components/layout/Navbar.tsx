@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom'
 
-const DASHBOARD_URL = 'https://brummer.onrender.com'
+const DASHBOARD_URL = '/dashboard/'
 
 export default function Navbar() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>

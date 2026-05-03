@@ -25,4 +25,28 @@ window.APPS = [
     href: "/apps/fitness/",
     enabled: true,
   },
+  {
+    id: "travel-planner",
+    title: "Travel Planner",
+    desc: "Plan trips with itineraries, packing lists, and budgets.",
+    icon: "✈️",
+    href: "/apps/travel-planner/",
+    enabled: true,
+  },
+  {
+    id: "grades",
+    title: "Grade Calculator",
+    desc: "Build rubrics and calculate grades with weighted criteria.",
+    icon: "📊",
+    href: "/apps/grades/",
+    enabled: true,
+  },
+  {
+    id: "journal",
+    title: "Journal",
+    desc: "Markdown notes with tags, search, and live preview.",
+    icon: "📓",
+    href: "/apps/journal/",
+    enabled: true,
+  },
 ];

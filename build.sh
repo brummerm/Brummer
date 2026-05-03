@@ -32,6 +32,27 @@ echo "==> Building fitness tracker frontend"
 npm run build
 cd ../..
 
+echo "==> Installing Node deps for travel planner"
+cd apps/travel-planner
+npm ci
+echo "==> Building travel planner frontend"
+npm run build
+cd ../..
+
+echo "==> Installing Node deps for grade calculator"
+cd apps/grades
+npm ci
+echo "==> Building grade calculator frontend"
+npm run build
+cd ../..
+
+echo "==> Installing Node deps for journal"
+cd apps/journal
+npm ci
+echo "==> Building journal frontend"
+npm run build
+cd ../..
+
 echo "==> Copying dashboard static files"
 mkdir -p server/static/dashboard server/static/login
 cp -r dashboard/dashboard/. server/static/dashboard/

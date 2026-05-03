@@ -2,17 +2,20 @@
 Top-level FastAPI app for the Brummer personal dashboard.
 
 Layout served at runtime:
-  /                     -> redirect to /login if not authed, else /dashboard/
-  /login                -> static login page
-  /dashboard/...        -> static dashboard files (the tile grid)
-  /apps/meal-planner/.. -> built React app for the meal planner
-  /apps/budget/...      -> built React app for the budget tracker
-  /apps/fitness/...     -> built React app for the fitness tracker
-  /api/auth/...         -> login/logout/me
-  /api/recipes, etc.    -> meal-planner API (auth required)
-  /api/budget/...       -> budget tracker API (auth required)
-  /api/fitness/...      -> fitness tracker API (auth required)
-  /images/...           -> recipe images (auth required)
+  /                          -> redirect to /login if not authed, else /dashboard/
+  /login                     -> static login page
+  /dashboard/...             -> static dashboard files (the tile grid)
+  /apps/meal-planner/..      -> built React app for the meal planner
+  /apps/budget/...           -> built React app for the budget tracker
+  /apps/fitness/...          -> built React app for the fitness tracker
+  /apps/travel-planner/...   -> built React app for travel planner
+  /apps/grades/...           -> built React app for grade calculator
+  /apps/journal/...          -> built React app for journal
+  /api/auth/...              -> login/logout/me
+  /api/travel/...            -> travel planner API (auth required)
+  /api/grades/...            -> grade calculator API (auth required)
+  /api/journal/...           -> journal API (auth required)
+  /images/...                -> recipe images (auth required)
 """
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -24,7 +27,7 @@ from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from .config import settings
 from .database import Base, engine, SessionLocal
 from . import models  # noqa: F401 — registers ORM tables before create_all
-from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness
+from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness, travel, grades, journal
 from .crud import budget as budget_crud
 from .auth import router as auth_router, get_current_user, is_authenticated
 
@@ -50,9 +53,12 @@ STATIC_DIR = Path(settings.STATIC_DIR)
 DASHBOARD_DIR = STATIC_DIR / "dashboard"
 LOGIN_DIR = STATIC_DIR / "login"
 MEAL_PLANNER_DIR = STATIC_DIR / "meal-planner"
-BUDGET_DIR = STATIC_DIR / "budget"
-FITNESS_DIR = STATIC_DIR / "fitness"
-for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR):
+BUDGET_DIR         = STATIC_DIR / "budget"
+FITNESS_DIR        = STATIC_DIR / "fitness"
+TRAVEL_DIR         = STATIC_DIR / "travel-planner"
+GRADES_DIR         = STATIC_DIR / "grades"
+JOURNAL_DIR        = STATIC_DIR / "journal"
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, GRADES_DIR, JOURNAL_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -97,6 +103,15 @@ app.include_router(budget.router,  prefix="/api/budget",  dependencies=auth_dep,
 # ---- Fitness API ----
 app.include_router(fitness.router, prefix="/api/fitness", dependencies=auth_dep, tags=["fitness"])
 
+# ---- Travel Planner API ----
+app.include_router(travel.router,  prefix="/api/travel",  dependencies=auth_dep, tags=["travel"])
+
+# ---- Grade Calculator API ----
+app.include_router(grades.router,  prefix="/api/grades",  dependencies=auth_dep, tags=["grades"])
+
+# ---- Journal API ----
+app.include_router(journal.router, prefix="/api/journal", dependencies=auth_dep, tags=["journal"])
+
 
 # ---- Image static mount, with auth gate ----
 # StaticFiles can't easily depend on auth, so we wrap the path with a guard endpoint
@@ -124,8 +139,11 @@ app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="logi
 # without auth is fine; the API calls inside them require the cookie anyway.
 app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
 app.mount("/apps/meal-planner", StaticFiles(directory=str(MEAL_PLANNER_DIR), html=True), name="meal-planner")
-app.mount("/apps/budget",       StaticFiles(directory=str(BUDGET_DIR),       html=True), name="budget")
-app.mount("/apps/fitness",      StaticFiles(directory=str(FITNESS_DIR),       html=True), name="fitness")
+app.mount("/apps/budget",          StaticFiles(directory=str(BUDGET_DIR),   html=True), name="budget")
+app.mount("/apps/fitness",         StaticFiles(directory=str(FITNESS_DIR),  html=True), name="fitness")
+app.mount("/apps/travel-planner",  StaticFiles(directory=str(TRAVEL_DIR),   html=True), name="travel-planner")
+app.mount("/apps/grades",          StaticFiles(directory=str(GRADES_DIR),   html=True), name="grades")
+app.mount("/apps/journal",         StaticFiles(directory=str(JOURNAL_DIR),  html=True), name="journal")
 
 
 @app.get("/")
