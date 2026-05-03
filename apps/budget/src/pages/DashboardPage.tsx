@@ -1,314 +1,273 @@
-import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import {
-  getSummary,
-  getIncome,
-  getExpenses,
-  getAllocations,
-  getRetirement,
-  type IncomeItem,
-  type ExpenseItem,
-  type SurplusAllocation,
-  type RetirementEntry,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  PieChart, Pie, Cell,
+  LineChart, Line, ReferenceLine,
+  AreaChart, Area,
+} from 'recharts'
+import {
+  getSummary, getSnapshots, saveSnapshot, deleteSnapshot,
+  type BudgetSummary, type MonthSnapshot,
 } from '../api/budget'
 
-function fmt(n: number) {
-  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+const fmtPct = (n: number) => (n * 100).toFixed(1) + '%'
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Housing:       '#6366f1',
+  Food:          '#f59e0b',
+  Transport:     '#10b981',
+  Debt:          '#ef4444',
+  Health:        '#ec4899',
+  Entertainment: '#8b5cf6',
+  Subscriptions: '#0ea5e9',
+  Savings:       '#14b8a6',
+  Personal:      '#f97316',
+  Other:         '#94a3b8',
 }
 
-function fmtPct(n: number) {
-  return (n * 100).toFixed(1) + '%'
+function currentMonth() {
+  return format(new Date(), 'yyyy-MM')
 }
 
-function StatCard({
-  label,
-  value,
-  colorClass,
-}: {
-  label: string
-  value: string
-  colorClass: string
-}) {
+function StatCard({ label, value, sub, color }: { label: string; value: string; sub?: string; color: string }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col gap-1">
-      <span className="text-sm text-gray-500 font-medium">{label}</span>
-      <span className={`text-3xl font-bold font-display ${colorClass}`}>{value}</span>
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <p className="text-sm text-gray-500 font-medium">{label}</p>
+      <p className={`text-3xl font-bold font-display mt-1 ${color}`}>{value}</p>
+      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
     </div>
   )
 }
 
+function EmptyChart({ message }: { message: string }) {
+  return (
+    <div className="flex items-center justify-center h-48 text-gray-400 text-sm">{message}</div>
+  )
+}
+
 export default function DashboardPage() {
-  const { data: summary, isLoading: sumLoading } = useQuery({
-    queryKey: ['budget-summary'],
-    queryFn: getSummary,
+  const qc = useQueryClient()
+  const { data: summary } = useQuery<BudgetSummary>({ queryKey: ['budget-summary'], queryFn: getSummary })
+  const { data: snapshots = [] } = useQuery<MonthSnapshot[]>({ queryKey: ['snapshots'], queryFn: getSnapshots })
+
+  const saveMut = useMutation({
+    mutationFn: () => saveSnapshot(currentMonth()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['snapshots'] })
+    },
   })
-  const { data: income = [] } = useQuery<IncomeItem[]>({
-    queryKey: ['income'],
-    queryFn: getIncome,
-  })
-  const { data: expenses = [] } = useQuery<ExpenseItem[]>({
-    queryKey: ['expenses'],
-    queryFn: getExpenses,
-  })
-  const { data: allocations = [] } = useQuery<SurplusAllocation[]>({
-    queryKey: ['allocations'],
-    queryFn: getAllocations,
-  })
-  const { data: retirement = [] } = useQuery<RetirementEntry[]>({
-    queryKey: ['retirement'],
-    queryFn: getRetirement,
+  const deleteMut = useMutation({
+    mutationFn: deleteSnapshot,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['snapshots'] }),
   })
 
-  const now = new Date()
-  const monthLabel = format(now, 'MMMM yyyy')
+  const monthLabel = format(new Date(), 'MMMM yyyy')
+  const surplusColor = (summary?.surplus ?? 0) >= 0 ? 'text-brand-600' : 'text-red-600'
+  const srValue = summary?.savings_rate ?? 0
+  const srColor = srValue >= 0.2 ? 'text-emerald-600' : srValue >= 0.1 ? 'text-yellow-600' : 'text-red-600'
 
-  // Derive latest balance per account
-  const latestPerAccount: Record<string, number> = {}
-  for (const entry of retirement) {
-    if (!(entry.account_name in latestPerAccount)) {
-      latestPerAccount[entry.account_name] = entry.balance
-    }
-  }
-  const retirementTotal = Object.values(latestPerAccount).reduce((a, b) => a + b, 0)
+  // Pie chart data from expenses_by_category
+  const pieData = Object.entries(summary?.expenses_by_category ?? {}).map(([name, value]) => ({ name, value }))
 
-  const matthewIncome = income.filter((i) => i.person === 'matthew')
-  const alyssaIncome = income.filter((i) => i.person === 'alyssa')
+  // Snapshot chart data
+  const barData = snapshots.map(s => ({
+    month: s.month.slice(0, 7),
+    Income: Math.round(s.income),
+    Expenses: Math.round(s.total_expenses),
+  }))
 
-  const sharedExpenses = expenses.filter((e) => e.category === 'shared')
-  const matthewExpenses = expenses.filter((e) => e.category === 'matthew')
-  const alyssaExpenses = expenses.filter((e) => e.category === 'alyssa')
+  const lineData = snapshots.map(s => ({
+    month: s.month.slice(0, 7),
+    rate: parseFloat((s.savings_rate * 100).toFixed(1)),
+  }))
 
-  const allocationTotal = allocations.reduce((a, b) => a + b.percentage, 0)
-  const allocationValid = Math.abs(allocationTotal - 1.0) < 0.001
-
-  const savingsRate = summary?.savings_rate ?? 0
-  const savingsColor =
-    savingsRate > 0.2
-      ? 'bg-emerald-500'
-      : savingsRate >= 0.1
-        ? 'bg-yellow-400'
-        : 'bg-red-500'
-  const savingsTextColor =
-    savingsRate > 0.2
-      ? 'text-emerald-700'
-      : savingsRate >= 0.1
-        ? 'text-yellow-700'
-        : 'text-red-700'
-
-  if (sumLoading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
-        Loading…
-      </div>
-    )
-  }
+  const areaData = snapshots.map(s => ({
+    month: s.month.slice(0, 7),
+    'Net Worth': Math.round(s.net_worth),
+  }))
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-3xl font-bold text-gray-900">Monthly Overview</h1>
-        <p className="text-gray-500 mt-1">{monthLabel}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-gray-900">Overview</h1>
+          <p className="text-gray-500 mt-1">{monthLabel}</p>
+        </div>
+        <button
+          onClick={() => saveMut.mutate()}
+          disabled={saveMut.isPending}
+          className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-60 transition-colors"
+        >
+          {saveMut.isPending ? 'Saving…' : saveMut.isSuccess ? '✓ Saved' : '💾 Save This Month'}
+        </button>
       </div>
 
-      {/* Top stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Summary stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard label="Monthly Income" value={fmt(summary?.total_income ?? 0)} color="text-blue-600" />
+        <StatCard label="Total Expenses" value={fmt(summary?.total_expenses ?? 0)} color="text-red-600" />
+        <StatCard label="Monthly Surplus" value={fmt(summary?.surplus ?? 0)} color={surplusColor} />
         <StatCard
-          label="Combined Income"
-          value={fmt(summary?.combined_income ?? 0)}
-          colorClass="text-blue-600"
-        />
-        <StatCard
-          label="Total Expenses"
-          value={fmt(summary?.total_expenses ?? 0)}
-          colorClass="text-red-600"
-        />
-        <StatCard
-          label="Monthly Surplus"
-          value={fmt(summary?.surplus ?? 0)}
-          colorClass={(summary?.surplus ?? 0) >= 0 ? 'text-brand-600' : 'text-red-600'}
+          label="Savings Rate"
+          value={fmtPct(srValue)}
+          sub="> 20% excellent · 10–20% good"
+          color={srColor}
         />
       </div>
 
-      {/* Savings rate bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-medium text-gray-700">Savings Rate</span>
-          <span className={`font-bold ${savingsTextColor}`}>
-            {fmtPct(savingsRate)}
-          </span>
+      {/* Net worth quick stat */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-500 font-medium">Current Net Worth</p>
+          <p className={`text-3xl font-bold font-display mt-1 ${(summary?.net_worth ?? 0) >= 0 ? 'text-brand-600' : 'text-red-600'}`}>
+            {fmt(summary?.net_worth ?? 0)}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">Retirement assets − total debt balances</p>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-3">
-          <div
-            className={`${savingsColor} h-3 rounded-full transition-all`}
-            style={{ width: `${Math.min(savingsRate * 100, 100)}%` }}
-          />
-        </div>
-        <p className="text-xs text-gray-400 mt-2">
-          Benchmark: &gt;20% excellent · 10–20% good · &lt;10% needs attention
-        </p>
+        <div className="text-5xl">📈</div>
       </div>
 
-      {/* Income breakdown */}
-      <div>
-        <h2 className="font-display text-xl font-bold text-gray-800 mb-3">Income</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[
-            { label: "Matthew", items: matthewIncome },
-            { label: "Alyssa", items: alyssaIncome },
-          ].map(({ label, items }) => (
-            <div
-              key={label}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-5"
-            >
-              <h3 className="font-semibold text-gray-700 mb-3">{label}</h3>
-              <table className="w-full text-sm">
-                <tbody>
-                  {items.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-50 last:border-0">
-                      <td className="py-1.5 text-gray-600">{item.label}</td>
-                      <td className="py-1.5 text-right font-medium text-gray-800">
-                        {fmt(item.amount)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td className="pt-3 font-semibold text-gray-700">Total</td>
-                    <td className="pt-3 text-right font-bold text-blue-600">
-                      {fmt(items.reduce((a, b) => a + b.amount, 0))}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Expense breakdown */}
-      <div>
-        <h2 className="font-display text-xl font-bold text-gray-800 mb-3">Expenses</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { label: "Shared", items: sharedExpenses },
-            { label: "Matthew", items: matthewExpenses },
-            { label: "Alyssa", items: alyssaExpenses },
-          ].map(({ label, items }) => (
-            <div
-              key={label}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-5"
-            >
-              <h3 className="font-semibold text-gray-700 mb-3">{label}</h3>
-              <table className="w-full text-sm">
-                <tbody>
-                  {items.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-50 last:border-0">
-                      <td className="py-1.5 text-gray-600 pr-2">{item.label}</td>
-                      <td className="py-1.5 text-right font-medium text-gray-800 whitespace-nowrap">
-                        {fmt(item.amount)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td className="pt-3 font-semibold text-gray-700">Total</td>
-                    <td className="pt-3 text-right font-bold text-red-600">
-                      {fmt(items.reduce((a, b) => a + b.amount, 0))}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Surplus allocation */}
-      <div>
-        <h2 className="font-display text-xl font-bold text-gray-800 mb-3">
-          Surplus Allocation
-          {allocationValid ? (
-            <span className="ml-2 text-sm text-brand-600 font-normal">✓ 100%</span>
+      {/* Charts row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Income vs Expenses bar chart */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 className="font-semibold text-gray-800 mb-4">Income vs. Expenses</h2>
+          {barData.length === 0 ? (
+            <EmptyChart message='No snapshots yet — click "Save This Month" to start tracking.' />
           ) : (
-            <span className="ml-2 text-sm text-red-500 font-normal">
-              ⚠ {fmtPct(allocationTotal)} (must equal 100%)
-            </span>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={barData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(v) => fmt(v as number)} />
+                <Legend />
+                <Bar dataKey="Income" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="Expenses" fill="#ef4444" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
-        </h2>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-5 py-3 text-left text-gray-600 font-medium">Label</th>
-                <th className="px-5 py-3 text-right text-gray-600 font-medium">%</th>
-                <th className="px-5 py-3 text-right text-gray-600 font-medium">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allocations.map((a) => (
-                <tr key={a.id} className="border-t border-gray-100">
-                  <td className="px-5 py-3 text-gray-700">{a.label}</td>
-                  <td className="px-5 py-3 text-right text-gray-800">
-                    {(a.percentage * 100).toFixed(0)}%
-                  </td>
-                  <td className="px-5 py-3 text-right font-medium text-brand-700">
-                    {fmt((summary?.surplus ?? 0) * a.percentage)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        </div>
+
+        {/* Expense breakdown donut */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 className="font-semibold text-gray-800 mb-4">Expense Breakdown</h2>
+          {pieData.length === 0 ? (
+            <EmptyChart message="No expenses found." />
+          ) : (
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width="55%" height={220}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} dataKey="value" paddingAngle={2}>
+                    {pieData.map(entry => (
+                      <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] ?? '#94a3b8'} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => fmt(v as number)} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex-1 space-y-1.5">
+                {pieData.sort((a, b) => b.value - a.value).map(entry => (
+                  <div key={entry.name} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CATEGORY_COLORS[entry.name] ?? '#94a3b8' }} />
+                      <span className="text-gray-600">{entry.name}</span>
+                    </div>
+                    <span className="font-medium text-gray-800">{fmt(entry.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Retirement snapshot */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-xl font-bold text-gray-800">Retirement Snapshot</h2>
-          <Link to="/retirement" className="text-sm text-brand-600 hover:underline">
-            + Add entry
-          </Link>
+      {/* Charts row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Savings rate trend */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 className="font-semibold text-gray-800 mb-4">Savings Rate Trend</h2>
+          {lineData.length === 0 ? (
+            <EmptyChart message='No snapshots yet — click "Save This Month" to start tracking.' />
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={lineData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <Tooltip formatter={(v) => `${v}%`} />
+                <ReferenceLine y={20} stroke="#10b981" strokeDasharray="4 4" label={{ value: '20%', fill: '#10b981', fontSize: 10 }} />
+                <ReferenceLine y={10} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: '10%', fill: '#f59e0b', fontSize: 10 }} />
+                <Line type="monotone" dataKey="rate" stroke="#6366f1" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+        {/* Net worth over time */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 className="font-semibold text-gray-800 mb-4">Net Worth Over Time</h2>
+          {areaData.length === 0 ? (
+            <EmptyChart message='No snapshots yet — click "Save This Month" to start tracking.' />
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={areaData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="nwGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(v) => fmt(v as number)} />
+                <Area type="monotone" dataKey="Net Worth" stroke="#10b981" strokeWidth={2} fill="url(#nwGradient)" dot={{ r: 4 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Snapshot history */}
+      {snapshots.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
+            <h2 className="font-semibold text-gray-700">Monthly Snapshots</h2>
+          </div>
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-5 py-3 text-left text-gray-600 font-medium">Account</th>
-                <th className="px-5 py-3 text-right text-gray-600 font-medium">Latest Balance</th>
-                <th className="px-5 py-3 text-right text-gray-600 font-medium">% of Total</th>
+                <th className="px-5 py-3 text-left text-gray-500 font-medium">Month</th>
+                <th className="px-5 py-3 text-right text-gray-500 font-medium">Income</th>
+                <th className="px-5 py-3 text-right text-gray-500 font-medium">Expenses</th>
+                <th className="px-5 py-3 text-right text-gray-500 font-medium">Surplus</th>
+                <th className="px-5 py-3 text-right text-gray-500 font-medium">Savings Rate</th>
+                <th className="px-5 py-3 text-right text-gray-500 font-medium">Net Worth</th>
+                <th className="px-5 py-3" />
               </tr>
             </thead>
             <tbody>
-              {Object.entries(latestPerAccount).map(([name, balance]) => (
-                <tr key={name} className="border-t border-gray-100">
-                  <td className="px-5 py-3 text-gray-700">{name}</td>
-                  <td className="px-5 py-3 text-right font-medium text-gray-800">
-                    {fmt(balance)}
-                  </td>
-                  <td className="px-5 py-3 text-right text-gray-500">
-                    {retirementTotal > 0
-                      ? ((balance / retirementTotal) * 100).toFixed(1) + '%'
-                      : '—'}
+              {[...snapshots].reverse().map(s => (
+                <tr key={s.id} className="border-t border-gray-100 hover:bg-gray-50 group">
+                  <td className="px-5 py-3 font-medium text-gray-700">{s.month}</td>
+                  <td className="px-5 py-3 text-right text-blue-600">{fmt(s.income)}</td>
+                  <td className="px-5 py-3 text-right text-red-600">{fmt(s.total_expenses)}</td>
+                  <td className={`px-5 py-3 text-right font-medium ${s.surplus >= 0 ? 'text-brand-600' : 'text-red-600'}`}>{fmt(s.surplus)}</td>
+                  <td className="px-5 py-3 text-right text-gray-700">{fmtPct(s.savings_rate)}</td>
+                  <td className={`px-5 py-3 text-right font-medium ${s.net_worth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmt(s.net_worth)}</td>
+                  <td className="px-5 py-3 text-right">
+                    <button onClick={() => deleteMut.mutate(s.id)} className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-colors">🗑</button>
                   </td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-gray-200 bg-gray-50">
-                <td className="px-5 py-3 font-semibold text-gray-700">Total</td>
-                <td className="px-5 py-3 text-right font-bold text-brand-700">
-                  {fmt(retirementTotal)}
-                </td>
-                <td />
-              </tr>
-            </tfoot>
           </table>
         </div>
-      </div>
+      )}
     </div>
   )
 }

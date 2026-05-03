@@ -7,7 +7,6 @@ from typing import Optional
 # ── Income ────────────────────────────────────────────────────────────────────
 
 class IncomeItemBase(BaseModel):
-    person: str
     label: str
     amount: float
     sort_order: int = 0
@@ -18,7 +17,6 @@ class IncomeItemCreate(IncomeItemBase):
 
 
 class IncomeItemUpdate(BaseModel):
-    person: Optional[str] = None
     label: Optional[str] = None
     amount: Optional[float] = None
     sort_order: Optional[int] = None
@@ -95,15 +93,76 @@ class RetirementEntryOut(RetirementEntryBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-# ── Summary ───────────────────────────────────────────────────────────────────
+# ── Month Snapshots ───────────────────────────────────────────────────────────
 
-class BudgetSummary(BaseModel):
-    matthew_income: float
-    alyssa_income: float
-    combined_income: float
-    shared_expenses: float
-    matthew_expenses: float
-    alyssa_expenses: float
+class MonthSnapshotOut(BaseModel):
+    id: int
+    month: str
+    income: float
     total_expenses: float
     surplus: float
     savings_rate: float
+    net_worth: float
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ── Actual Spending ───────────────────────────────────────────────────────────
+
+class ActualSpendingItem(BaseModel):
+    category: str
+    budgeted: float
+    actual: float
+
+
+class ActualSpendingOut(ActualSpendingItem):
+    id: int
+    month: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ActualSpendingBatch(BaseModel):
+    month: str
+    items: list[ActualSpendingItem]
+
+
+# ── Debt Accounts ─────────────────────────────────────────────────────────────
+
+class DebtAccountBase(BaseModel):
+    name: str
+    account_type: str
+    balance: float
+    interest_rate: float
+    minimum_payment: float
+    extra_payment: float = 0.0
+
+
+class DebtAccountCreate(DebtAccountBase):
+    pass
+
+
+class DebtAccountUpdate(BaseModel):
+    name: Optional[str] = None
+    account_type: Optional[str] = None
+    balance: Optional[float] = None
+    interest_rate: Optional[float] = None
+    minimum_payment: Optional[float] = None
+    extra_payment: Optional[float] = None
+
+
+class DebtAccountOut(DebtAccountBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ── Summary ───────────────────────────────────────────────────────────────────
+
+class BudgetSummary(BaseModel):
+    total_income: float
+    total_expenses: float
+    surplus: float
+    savings_rate: float
+    expenses_by_category: dict[str, float]
+    net_worth: float

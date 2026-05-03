@@ -40,6 +40,7 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         budget_crud.seed_defaults(db)
+        budget_crud.migrate_data(db)
     finally:
         db.close()
     yield
