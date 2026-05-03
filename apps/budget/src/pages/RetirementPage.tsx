@@ -80,14 +80,22 @@ export default function RetirementPage() {
   const [customAccount, setCustomAccount] = useState('')
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
-  // Projection settings
-  const [currentAge, setCurrentAge] = useState(45)
+  // Projection settings — stored as strings so inputs don't snap while typing
+  const [ageStr, setAgeStr] = useState('32')
   const [retirementAge] = useState(63)
-  const [monthlySpend, setMonthlySpend] = useState(12500)
-  const [annualContribution, setAnnualContribution] = useState(30000)
-  const [annualReturn, setAnnualReturn] = useState(7)
-  const [withdrawalRate, setWithdrawalRate] = useState(4)
-  const [postReturn, setPostReturn] = useState(5)
+  const [spendStr, setSpendStr] = useState('12500')
+  const [contribStr, setContribStr] = useState('30000')
+  const [returnStr, setReturnStr] = useState('7')
+  const [withdrawalStr, setWithdrawalStr] = useState('4')
+  const [postReturnStr, setPostReturnStr] = useState('5')
+
+  // Parsed numeric values with safe fallbacks for calculations
+  const currentAge = Math.max(1, parseInt(ageStr) || 32)
+  const monthlySpend = parseFloat(spendStr) || 12500
+  const annualContribution = parseFloat(contribStr) || 0
+  const annualReturn = parseFloat(returnStr) || 7
+  const withdrawalRate = parseFloat(withdrawalStr) || 4
+  const postReturn = parseFloat(postReturnStr) || 5
 
   const createMut = useMutation({
     mutationFn: createRetirement,
@@ -214,20 +222,20 @@ export default function RetirementPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Your Age</label>
-              <input type="number" min={20} max={62} value={currentAge}
-                onChange={e => setCurrentAge(parseInt(e.target.value) || 45)}
+              <input type="number" min={1} max={62} value={ageStr}
+                onChange={e => setAgeStr(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
             </div>
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Monthly Spend Goal</label>
               <div className="relative">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                <input type="number" min={5000} max={30000} step={500} value={monthlySpend}
-                  onChange={e => setMonthlySpend(parseFloat(e.target.value) || 12500)}
+                <input type="number" min={5000} max={30000} step={500} value={spendStr}
+                  onChange={e => setSpendStr(e.target.value)}
                   className="w-full border border-gray-300 rounded-md pl-5 pr-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
               </div>
               <input type="range" min={10000} max={15000} step={500} value={monthlySpend}
-                onChange={e => setMonthlySpend(parseInt(e.target.value))}
+                onChange={e => setSpendStr(e.target.value)}
                 className="w-full mt-1 accent-brand-500" />
               <div className="flex justify-between text-xs text-gray-400 -mt-0.5">
                 <span>$10k</span><span>$15k</span>
@@ -237,16 +245,16 @@ export default function RetirementPage() {
               <label className="text-xs text-gray-500 font-medium block mb-1">Annual Contribution</label>
               <div className="relative">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                <input type="number" min={0} max={200000} step={1000} value={annualContribution}
-                  onChange={e => setAnnualContribution(parseFloat(e.target.value) || 0)}
+                <input type="number" min={0} max={200000} step={1000} value={contribStr}
+                  onChange={e => setContribStr(e.target.value)}
                   className="w-full border border-gray-300 rounded-md pl-5 pr-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
               </div>
             </div>
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Expected Return</label>
               <div className="relative">
-                <input type="number" min={1} max={15} step={0.5} value={annualReturn}
-                  onChange={e => setAnnualReturn(parseFloat(e.target.value) || 7)}
+                <input type="number" min={1} max={15} step={0.5} value={returnStr}
+                  onChange={e => setReturnStr(e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-2 pr-6 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
               </div>
@@ -254,8 +262,8 @@ export default function RetirementPage() {
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Withdrawal Rate</label>
               <div className="relative">
-                <input type="number" min={2} max={6} step={0.5} value={withdrawalRate}
-                  onChange={e => setWithdrawalRate(parseFloat(e.target.value) || 4)}
+                <input type="number" min={2} max={6} step={0.5} value={withdrawalStr}
+                  onChange={e => setWithdrawalStr(e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-2 pr-6 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
               </div>
@@ -263,8 +271,8 @@ export default function RetirementPage() {
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Post-Ret. Return</label>
               <div className="relative">
-                <input type="number" min={1} max={10} step={0.5} value={postReturn}
-                  onChange={e => setPostReturn(parseFloat(e.target.value) || 5)}
+                <input type="number" min={1} max={10} step={0.5} value={postReturnStr}
+                  onChange={e => setPostReturnStr(e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-2 pr-6 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
               </div>
