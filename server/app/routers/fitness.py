@@ -1,81 +1,95 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Response, Query
+from sqlalchemy.orm import Session, joinedload
+from datetime import date as date_type
 
 from ..database import get_db
-from ..models.fitness import WorkoutLog
-from ..schemas.fitness import (
-    PlanConfigOut,
-    PlanConfigCreate,
-    WorkoutLogOut,
-    WorkoutLogCreate,
-)
 from ..crud import fitness as crud
-from ..services.fitness_plan import PLAN
+from ..models.fitness import WorkoutEntry, WorkoutTemplate
+from ..schemas.fitness import (
+    WorkoutEntryCreate, WorkoutEntryUpdate, WorkoutEntryOut,
+    WorkoutTemplateCreate, WorkoutTemplateUpdate, WorkoutTemplateOut,
+)
 
 router = APIRouter(tags=["fitness"])
 
 
-# ── Config ──────────────────────────────────────────────────────────────────
+# ── Workouts ──────────────────────────────────────────────────────────────────
 
-@router.get("/config", response_model=PlanConfigOut)
-def get_config(db: Session = Depends(get_db)):
-    config = crud.get_config(db)
-    if not config:
-        raise HTTPException(status_code=404, detail="No plan config set")
-    return config
+@router.get("/workouts", response_model=list[WorkoutEntryOut])
+def list_workouts(start: date_type = Query(...), end: date_type = Query(...), db: Session = Depends(get_db)):
+    return crud.get_workouts_in_range(db, start, end)
 
 
-@router.post("/config", response_model=PlanConfigOut)
-def set_config(body: PlanConfigCreate, db: Session = Depends(get_db)):
-    return crud.set_config(db, body.start_date)
+@router.get("/workouts/date/{d}", response_model=WorkoutEntryOut)
+def get_by_date(d: date_type, db: Session = Depends(get_db)):
+    entry = crud.get_workout_by_date(db, d)
+    if not entry:
+        raise HTTPException(status_code=404, detail="No workout for this date")
+    return entry
 
 
-# ── Plan ─────────────────────────────────────────────────────────────────────
-
-@router.get("/plan")
-def get_plan():
-    return PLAN
-
-
-@router.get("/plan/{day_index}")
-def get_plan_day(day_index: int):
-    if day_index < 0 or day_index >= len(PLAN):
-        raise HTTPException(status_code=404, detail="Plan day not found")
-    return PLAN[day_index]
+@router.get("/workouts/{entry_id}", response_model=WorkoutEntryOut)
+def get_workout(entry_id: int, db: Session = Depends(get_db)):
+    entry = crud.get_workout(db, entry_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    return entry
 
 
-# ── Logs ──────────────────────────────────────────────────────────────────────
-
-@router.get("/logs", response_model=list[WorkoutLogOut])
-def get_logs(db: Session = Depends(get_db)):
-    return crud.get_logs(db)
+@router.post("/workouts", response_model=WorkoutEntryOut, status_code=201)
+def create_workout(data: WorkoutEntryCreate, db: Session = Depends(get_db)):
+    return crud.create_workout(db, data)
 
 
-@router.get("/logs/day/{day_index}", response_model=WorkoutLogOut)
-def get_log_by_day(day_index: int, db: Session = Depends(get_db)):
-    log = crud.get_log_by_day(db, day_index)
-    if not log:
-        raise HTTPException(status_code=404, detail="Log not found")
-    return log
+@router.put("/workouts/{entry_id}", response_model=WorkoutEntryOut)
+def update_workout(entry_id: int, data: WorkoutEntryUpdate, db: Session = Depends(get_db)):
+    entry = db.query(WorkoutEntry).filter(WorkoutEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    return crud.update_workout(db, entry, data)
 
 
-@router.post("/logs", response_model=WorkoutLogOut, status_code=201)
-def create_log(body: WorkoutLogCreate, db: Session = Depends(get_db)):
-    return crud.create_log(db, body)
+@router.delete("/workouts/{entry_id}", status_code=204)
+def delete_workout(entry_id: int, db: Session = Depends(get_db)):
+    entry = db.query(WorkoutEntry).filter(WorkoutEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    crud.delete_workout(db, entry)
+    return Response(status_code=204)
 
 
-@router.put("/logs/{log_id}", response_model=WorkoutLogOut)
-def update_log(log_id: int, body: WorkoutLogCreate, db: Session = Depends(get_db)):
-    log = db.query(WorkoutLog).filter(WorkoutLog.id == log_id).first()
-    if not log:
-        raise HTTPException(status_code=404, detail="Log not found")
-    return crud.update_log(db, log, body)
+# ── Templates ─────────────────────────────────────────────────────────────────
+
+@router.get("/templates", response_model=list[WorkoutTemplateOut])
+def list_templates(db: Session = Depends(get_db)):
+    return crud.get_templates(db)
 
 
-@router.delete("/logs/{log_id}", status_code=204)
-def delete_log(log_id: int, db: Session = Depends(get_db)):
-    log = db.query(WorkoutLog).filter(WorkoutLog.id == log_id).first()
-    if not log:
-        raise HTTPException(status_code=404, detail="Log not found")
-    crud.delete_log(db, log)
+@router.get("/templates/{tid}", response_model=WorkoutTemplateOut)
+def get_template(tid: int, db: Session = Depends(get_db)):
+    t = crud.get_template(db, tid)
+    if not t:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return t
+
+
+@router.post("/templates", response_model=WorkoutTemplateOut, status_code=201)
+def create_template(data: WorkoutTemplateCreate, db: Session = Depends(get_db)):
+    return crud.create_template(db, data)
+
+
+@router.put("/templates/{tid}", response_model=WorkoutTemplateOut)
+def update_template(tid: int, data: WorkoutTemplateUpdate, db: Session = Depends(get_db)):
+    t = db.query(WorkoutTemplate).options(joinedload(WorkoutTemplate.exercises)).filter(WorkoutTemplate.id == tid).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return crud.update_template(db, t, data)
+
+
+@router.delete("/templates/{tid}", status_code=204)
+def delete_template(tid: int, db: Session = Depends(get_db)):
+    t = db.query(WorkoutTemplate).filter(WorkoutTemplate.id == tid).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="Template not found")
+    crud.delete_template(db, t)
     return Response(status_code=204)

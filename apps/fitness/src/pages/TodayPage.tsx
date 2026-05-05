@@ -1,240 +1,199 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { format, differenceInDays, parseISO } from 'date-fns'
-import { getConfig, setConfig, getPlanDay, getLogByDay } from '../api/fitness'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { format, parseISO } from 'date-fns'
+import { getWorkoutByDate, type WorkoutEntry, type WorkoutType } from '../api/fitness'
+import WorkoutEditor from '../components/WorkoutEditor'
 
-const DAY_TYPE_COLORS: Record<string, string> = {
+const today = format(new Date(), 'yyyy-MM-dd')
+
+const typeBadge: Record<WorkoutType, string> = {
   lift: 'bg-blue-100 text-blue-800',
   run: 'bg-green-100 text-green-800',
   rest: 'bg-gray-100 text-gray-700',
-  test: 'bg-orange-100 text-orange-800',
+  hike: 'bg-amber-100 text-amber-800',
+  custom: 'bg-purple-100 text-purple-800',
+}
+
+function WorkoutCard({ entry, onEdit }: { entry: WorkoutEntry; onEdit: () => void }) {
+  const typeLabel = entry.custom_type_label || entry.workout_type
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${typeBadge[entry.workout_type]}`}>
+            {typeLabel}
+          </span>
+          {entry.title && <h2 className="font-semibold text-gray-900 text-lg">{entry.title}</h2>}
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+            entry.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-50 text-yellow-700'
+          }`}>
+            {entry.status}
+          </span>
+          <button
+            onClick={onEdit}
+            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Edit
+          </button>
+        </div>
+      </div>
+
+      {entry.exercises.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Exercises</h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-xs text-gray-400 border-b border-gray-100">
+                <th className="text-left py-1.5 font-medium">Exercise</th>
+                <th className="text-left py-1.5 font-medium">Sets</th>
+                <th className="text-left py-1.5 font-medium">Reps</th>
+                <th className="text-left py-1.5 font-medium">Weight</th>
+                <th className="text-left py-1.5 font-medium">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entry.exercises.map(ex => (
+                <tr key={ex.id} className="border-b border-gray-50 last:border-0">
+                  <td className="py-2 font-medium text-gray-800">{ex.exercise_name}</td>
+                  <td className="py-2 text-gray-600">{ex.sets ?? '—'}</td>
+                  <td className="py-2 text-gray-600">{ex.reps ?? '—'}</td>
+                  <td className="py-2 text-gray-600">{ex.weight ?? '—'}</td>
+                  <td className="py-2 text-gray-500 text-xs">{ex.notes ?? ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {entry.run && (
+        <div className="mb-4 flex gap-4">
+          {entry.run.distance_miles != null && (
+            <div className="bg-green-50 rounded-lg p-3 text-center min-w-[80px]">
+              <div className="text-2xl font-bold text-green-700">{entry.run.distance_miles.toFixed(2)}</div>
+              <div className="text-xs text-green-600 mt-0.5">miles</div>
+            </div>
+          )}
+          {entry.run.duration_minutes != null && (
+            <div className="bg-green-50 rounded-lg p-3 text-center min-w-[80px]">
+              <div className="text-2xl font-bold text-green-700">
+                {Math.floor(entry.run.duration_minutes)}:{String(Math.round((entry.run.duration_minutes % 1) * 60)).padStart(2, '0')}
+              </div>
+              <div className="text-xs text-green-600 mt-0.5">duration</div>
+            </div>
+          )}
+          {entry.run.distance_miles != null && entry.run.duration_minutes != null && (
+            <div className="bg-green-50 rounded-lg p-3 text-center min-w-[80px]">
+              <div className="text-2xl font-bold text-green-700">
+                {(entry.run.duration_minutes / entry.run.distance_miles).toFixed(1)}
+              </div>
+              <div className="text-xs text-green-600 mt-0.5">min/mile</div>
+            </div>
+          )}
+          {entry.run.notes && (
+            <p className="text-sm text-gray-500 self-center">{entry.run.notes}</p>
+          )}
+        </div>
+      )}
+
+      {entry.notes && (
+        <p className="text-sm text-gray-600 bg-gray-50 rounded-lg px-4 py-3">{entry.notes}</p>
+      )}
+    </div>
+  )
 }
 
 export default function TodayPage() {
   const qc = useQueryClient()
-  const today = new Date()
-  const todayStr = format(today, 'yyyy-MM-dd')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<WorkoutEntry | null>(null)
 
-  const [startDate, setStartDate] = useState(todayStr)
-
-  const { data: config, isLoading: configLoading, error: configError } = useQuery({
-    queryKey: ['fitness-config'],
-    queryFn: getConfig,
-    retry: false,
-  })
-
-  const configMissing =
-    !configLoading && (configError as { response?: { status?: number } } | null)?.response?.status === 404
-
-  const dayIndex = config
-    ? differenceInDays(today, parseISO(config.start_date))
-    : null
-
-  const { data: planDay } = useQuery({
-    queryKey: ['fitness-plan-day', dayIndex],
-    queryFn: () => getPlanDay(dayIndex!),
-    enabled: dayIndex != null && dayIndex >= 0 && dayIndex < 84,
-  })
-
-  const { data: log } = useQuery({
-    queryKey: ['fitness-log-day', dayIndex],
-    queryFn: () => getLogByDay(dayIndex!),
-    enabled: dayIndex != null && dayIndex >= 0 && dayIndex < 84,
-  })
-
-  const setConfigMutation = useMutation({
-    mutationFn: (date: string) => setConfig(date),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['fitness-config'] })
+  const { data: workout, isLoading, error } = useQuery({
+    queryKey: ['workout-today', today],
+    queryFn: () => getWorkoutByDate(today),
+    retry: (failureCount, err: unknown) => {
+      const e = err as { response?: { status?: number } }
+      if (e?.response?.status === 404) return false
+      return failureCount < 1
     },
   })
 
-  if (configLoading) {
-    return <div className="text-center py-16 text-gray-500">Loading…</div>
+  const todayNotFound = (error as { response?: { status?: number } })?.response?.status === 404
+
+  function openAdd() {
+    setEditingEntry(null)
+    setModalOpen(true)
   }
 
-  // No config set
-  if (configMissing) {
-    return (
-      <div className="max-w-md mx-auto mt-12">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="text-5xl mb-4">🏋️</div>
-          <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">
-            Start Your Plan
-          </h1>
-          <p className="text-gray-500 mb-6">
-            Choose a start date to begin your 12-week fitness program.
-          </p>
-          <div className="flex flex-col gap-3">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full rounded-lg border-gray-300 focus:border-brand-500 focus:ring-brand-500"
-            />
-            <button
-              onClick={() => setConfigMutation.mutate(startDate)}
-              disabled={setConfigMutation.isPending}
-              className="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-60"
-            >
-              {setConfigMutation.isPending ? 'Saving…' : 'Start Plan'}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+  function openEdit(entry: WorkoutEntry) {
+    setEditingEntry(entry)
+    setModalOpen(true)
   }
 
-  // Plan hasn't started yet
-  if (dayIndex != null && dayIndex < 0) {
-    return (
-      <div className="max-w-md mx-auto mt-12">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="text-5xl mb-4">📅</div>
-          <h2 className="font-display text-2xl font-bold text-gray-900 mb-2">
-            Plan Starts Soon
-          </h2>
-          <p className="text-gray-500">
-            Your plan starts in <strong>{Math.abs(dayIndex)}</strong> day{Math.abs(dayIndex) !== 1 ? 's' : ''}.
-          </p>
-        </div>
-      </div>
-    )
+  function handleSave() {
+    qc.invalidateQueries({ queryKey: ['workout-today'] })
+    setModalOpen(false)
   }
-
-  // Plan complete
-  if (dayIndex != null && dayIndex >= 84) {
-    return (
-      <div className="max-w-md mx-auto mt-12">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="text-5xl mb-4">🎉</div>
-          <h2 className="font-display text-2xl font-bold text-gray-900 mb-2">
-            Plan Complete!
-          </h2>
-          <p className="text-gray-500 mb-6">
-            You've finished your 12-week program. Amazing work!
-          </p>
-          <Link
-            to="/history"
-            className="inline-block bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
-          >
-            View History
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  if (!planDay || dayIndex == null) {
-    return <div className="text-center py-16 text-gray-500">Loading plan…</div>
-  }
-
-  const week = planDay.week
-  const dayOfWeek = planDay.day_of_week
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Date header */}
+    <div className="max-w-3xl mx-auto">
       <div className="mb-6">
-        <p className="text-sm text-gray-500">{format(today, 'EEEE, MMMM d')}</p>
         <h1 className="font-display text-3xl font-bold text-gray-900">
-          Week {week}, {dayOfWeek}
+          {format(parseISO(today), 'EEEE, MMMM d, yyyy')}
         </h1>
+        <p className="text-gray-500 text-sm mt-1">Today's workout</p>
       </div>
 
-      {/* Day card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Card header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <span className="font-semibold text-gray-900">{planDay.label}</span>
-          </div>
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${DAY_TYPE_COLORS[planDay.day_type] ?? 'bg-gray-100 text-gray-700'}`}
+      {isLoading && (
+        <div className="text-center py-12 text-gray-400">Loading…</div>
+      )}
+
+      {!isLoading && (todayNotFound || !workout) && (
+        <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div className="text-5xl mb-4">🏋️</div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No workout planned for today</h2>
+          <p className="text-gray-400 text-sm mb-6">Add a workout to get started.</p>
+          <button
+            onClick={openAdd}
+            className="px-6 py-2.5 rounded-lg bg-brand-500 text-white font-medium hover:bg-brand-600 transition-colors"
           >
-            {planDay.focus}
-          </span>
+            Add Workout
+          </button>
         </div>
+      )}
 
-        <div className="divide-y divide-gray-50">
-          {/* Strength */}
-          <div className="px-6 py-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">💪</span>
-              <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
-                Strength / Conditioning
-              </h3>
-            </div>
-            <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">
-              {planDay.strength || '—'}
-            </p>
+      {!isLoading && workout && (
+        <>
+          <WorkoutCard entry={workout} onEdit={() => openEdit(workout)} />
+          <div className="mt-4 text-center">
+            <button onClick={openAdd} className="text-sm text-brand-600 hover:text-brand-700 font-medium">
+              + Add another workout
+            </button>
           </div>
+        </>
+      )}
 
-          {/* Run */}
-          <div className="px-6 py-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">🏃</span>
-              <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
-                Run
-              </h3>
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="px-6 pt-6 pb-4 border-b border-gray-100">
+              <h2 className="font-semibold text-gray-900 text-lg">
+                {editingEntry ? 'Edit Workout' : 'Add Workout'}
+              </h2>
             </div>
-            <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">
-              {planDay.run || '—'}
-            </p>
-          </div>
-
-          {/* Mental */}
-          <div className="px-6 py-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">🧠</span>
-              <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
-                Mental + Recovery
-              </h3>
+            <div className="p-6">
+              <WorkoutEditor
+                initialDate={today}
+                initialData={editingEntry ?? undefined}
+                onSave={handleSave}
+                onCancel={() => setModalOpen(false)}
+              />
             </div>
-            <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">
-              {planDay.mental_recovery || '—'}
-            </p>
           </div>
         </div>
-
-        {/* Actions */}
-        <div className="px-6 py-4 bg-gray-50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {log ? (
-              <span className="inline-flex items-center gap-1 text-green-700 font-medium text-sm">
-                <span className="text-green-500">✓</span> Logged
-              </span>
-            ) : null}
-            <Link
-              to={`/log/${dayIndex}`}
-              className="inline-block bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              {log ? 'View / Edit Log' : 'Log This Workout'}
-            </Link>
-          </div>
-
-          {/* Adjacent day nav */}
-          <div className="flex items-center gap-3 text-sm">
-            {dayIndex > 0 && (
-              <Link
-                to={`/log/${dayIndex - 1}`}
-                className="text-gray-500 hover:text-brand-600 transition-colors"
-              >
-                ← Yesterday
-              </Link>
-            )}
-            {dayIndex < 83 && (
-              <Link
-                to={`/log/${dayIndex + 1}`}
-                className="text-gray-500 hover:text-brand-600 transition-colors"
-              >
-                Tomorrow →
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

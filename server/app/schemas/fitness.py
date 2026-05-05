@@ -1,9 +1,10 @@
-from pydantic import BaseModel, ConfigDict
-from datetime import date, datetime
+from __future__ import annotations
+from pydantic import BaseModel
+from datetime import date
 from typing import Optional
 
 
-class ExerciseSetBase(BaseModel):
+class ExerciseIn(BaseModel):
     exercise_name: str
     sets: Optional[int] = None
     reps: Optional[str] = None
@@ -11,55 +12,82 @@ class ExerciseSetBase(BaseModel):
     notes: Optional[str] = None
     sort_order: int = 0
 
-
-class ExerciseSetCreate(ExerciseSetBase):
-    pass
-
-
-class ExerciseSetOut(ExerciseSetBase):
+class ExerciseOut(ExerciseIn):
     id: int
-    model_config = ConfigDict(from_attributes=True)
+    class Config: from_attributes = True
 
-
-class RunEntryBase(BaseModel):
+class RunIn(BaseModel):
     distance_miles: Optional[float] = None
     duration_minutes: Optional[float] = None
     notes: Optional[str] = None
 
-
-class RunEntryCreate(RunEntryBase):
-    pass
-
-
-class RunEntryOut(RunEntryBase):
+class RunOut(RunIn):
     id: int
-    model_config = ConfigDict(from_attributes=True)
+    class Config: from_attributes = True
 
-
-class WorkoutLogCreate(BaseModel):
-    plan_day_index: int
-    logged_date: date
+class WorkoutEntryCreate(BaseModel):
+    date: date
+    workout_type: str  # lift|run|rest|hike|custom
+    custom_type_label: Optional[str] = None
+    title: Optional[str] = None
+    status: str = "planned"
     notes: Optional[str] = None
-    exercises: list[ExerciseSetCreate] = []
-    run: Optional[RunEntryCreate] = None
+    exercises: list[ExerciseIn] = []
+    run: Optional[RunIn] = None
 
-
-class WorkoutLogOut(BaseModel):
-    id: int
-    plan_day_index: int
-    logged_date: date
+class WorkoutEntryUpdate(BaseModel):
+    date: Optional[date] = None
+    workout_type: Optional[str] = None
+    custom_type_label: Optional[str] = None
+    title: Optional[str] = None
+    status: Optional[str] = None
     notes: Optional[str] = None
-    exercises: list[ExerciseSetOut]
-    run: Optional[RunEntryOut] = None
-    created_at: datetime
-    model_config = ConfigDict(from_attributes=True)
+    exercises: Optional[list[ExerciseIn]] = None
+    run: Optional[RunIn] = None
 
-
-class PlanConfigOut(BaseModel):
+class WorkoutEntryOut(BaseModel):
     id: int
-    start_date: date
-    model_config = ConfigDict(from_attributes=True)
+    date: date
+    workout_type: str
+    custom_type_label: Optional[str]
+    title: Optional[str]
+    status: str
+    notes: Optional[str]
+    exercises: list[ExerciseOut]
+    run: Optional[RunOut]
+    class Config: from_attributes = True
 
+class TemplateExerciseIn(BaseModel):
+    exercise_name: str
+    sets: Optional[int] = None
+    reps: Optional[str] = None
+    weight: Optional[str] = None
+    notes: Optional[str] = None
+    sort_order: int = 0
 
-class PlanConfigCreate(BaseModel):
-    start_date: date
+class TemplateExerciseOut(TemplateExerciseIn):
+    id: int
+    class Config: from_attributes = True
+
+class WorkoutTemplateCreate(BaseModel):
+    name: str
+    workout_type: str
+    custom_type_label: Optional[str] = None
+    notes: Optional[str] = None
+    exercises: list[TemplateExerciseIn] = []
+
+class WorkoutTemplateUpdate(BaseModel):
+    name: Optional[str] = None
+    workout_type: Optional[str] = None
+    custom_type_label: Optional[str] = None
+    notes: Optional[str] = None
+    exercises: Optional[list[TemplateExerciseIn]] = None
+
+class WorkoutTemplateOut(BaseModel):
+    id: int
+    name: str
+    workout_type: str
+    custom_type_label: Optional[str]
+    notes: Optional[str]
+    exercises: list[TemplateExerciseOut]
+    class Config: from_attributes = True

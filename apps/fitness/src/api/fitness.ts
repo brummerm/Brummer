@@ -1,63 +1,61 @@
-import client from './client'
-import type { PlanConfig, PlanDay, WorkoutLog } from '../types/fitness'
-import type { ExerciseSetCreate, RunEntryCreate } from './fitnessTypes'
+import axios from 'axios'
+import { format } from 'date-fns'
 
-export interface WorkoutLogPayload {
-  plan_day_index: number
-  logged_date: string
-  notes?: string | null
-  exercises: ExerciseSetCreate[]
-  run?: RunEntryCreate | null
-}
+const api = axios.create({
+  baseURL: '/api/fitness',
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+})
 
-export async function getConfig(): Promise<PlanConfig> {
-  const res = await client.get<PlanConfig>('/fitness/config')
-  return res.data
-}
-
-export async function setConfig(start_date: string): Promise<PlanConfig> {
-  const res = await client.post<PlanConfig>('/fitness/config', { start_date })
-  return res.data
-}
-
-export async function getPlan(): Promise<PlanDay[]> {
-  const res = await client.get<PlanDay[]>('/fitness/plan')
-  return res.data
-}
-
-export async function getPlanDay(day_index: number): Promise<PlanDay> {
-  const res = await client.get<PlanDay>(`/fitness/plan/${day_index}`)
-  return res.data
-}
-
-export async function getLogs(): Promise<WorkoutLog[]> {
-  const res = await client.get<WorkoutLog[]>('/fitness/logs')
-  return res.data
-}
-
-export async function getLogByDay(day_index: number): Promise<WorkoutLog | null> {
-  try {
-    const res = await client.get<WorkoutLog>(`/fitness/logs/day/${day_index}`)
-    return res.data
-  } catch (err: unknown) {
-    const e = err as { response?: { status?: number } }
-    if (e?.response?.status === 404) return null
-    throw err
+api.interceptors.response.use(
+  (r) => r,
+  (err) => {
+    if (err?.response?.status === 401) window.location.replace('/login/')
+    return Promise.reject(err)
   }
+)
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export type WorkoutType = 'lift' | 'run' | 'rest' | 'hike' | 'custom'
+export type WorkoutStatus = 'planned' | 'completed'
+
+export interface WorkoutExercise {
+  id?: number
+  exercise_name: string
+  sets: number | null
+  reps: string | null
+  weight: string | null
+  notes: string | null
+  sort_order: number
 }
 
-export async function createLog(data: WorkoutLogPayload): Promise<WorkoutLog> {
-  const res = await client.post<WorkoutLog>('/fitness/logs', data)
-  return res.data
+export interface WorkoutRun {
+  id?: number
+  distance_miles: number | null
+  duration_minutes: number | null
+  notes: string | null
 }
 
-export async function updateLog(id: number, data: WorkoutLogPayload): Promise<WorkoutLog> {
-  const res = await client.put<WorkoutLog>(`/fitness/logs/${id}`, data)
-  return res.data
+export interface WorkoutEntry {
+  id: number
+  date: string
+  workout_type: WorkoutType
+  custom_type_label: string | null
+  title: string | null
+  status: WorkoutStatus
+  notes: string | null
+  exercises: WorkoutExercise[]
+  run: WorkoutRun | null
 }
 
-export async function deleteLog(id: number): Promise<void> {
-  await client.delete(`/fitness/logs/${id}`)
+export interface WorkoutTemplate {
+  id: number
+  name: string
+  workout_type: WorkoutType
+  custom_type_label: string | null
+  notes: string | null
+  exercises: WorkoutExercise[]
 }
 
 export interface BodyWeightEntry {
@@ -67,7 +65,53 @@ export interface BodyWeightEntry {
   notes: string | null
 }
 
-export const getBodyWeights = () => client.get<BodyWeightEntry[]>('/body-weight').then(r => r.data)
+// ── Workouts ──────────────────────────────────────────────────────────────────
+
+export const getWorkoutsInRange = (start: Date, end: Date) =>
+  api.get<WorkoutEntry[]>('/workouts', {
+    params: { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') }
+  }).then(r => r.data)
+
+export const getWorkoutByDate = (date: string) =>
+  api.get<WorkoutEntry>(`/workouts/date/${date}`).then(r => r.data)
+
+export const createWorkout = (data: Omit<WorkoutEntry, 'id'>) =>
+  api.post<WorkoutEntry>('/workouts', data).then(r => r.data)
+
+export const updateWorkout = (id: number, data: Partial<Omit<WorkoutEntry, 'id'>>) =>
+  api.put<WorkoutEntry>(`/workouts/${id}`, data).then(r => r.data)
+
+export const deleteWorkout = (id: number) => api.delete(`/workouts/${id}`)
+
+// ── Templates ─────────────────────────────────────────────────────────────────
+
+export const getTemplates = () =>
+  api.get<WorkoutTemplate[]>('/templates').then(r => r.data)
+
+export const createTemplate = (data: Omit<WorkoutTemplate, 'id'>) =>
+  api.post<WorkoutTemplate>('/templates', data).then(r => r.data)
+
+export const updateTemplate = (id: number, data: Partial<Omit<WorkoutTemplate, 'id'>>) =>
+  api.put<WorkoutTemplate>(`/templates/${id}`, data).then(r => r.data)
+
+export const deleteTemplate = (id: number) => api.delete(`/templates/${id}`)
+
+// ── Body Weight ───────────────────────────────────────────────────────────────
+
+const bwApi = axios.create({
+  baseURL: '/api',
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+})
+bwApi.interceptors.response.use(
+  (r) => r,
+  (err) => {
+    if (err?.response?.status === 401) window.location.replace('/login/')
+    return Promise.reject(err)
+  }
+)
+
+export const getBodyWeights = () => bwApi.get<BodyWeightEntry[]>('/body-weight').then(r => r.data)
 export const logBodyWeight = (data: { date: string; weight_lbs: number; notes?: string }) =>
-  client.post<BodyWeightEntry>('/body-weight', data).then(r => r.data)
-export const deleteBodyWeight = (id: number) => client.delete(`/body-weight/${id}`)
+  bwApi.post<BodyWeightEntry>('/body-weight', data).then(r => r.data)
+export const deleteBodyWeight = (id: number) => bwApi.delete(`/body-weight/${id}`)

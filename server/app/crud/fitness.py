@@ -1,125 +1,117 @@
-from datetime import date
+from datetime import date as date_type
 from typing import Optional
 from sqlalchemy.orm import Session, joinedload
-
-from ..models.fitness import FitnessPlanConfig, WorkoutLog, ExerciseSet, RunEntry
-from ..schemas.fitness import WorkoutLogCreate
-
-
-def get_config(db: Session) -> Optional[FitnessPlanConfig]:
-    return db.query(FitnessPlanConfig).first()
+from ..models.fitness import WorkoutEntry, WorkoutExercise, WorkoutRun, WorkoutTemplate, WorkoutTemplateExercise
+from ..schemas.fitness import WorkoutEntryCreate, WorkoutEntryUpdate, WorkoutTemplateCreate, WorkoutTemplateUpdate
 
 
-def set_config(db: Session, start_date: date) -> FitnessPlanConfig:
-    existing = db.query(FitnessPlanConfig).first()
-    if existing:
-        db.delete(existing)
-        db.flush()
-    config = FitnessPlanConfig(start_date=start_date)
-    db.add(config)
-    db.commit()
-    db.refresh(config)
-    return config
+def _load_entry(db: Session, entry_id: int) -> Optional[WorkoutEntry]:
+    return (db.query(WorkoutEntry)
+            .options(joinedload(WorkoutEntry.exercises), joinedload(WorkoutEntry.run))
+            .filter(WorkoutEntry.id == entry_id).first())
 
 
-def get_logs(db: Session) -> list[WorkoutLog]:
-    return (
-        db.query(WorkoutLog)
-        .options(joinedload(WorkoutLog.exercises), joinedload(WorkoutLog.run))
-        .order_by(WorkoutLog.logged_date.desc())
-        .all()
+def get_workouts_in_range(db: Session, start: date_type, end: date_type) -> list[WorkoutEntry]:
+    return (db.query(WorkoutEntry)
+            .options(joinedload(WorkoutEntry.exercises), joinedload(WorkoutEntry.run))
+            .filter(WorkoutEntry.date >= start, WorkoutEntry.date <= end)
+            .order_by(WorkoutEntry.date).all())
+
+
+def get_workout_by_date(db: Session, d: date_type) -> Optional[WorkoutEntry]:
+    return (db.query(WorkoutEntry)
+            .options(joinedload(WorkoutEntry.exercises), joinedload(WorkoutEntry.run))
+            .filter(WorkoutEntry.date == d).first())
+
+
+def get_workout(db: Session, entry_id: int) -> Optional[WorkoutEntry]:
+    return _load_entry(db, entry_id)
+
+
+def create_workout(db: Session, data: WorkoutEntryCreate) -> WorkoutEntry:
+    entry = WorkoutEntry(
+        date=data.date, workout_type=data.workout_type,
+        custom_type_label=data.custom_type_label, title=data.title,
+        status=data.status, notes=data.notes,
     )
-
-
-def get_log_by_day(db: Session, day_index: int) -> Optional[WorkoutLog]:
-    return (
-        db.query(WorkoutLog)
-        .options(joinedload(WorkoutLog.exercises), joinedload(WorkoutLog.run))
-        .filter(WorkoutLog.plan_day_index == day_index)
-        .first()
-    )
-
-
-def create_log(db: Session, data: WorkoutLogCreate) -> WorkoutLog:
-    log = WorkoutLog(
-        plan_day_index=data.plan_day_index,
-        logged_date=data.logged_date,
-        notes=data.notes,
-    )
-    db.add(log)
+    db.add(entry)
     db.flush()
+    for i, ex in enumerate(data.exercises):
+        db.add(WorkoutExercise(workout_entry_id=entry.id, exercise_name=ex.exercise_name,
+            sets=ex.sets, reps=ex.reps, weight=ex.weight, notes=ex.notes, sort_order=i))
+    if data.run:
+        db.add(WorkoutRun(workout_entry_id=entry.id, distance_miles=data.run.distance_miles,
+            duration_minutes=data.run.duration_minutes, notes=data.run.notes))
+    db.commit()
+    return _load_entry(db, entry.id)
 
-    for ex in data.exercises:
-        exercise = ExerciseSet(
-            workout_log_id=log.id,
-            exercise_name=ex.exercise_name,
-            sets=ex.sets,
-            reps=ex.reps,
-            weight=ex.weight,
-            notes=ex.notes,
-            sort_order=ex.sort_order,
-        )
-        db.add(exercise)
 
+def update_workout(db: Session, entry: WorkoutEntry, data: WorkoutEntryUpdate) -> WorkoutEntry:
+    if data.date is not None: entry.date = data.date
+    if data.workout_type is not None: entry.workout_type = data.workout_type
+    if data.custom_type_label is not None: entry.custom_type_label = data.custom_type_label
+    if data.title is not None: entry.title = data.title
+    if data.status is not None: entry.status = data.status
+    if data.notes is not None: entry.notes = data.notes
+    if data.exercises is not None:
+        db.query(WorkoutExercise).filter(WorkoutExercise.workout_entry_id == entry.id).delete()
+        for i, ex in enumerate(data.exercises):
+            db.add(WorkoutExercise(workout_entry_id=entry.id, exercise_name=ex.exercise_name,
+                sets=ex.sets, reps=ex.reps, weight=ex.weight, notes=ex.notes, sort_order=i))
     if data.run is not None:
-        run = RunEntry(
-            workout_log_id=log.id,
-            distance_miles=data.run.distance_miles,
-            duration_minutes=data.run.duration_minutes,
-            notes=data.run.notes,
-        )
-        db.add(run)
-
+        db.query(WorkoutRun).filter(WorkoutRun.workout_entry_id == entry.id).delete()
+        db.add(WorkoutRun(workout_entry_id=entry.id, distance_miles=data.run.distance_miles,
+            duration_minutes=data.run.duration_minutes, notes=data.run.notes))
     db.commit()
-    return (
-        db.query(WorkoutLog)
-        .options(joinedload(WorkoutLog.exercises), joinedload(WorkoutLog.run))
-        .filter(WorkoutLog.id == log.id)
-        .first()
-    )
+    return _load_entry(db, entry.id)
 
 
-def update_log(db: Session, log: WorkoutLog, data: WorkoutLogCreate) -> WorkoutLog:
-    # Delete existing child rows
-    db.query(ExerciseSet).filter(ExerciseSet.workout_log_id == log.id).delete()
-    db.query(RunEntry).filter(RunEntry.workout_log_id == log.id).delete()
-    db.flush()
+def delete_workout(db: Session, entry: WorkoutEntry) -> None:
+    db.delete(entry); db.commit()
 
-    # Update log fields
-    log.plan_day_index = data.plan_day_index
-    log.logged_date = data.logged_date
-    log.notes = data.notes
 
-    for ex in data.exercises:
-        exercise = ExerciseSet(
-            workout_log_id=log.id,
-            exercise_name=ex.exercise_name,
-            sets=ex.sets,
-            reps=ex.reps,
-            weight=ex.weight,
-            notes=ex.notes,
-            sort_order=ex.sort_order,
-        )
-        db.add(exercise)
+# ── Templates ─────────────────────────────────────────────────────────────────
 
-    if data.run is not None:
-        run = RunEntry(
-            workout_log_id=log.id,
-            distance_miles=data.run.distance_miles,
-            duration_minutes=data.run.duration_minutes,
-            notes=data.run.notes,
-        )
-        db.add(run)
+def _load_template(db: Session, tid: int) -> Optional[WorkoutTemplate]:
+    return (db.query(WorkoutTemplate)
+            .options(joinedload(WorkoutTemplate.exercises))
+            .filter(WorkoutTemplate.id == tid).first())
 
+
+def get_templates(db: Session) -> list[WorkoutTemplate]:
+    return (db.query(WorkoutTemplate)
+            .options(joinedload(WorkoutTemplate.exercises))
+            .order_by(WorkoutTemplate.name).all())
+
+
+def get_template(db: Session, tid: int) -> Optional[WorkoutTemplate]:
+    return _load_template(db, tid)
+
+
+def create_template(db: Session, data: WorkoutTemplateCreate) -> WorkoutTemplate:
+    t = WorkoutTemplate(name=data.name, workout_type=data.workout_type,
+        custom_type_label=data.custom_type_label, notes=data.notes)
+    db.add(t); db.flush()
+    for i, ex in enumerate(data.exercises):
+        db.add(WorkoutTemplateExercise(template_id=t.id, exercise_name=ex.exercise_name,
+            sets=ex.sets, reps=ex.reps, weight=ex.weight, notes=ex.notes, sort_order=i))
     db.commit()
-    return (
-        db.query(WorkoutLog)
-        .options(joinedload(WorkoutLog.exercises), joinedload(WorkoutLog.run))
-        .filter(WorkoutLog.id == log.id)
-        .first()
-    )
+    return _load_template(db, t.id)
 
 
-def delete_log(db: Session, log: WorkoutLog) -> None:
-    db.delete(log)
+def update_template(db: Session, t: WorkoutTemplate, data: WorkoutTemplateUpdate) -> WorkoutTemplate:
+    if data.name is not None: t.name = data.name
+    if data.workout_type is not None: t.workout_type = data.workout_type
+    if data.custom_type_label is not None: t.custom_type_label = data.custom_type_label
+    if data.notes is not None: t.notes = data.notes
+    if data.exercises is not None:
+        db.query(WorkoutTemplateExercise).filter(WorkoutTemplateExercise.template_id == t.id).delete()
+        for i, ex in enumerate(data.exercises):
+            db.add(WorkoutTemplateExercise(template_id=t.id, exercise_name=ex.exercise_name,
+                sets=ex.sets, reps=ex.reps, weight=ex.weight, notes=ex.notes, sort_order=i))
     db.commit()
+    return _load_template(db, t.id)
+
+
+def delete_template(db: Session, t: WorkoutTemplate) -> None:
+    db.delete(t); db.commit()

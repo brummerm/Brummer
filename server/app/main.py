@@ -28,6 +28,7 @@ from .config import settings
 from .database import Base, engine, SessionLocal
 from . import models  # noqa: F401 — registers ORM tables before create_all
 from .models import body_weight  # noqa: F401 — registers body_weights table
+from .models import fitness  # noqa: F401 — registers workout tables
 from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness, travel, grades, journal
 from .routers import body_weight as body_weight_router
 from .crud import budget as budget_crud

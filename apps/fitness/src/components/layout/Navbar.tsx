@@ -30,8 +30,11 @@ export default function Navbar() {
             <NavLink to="/" end className={linkClass}>
               Today
             </NavLink>
-            <NavLink to="/plan" className={linkClass}>
-              Plan
+            <NavLink to="/calendar" className={linkClass}>
+              Calendar
+            </NavLink>
+            <NavLink to="/templates" className={linkClass}>
+              Templates
             </NavLink>
             <NavLink to="/history" className={linkClass}>
               History
