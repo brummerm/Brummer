@@ -255,14 +255,14 @@ export default function GroceryListPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between no-print">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 no-print">
         <div>
-          <h1 className="text-3xl font-display font-bold">Grocery List</h1>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold">Grocery List</h1>
           {groceryList && (
             <p className="text-sm text-gray-500 mt-1">Week of {weekLabel(groceryList.week_start)}</p>
           )}
         </div>
-        <div className="flex gap-2 flex-wrap justify-end">
+        <div className="flex gap-2 flex-wrap sm:justify-end">
           <Button variant="secondary" size="sm" onClick={clearGroceryChecks}>
             Uncheck All
           </Button>

@@ -30,7 +30,7 @@ export default function RecipeFiltersBar({ filters, onChange }: Props) {
       <select
         value={filters.category || ''}
         onChange={(e) => onChange({ category: e.target.value || undefined, page: 1 })}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none"
+        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none w-full sm:w-auto"
       >
         <option value="">All Categories</option>
         {categories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -38,7 +38,7 @@ export default function RecipeFiltersBar({ filters, onChange }: Props) {
       <select
         value={filters.cuisine || ''}
         onChange={(e) => onChange({ cuisine: e.target.value || undefined, page: 1 })}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none"
+        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none w-full sm:w-auto"
       >
         <option value="">All Cuisines</option>
         {cuisines.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -49,7 +49,7 @@ export default function RecipeFiltersBar({ filters, onChange }: Props) {
           const v = e.target.value
           onChange({ is_custom: v === '' ? undefined : v === 'true', page: 1 })
         }}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none"
+        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none w-full sm:w-auto"
       >
         <option value="">All Recipes</option>
         <option value="true">My Recipes</option>

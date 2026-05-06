@@ -32,9 +32,9 @@ export default function RecipeIndexPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-display font-bold text-gray-900">Recipes</h1>
-        <Link to="/recipes/new">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">Recipes</h1>
+        <Link to="/recipes/new" className="shrink-0">
           <Button>+ Add Recipe</Button>
         </Link>
       </div>
@@ -67,7 +67,7 @@ export default function RecipeIndexPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {data.items.map((recipe) => (
                 <RecipeCard
                   key={recipe.id}

@@ -36,12 +36,12 @@ export default function RecipeDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <Link to="/recipes" className="text-sm text-gray-400 hover:text-brand-500 mb-2 inline-block">
             ← Back to Recipes
           </Link>
-          <h1 className="text-3xl font-display font-bold text-gray-900">{recipe.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">{recipe.title}</h1>
           {recipe.description && (
             <p className="text-gray-500 mt-2">{recipe.description}</p>
           )}
@@ -77,7 +77,7 @@ export default function RecipeDetailPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-4 bg-brand-50 rounded-xl p-4 text-center">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 bg-brand-50 rounded-xl p-4 text-center">
         {recipe.prep_time_mins && (
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">Prep</p>

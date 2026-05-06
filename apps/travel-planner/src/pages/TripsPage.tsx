@@ -125,7 +125,7 @@ export default function TripsPage() {
                 value={form.title}
                 onChange={e => set('title', e.target.value)}
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                   placeholder="Destination city"
@@ -139,7 +139,7 @@ export default function TripsPage() {
                   onChange={e => set('country', e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-gray-500 mb-1 block">Start date</label>
                   <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
@@ -151,7 +151,7 @@ export default function TripsPage() {
                     value={form.end_date ?? ''} onChange={e => set('end_date', e.target.value || null)} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input type="number" min="0" className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                   placeholder="Budget" value={form.budget || ''} onChange={e => set('budget', parseFloat(e.target.value) || 0)} />
                 <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"

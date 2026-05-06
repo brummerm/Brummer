@@ -152,10 +152,10 @@ export default function SavingsPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="font-semibold text-gray-700 mb-4">{accounts.length === 0 ? 'Add your first account' : 'Add Account'}</h2>
         {isLoading ? null : (
-          <form onSubmit={handleAdd} className="flex flex-wrap gap-3 items-end">
+          <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">Account Name</label>
-              <input className="border border-gray-300 rounded-md px-3 py-2 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-brand-400"
+              <input className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-brand-400"
                 placeholder="e.g. Chase Savings" value={name} onChange={e => setName(e.target.value)} required />
             </div>
             <div className="flex flex-col gap-1">
@@ -171,13 +171,15 @@ export default function SavingsPage() {
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                 <input type="number" min="0" step="0.01" placeholder="0.00"
                   value={balance} onChange={e => setBalance(e.target.value)} required
-                  className="border border-gray-300 rounded-md pl-6 pr-3 py-2 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-brand-400" />
+                  className="border border-gray-300 rounded-md pl-6 pr-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-brand-400" />
               </div>
             </div>
-            <button type="submit" disabled={createMut.isPending}
-              className="bg-brand-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-600 disabled:opacity-60 transition-colors">
-              {createMut.isPending ? 'Adding…' : 'Add Account'}
-            </button>
+            <div className="flex items-end">
+              <button type="submit" disabled={createMut.isPending}
+                className="w-full bg-brand-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-600 disabled:opacity-60 transition-colors">
+                {createMut.isPending ? 'Adding…' : 'Add Account'}
+              </button>
+            </div>
           </form>
         )}
       </div>
@@ -188,6 +190,7 @@ export default function SavingsPage() {
           <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
             <h2 className="font-semibold text-gray-700">All Accounts</h2>
           </div>
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
@@ -228,6 +231,7 @@ export default function SavingsPage() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

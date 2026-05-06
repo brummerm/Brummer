@@ -43,6 +43,7 @@ function WorkoutCard({ entry, onEdit }: { entry: WorkoutEntry; onEdit: () => voi
       {entry.exercises.length > 0 && (
         <div className="mb-4">
           <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Exercises</h3>
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-xs text-gray-400 border-b border-gray-100">
@@ -65,11 +66,12 @@ function WorkoutCard({ entry, onEdit }: { entry: WorkoutEntry; onEdit: () => voi
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {entry.run && (
-        <div className="mb-4 flex gap-4">
+        <div className="mb-4 flex flex-col sm:flex-row gap-4">
           {entry.run.distance_miles != null && (
             <div className="bg-green-50 rounded-lg p-3 text-center min-w-[80px]">
               <div className="text-2xl font-bold text-green-700">{entry.run.distance_miles.toFixed(2)}</div>

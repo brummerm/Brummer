@@ -48,7 +48,7 @@ function IngredientRow({
   }
 
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
       <div className="relative flex-1">
         <input
           type="text"
@@ -78,34 +78,36 @@ function IngredientRow({
           </ul>
         )}
       </div>
-      <input
-        type="text"
-        placeholder="Qty"
-        value={ing.quantity || ''}
-        onChange={(e) => onChange(index, 'quantity', e.target.value)}
-        className="w-16 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-brand-400 outline-none"
-      />
-      <input
-        type="text"
-        placeholder="Unit"
-        value={ing.unit || ''}
-        onChange={(e) => onChange(index, 'unit', e.target.value)}
-        className="w-20 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-brand-400 outline-none"
-      />
-      <input
-        type="text"
-        placeholder="Notes"
-        value={ing.notes || ''}
-        onChange={(e) => onChange(index, 'notes', e.target.value)}
-        className="w-28 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-brand-400 outline-none"
-      />
-      <button
-        type="button"
-        onClick={() => onRemove(index)}
-        className="text-red-400 hover:text-red-600 text-sm px-1"
-      >
-        ✕
-      </button>
+      <div className="flex gap-2 items-center">
+        <input
+          type="text"
+          placeholder="Qty"
+          value={ing.quantity || ''}
+          onChange={(e) => onChange(index, 'quantity', e.target.value)}
+          className="w-16 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-brand-400 outline-none"
+        />
+        <input
+          type="text"
+          placeholder="Unit"
+          value={ing.unit || ''}
+          onChange={(e) => onChange(index, 'unit', e.target.value)}
+          className="w-20 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-brand-400 outline-none"
+        />
+        <input
+          type="text"
+          placeholder="Notes"
+          value={ing.notes || ''}
+          onChange={(e) => onChange(index, 'notes', e.target.value)}
+          className="flex-1 sm:w-28 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-brand-400 outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => onRemove(index)}
+          className="text-red-400 hover:text-red-600 text-sm px-1 shrink-0"
+        >
+          ✕
+        </button>
+      </div>
     </div>
   )
 }
@@ -196,7 +198,7 @@ export default function RecipeFormPage() {
         <Link to="/recipes" className="text-sm text-gray-400 hover:text-brand-500 mb-2 inline-block">
           ← Back to Recipes
         </Link>
-        <h1 className="text-3xl font-display font-bold">{isEdit ? 'Edit Recipe' : 'New Recipe'}</h1>
+        <h1 className="text-2xl sm:text-3xl font-display font-bold">{isEdit ? 'Edit Recipe' : 'New Recipe'}</h1>
       </div>
 
       <form
@@ -237,7 +239,7 @@ export default function RecipeFormPage() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-400 outline-none" />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Servings</label>
               <input type="number" min={1} value={form.servings} onChange={(e) => setField('servings', Number(e.target.value))}
@@ -291,7 +293,7 @@ export default function RecipeFormPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
           <h2 className="font-semibold text-gray-700">Nutrition <span className="text-gray-400 font-normal text-sm">(optional)</span></h2>
           <p className="text-xs text-gray-400">Per serving</p>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Calories</label>
               <input

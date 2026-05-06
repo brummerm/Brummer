@@ -174,7 +174,7 @@ export default function RetirementPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(latestPerAccount).map(([name, bal]) => (
           <div key={name} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
             <p className="text-xs text-gray-500 font-medium">{name}</p>
@@ -219,7 +219,7 @@ export default function RetirementPage() {
         {/* Settings panel */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h3 className="font-semibold text-gray-700 mb-4 text-sm uppercase tracking-wide">Assumptions</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Your Age</label>
               <input type="number" min={1} max={62} value={ageStr}
@@ -281,7 +281,7 @@ export default function RetirementPage() {
         </div>
 
         {/* Goal progress + key metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
             <p className="text-xs text-gray-500 font-medium">Years to Retire</p>
             <p className="text-3xl font-bold font-display text-brand-600 mt-1">{yearsToRetirement}</p>
@@ -338,7 +338,7 @@ export default function RetirementPage() {
         </div>
 
         {/* Growth projection chart */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white rounded-xl border border-gray-200 p-5 min-w-0">
           <h3 className="font-semibold text-gray-800 mb-1">Portfolio Growth to Retirement</h3>
           <p className="text-xs text-gray-400 mb-4">
             Projected at {annualReturn}% annual return · {fmt(annualContribution / 12)}/mo contributions
@@ -372,7 +372,7 @@ export default function RetirementPage() {
         {/* Spending scenarios */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h3 className="font-semibold text-gray-800 mb-4">Spending Scenarios at Retirement</h3>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-gray-500 uppercase border-b border-gray-100">
@@ -413,12 +413,12 @@ export default function RetirementPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Add entry */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="font-semibold text-gray-700 mb-4">Add Entry</h2>
-            <form onSubmit={handleSubmit} className="flex flex-wrap gap-3 items-end">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-gray-500 font-medium">Account</label>
                 <select value={account} onChange={e => setAccount(e.target.value)}
@@ -461,6 +461,7 @@ export default function RetirementPage() {
             ) : entries.length === 0 ? (
               <div className="p-8 text-center text-gray-400">No entries yet.</div>
             ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
@@ -486,6 +487,7 @@ export default function RetirementPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         </div>

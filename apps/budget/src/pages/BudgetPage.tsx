@@ -112,6 +112,7 @@ function IncomeTab() {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="bg-gray-50">
           <tr>
@@ -163,6 +164,7 @@ function IncomeTab() {
           </tr>
         </tfoot>
       </table>
+      </div>
     </div>
   )
 }
@@ -207,6 +209,7 @@ function ExpensesTab() {
               <span className="font-semibold text-gray-700 text-sm">{cat}</span>
               <span className="text-sm font-bold text-red-500">{fmt(catTotal)}</span>
             </div>
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <tbody>
                 {catItems.map(item => (
@@ -249,6 +252,7 @@ function ExpensesTab() {
                 </tr>
               </tfoot>
             </table>
+            </div>
           </div>
         )
       })}
@@ -256,14 +260,14 @@ function ExpensesTab() {
       {/* Add item in a new category */}
       <div className="bg-white rounded-xl border border-dashed border-gray-200 p-4">
         <p className="text-sm font-medium text-gray-700 mb-3">Add expense in any category</p>
-        <div className="flex flex-wrap gap-2 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <select value={newCat} onChange={e => setNewCat(e.target.value)}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
             {EXPENSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
           </select>
           <input className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
             placeholder="Label" value={newLabel} onChange={e => setNewLabel(e.target.value)} />
-          <input type="number" step="0.01" className="w-28 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          <input type="number" step="0.01" className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
             placeholder="Amount" value={newAmount} onChange={e => setNewAmount(e.target.value)} />
           <button onClick={() => { if (newLabel) createMut.mutate({ category: newCat, label: newLabel, amount: parseFloat(newAmount) || 0, sort_order: 99 }) }}
             disabled={!newLabel}
@@ -302,6 +306,7 @@ function AllocationsTab() {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="bg-gray-50">
           <tr>
@@ -360,6 +365,7 @@ function AllocationsTab() {
           </tr>
         </tfoot>
       </table>
+      </div>
     </div>
   )
 }
@@ -406,6 +412,7 @@ function ActualsTab() {
         <div className="text-gray-400 text-sm">Loading…</div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
@@ -448,6 +455,7 @@ function ActualsTab() {
               </tr>
             </tfoot>
           </table>
+          </div>
         </div>
       )}
 

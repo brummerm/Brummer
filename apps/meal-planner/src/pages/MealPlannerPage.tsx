@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getWeekPlanByDate } from '../api/mealPlan'
@@ -27,6 +27,13 @@ export default function MealPlannerPage() {
   } = useUIStore()
 
   const weekStart = weekParam || activeWeek
+
+  // Mobile: which day is selected (0=Mon … 6=Sun, matching DAY_SHORT)
+  const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
+    const jsDay = new Date().getDay() // 0=Sun, 1=Mon…6=Sat
+    // Convert JS day to Mon-based index (Mon=0 … Sun=6)
+    return jsDay === 0 ? 6 : jsDay - 1
+  })
 
   useEffect(() => {
     if (weekParam) setActiveWeek(weekParam)
@@ -58,13 +65,13 @@ export default function MealPlannerPage() {
       {/* ── Header ── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-display font-bold">Meal Planner</h1>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold">Meal Planner</h1>
           {plannerView === 'week' && (
             <p className="text-sm text-gray-500 mt-0.5">{weekLabel(weekStart)}</p>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Grocery list shortcut (week view only) */}
           {plan && plannerView === 'week' && (
             <Link to={`/grocery/${plan.id}`}>
@@ -79,7 +86,7 @@ export default function MealPlannerPage() {
                 key={v}
                 onClick={() => switchView(v)}
                 className={clsx(
-                  'px-4 py-1.5 rounded-md text-sm font-medium transition-colors capitalize',
+                  'px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors capitalize',
                   plannerView === v
                     ? 'bg-white shadow text-brand-600'
                     : 'text-gray-500 hover:text-gray-700'
@@ -94,7 +101,7 @@ export default function MealPlannerPage() {
 
       {/* ── Month navigation (month view only) ── */}
       {plannerView === 'month' && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="secondary" size="sm" onClick={() => goMonth('prev')}>← Prev</Button>
           <span className="font-medium text-gray-700 min-w-44 text-center">
             {monthLabel(activeMonth)}
@@ -116,68 +123,134 @@ export default function MealPlannerPage() {
           {isLoading && <div className="flex justify-center py-20"><Spinner size="lg" /></div>}
 
           {plan && (
-            <div className="overflow-x-auto">
-              <div className="min-w-[700px]">
-                {/* Day headers */}
-                <div className="grid grid-cols-7 gap-2 mb-2">
-                  {Array.from({ length: 7 }, (_, day) => {
-                    const d = dayDate(weekStart, day)
+            <>
+              {/* ── Mobile: day pill selector + single-day view (< md) ── */}
+              <div className="md:hidden">
+                {/* Day pill row */}
+                <div className="flex overflow-x-auto gap-2 pb-2 mb-4 -mx-4 px-4">
+                  {DAY_SHORT.map((day, i) => {
+                    const d = dayDate(weekStart, i)
                     return (
-                      <div key={day} className="text-center">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                          {DAY_SHORT[day]}
-                        </p>
-                        <p className="text-sm font-medium text-gray-800">{format(d, 'MMM d')}</p>
-                      </div>
+                      <button
+                        key={day}
+                        onClick={() => setSelectedDayIndex(i)}
+                        className={clsx(
+                          'flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl text-sm font-medium transition-colors',
+                          selectedDayIndex === i
+                            ? 'bg-brand-500 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        )}
+                      >
+                        <span className="text-xs font-semibold">{day}</span>
+                        <span className="text-xs opacity-75">{format(d, 'M/d')}</span>
+                      </button>
                     )
                   })}
                 </div>
 
-                {/* Meal rows */}
-                {MEAL_TYPES.map((meal) => (
-                  <div key={meal} className="mb-3">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 pl-1">
-                      {MEAL_LABELS[meal]}
-                    </p>
-                    <div className="grid grid-cols-7 gap-2">
-                      {Array.from({ length: 7 }, (_, day) => {
-                        const slot = getSlot(day, meal)
-                        if (!slot) return (
-                          <div key={day} className="min-h-[90px] rounded-lg bg-gray-50 border border-dashed border-gray-200" />
-                        )
-                        return (
+                {/* Selected day's meals — vertical stack */}
+                <div className="space-y-3">
+                  {MEAL_TYPES.map((meal) => {
+                    const slot = getSlot(selectedDayIndex, meal)
+                    return (
+                      <div key={meal}>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 pl-1">
+                          {MEAL_LABELS[meal]}
+                        </p>
+                        {slot ? (
                           <MealSlotCard
-                            key={slot.id}
                             slot={slot}
                             planId={plan.id}
                             weekKey={weekStart}
                             allSlots={plan.slots}
                           />
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
-
-                {/* Daily calorie totals */}
-                <div className="grid grid-cols-7 gap-2 mt-1">
-                  {Array.from({ length: 7 }, (_, day) => {
-                    const daySlots = plan.slots.filter((s) => s.day_of_week === day && s.slot_type === 'recipe')
-                    const total = daySlots.reduce((sum, s) => {
-                      const cal = (s.recipe as any)?.calories as number | undefined
-                      return cal != null ? sum + cal : sum
-                    }, 0)
-                    return (
-                      <div key={day} className="text-center">
-                        {total > 0 && (
-                          <p className="text-[10px] text-gray-400">~{Math.round(total)} cal</p>
+                        ) : (
+                          <div className="min-h-[90px] rounded-lg bg-gray-50 border border-dashed border-gray-200" />
                         )}
                       </div>
                     )
                   })}
+
+                  {/* Daily calorie total for selected day */}
+                  {(() => {
+                    const daySlots = plan.slots.filter(
+                      (s) => s.day_of_week === selectedDayIndex && s.slot_type === 'recipe'
+                    )
+                    const total = daySlots.reduce((sum, s) => {
+                      const cal = (s.recipe as any)?.calories as number | undefined
+                      return cal != null ? sum + cal : sum
+                    }, 0)
+                    return total > 0 ? (
+                      <p className="text-xs text-gray-400 text-center pt-1">~{Math.round(total)} cal today</p>
+                    ) : null
+                  })()}
                 </div>
               </div>
-            </div>
+
+              {/* ── Desktop: 7-column grid (md+) ── */}
+              <div className="hidden md:block overflow-x-auto">
+                <div className="min-w-[700px]">
+                  {/* Day headers */}
+                  <div className="grid grid-cols-7 gap-2 mb-2">
+                    {Array.from({ length: 7 }, (_, day) => {
+                      const d = dayDate(weekStart, day)
+                      return (
+                        <div key={day} className="text-center">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            {DAY_SHORT[day]}
+                          </p>
+                          <p className="text-sm font-medium text-gray-800">{format(d, 'MMM d')}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Meal rows */}
+                  {MEAL_TYPES.map((meal) => (
+                    <div key={meal} className="mb-3">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 pl-1">
+                        {MEAL_LABELS[meal]}
+                      </p>
+                      <div className="grid grid-cols-7 gap-2">
+                        {Array.from({ length: 7 }, (_, day) => {
+                          const slot = getSlot(day, meal)
+                          if (!slot) return (
+                            <div key={day} className="min-h-[90px] rounded-lg bg-gray-50 border border-dashed border-gray-200" />
+                          )
+                          return (
+                            <MealSlotCard
+                              key={slot.id}
+                              slot={slot}
+                              planId={plan.id}
+                              weekKey={weekStart}
+                              allSlots={plan.slots}
+                            />
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Daily calorie totals */}
+                  <div className="grid grid-cols-7 gap-2 mt-1">
+                    {Array.from({ length: 7 }, (_, day) => {
+                      const daySlots = plan.slots.filter((s) => s.day_of_week === day && s.slot_type === 'recipe')
+                      const total = daySlots.reduce((sum, s) => {
+                        const cal = (s.recipe as any)?.calories as number | undefined
+                        return cal != null ? sum + cal : sum
+                      }, 0)
+                      return (
+                        <div key={day} className="text-center">
+                          {total > 0 && (
+                            <p className="text-[10px] text-gray-400">~{Math.round(total)} cal</p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </>
       )}

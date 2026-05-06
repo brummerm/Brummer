@@ -113,7 +113,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Summary stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Monthly Income" value={fmt(summary?.total_income ?? 0)} color="text-blue-600" />
         <StatCard label="Total Expenses" value={fmt(summary?.total_expenses ?? 0)} color="text-red-600" />
         <StatCard label="Monthly Surplus" value={fmt(summary?.surplus ?? 0)} color={surplusColor} />
@@ -138,7 +138,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
         {/* Income vs Expenses bar chart */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="font-semibold text-gray-800 mb-4">Income vs. Expenses</h2>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
         {/* Savings rate trend */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="font-semibold text-gray-800 mb-4">Savings Rate Trend</h2>
@@ -245,6 +245,7 @@ export default function DashboardPage() {
           <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
             <h2 className="font-semibold text-gray-700">Monthly Snapshots</h2>
           </div>
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
@@ -273,6 +274,7 @@ export default function DashboardPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

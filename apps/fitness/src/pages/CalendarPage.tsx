@@ -118,7 +118,7 @@ export default function CalendarPage() {
       <div>
         <div className="grid grid-cols-7 mb-1">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">{day}</div>
+            <div key={day} className="text-center text-xs font-medium text-gray-400 py-1 sm:py-2 truncate">{day}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-xl overflow-hidden">
@@ -131,11 +131,11 @@ export default function CalendarPage() {
               <button
                 key={key}
                 onClick={() => openEditor(key, entry)}
-                className={`min-h-[80px] p-2 text-left transition-colors hover:bg-blue-50 ${
+                className={`min-h-[56px] sm:min-h-[80px] p-1 sm:p-2 text-left transition-colors hover:bg-blue-50 ${
                   inMonth ? 'bg-white' : 'bg-gray-50'
                 }`}
               >
-                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mb-1 ${
+                <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full text-xs sm:text-sm font-medium mb-1 ${
                   isToday
                     ? 'bg-brand-500 text-white'
                     : inMonth
@@ -172,7 +172,8 @@ export default function CalendarPage() {
     const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
     return (
-      <div className="grid grid-cols-7 gap-3">
+      <div className="overflow-x-auto">
+      <div className="grid grid-cols-7 gap-3 min-w-[560px]">
         {days.map(day => {
           const key = dateKey(day)
           const entry = workoutMap[key]
@@ -217,6 +218,7 @@ export default function CalendarPage() {
           )
         })}
       </div>
+      </div>
     )
   }
 
@@ -251,7 +253,8 @@ export default function CalendarPage() {
               </div>
             </div>
             {entry.exercises.length > 0 && (
-              <table className="w-full text-sm mb-4">
+              <div className="overflow-x-auto mb-4">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="text-xs text-gray-400 border-b border-gray-100">
                     <th className="text-left py-1.5 font-medium">Exercise</th>
@@ -271,9 +274,10 @@ export default function CalendarPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
             {entry.run && (
-              <div className="flex gap-3 mb-4">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 {entry.run.distance_miles != null && (
                   <div className="bg-green-50 rounded-lg p-3 text-center">
                     <div className="font-bold text-green-700">{entry.run.distance_miles} mi</div>

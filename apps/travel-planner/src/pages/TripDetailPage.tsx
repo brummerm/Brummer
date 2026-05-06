@@ -112,11 +112,11 @@ export default function TripDetailPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+        <div className="min-w-0">
           <button onClick={() => navigate('/')} className="text-sm text-gray-500 hover:text-brand-600 mb-2 flex items-center gap-1">← All Trips</button>
-          <h1 className="font-display text-3xl font-bold text-gray-900">{trip.title}</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-gray-900 break-words">{trip.title}</h1>
+          <p className="text-gray-500 mt-1 text-sm">
             {trip.destination}{trip.country ? `, ${trip.country}` : ''}
             {trip.start_date && ` · ${format(parseDate(trip.start_date), 'MMM d')}`}
             {trip.end_date && ` – ${format(parseDate(trip.end_date), 'MMM d, yyyy')}`}
@@ -125,7 +125,7 @@ export default function TripDetailPage() {
         <select
           value={trip.status}
           onChange={e => updateStatusMut.mutate(e.target.value as TripStatus)}
-          className={`text-sm font-medium px-3 py-1.5 rounded-full border-0 cursor-pointer ${STATUS_COLORS[trip.status]}`}
+          className={`text-sm font-medium px-3 py-1.5 rounded-full border-0 cursor-pointer self-start flex-shrink-0 ${STATUS_COLORS[trip.status]}`}
         >
           <option value="planning">Planning</option>
           <option value="active">Active</option>
@@ -135,17 +135,17 @@ export default function TripDetailPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-          <div className="text-2xl font-bold text-brand-600">{trip.budget > 0 ? `${trip.currency} ${trip.budget.toLocaleString()}` : '—'}</div>
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-4 mb-6">
+        <div className="bg-white rounded-xl border border-gray-100 p-2 sm:p-4 text-center">
+          <div className="text-base sm:text-2xl font-bold text-brand-600 truncate">{trip.budget > 0 ? `${trip.currency} ${trip.budget.toLocaleString()}` : '—'}</div>
           <div className="text-xs text-gray-500 mt-1">Budget</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-          <div className="text-2xl font-bold text-gray-700">{totalItinCost > 0 ? `${trip.currency} ${totalItinCost.toLocaleString()}` : '—'}</div>
+        <div className="bg-white rounded-xl border border-gray-100 p-2 sm:p-4 text-center">
+          <div className="text-base sm:text-2xl font-bold text-gray-700 truncate">{totalItinCost > 0 ? `${trip.currency} ${totalItinCost.toLocaleString()}` : '—'}</div>
           <div className="text-xs text-gray-500 mt-1">Planned Spend</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-          <div className="text-2xl font-bold text-gray-700">{packedCount}/{trip.packing_items.length}</div>
+        <div className="bg-white rounded-xl border border-gray-100 p-2 sm:p-4 text-center">
+          <div className="text-base sm:text-2xl font-bold text-gray-700">{packedCount}/{trip.packing_items.length}</div>
           <div className="text-xs text-gray-500 mt-1">Items Packed</div>
         </div>
       </div>
@@ -173,7 +173,7 @@ export default function TripDetailPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
+      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-full sm:w-fit">
         {(['itinerary', 'packing', 'overview'] as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors capitalize ${tab === t ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>
@@ -239,13 +239,13 @@ export default function TripDetailPage() {
           {/* Add item form */}
           <div className="bg-white rounded-xl border border-dashed border-gray-200 p-4">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Add activity</h4>
-            <div className="grid grid-cols-2 gap-2 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
               <input className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                 placeholder="Activity title *" value={newItem} onChange={e => setNewItem(e.target.value)} />
               <input className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                 placeholder="Location" value={newLoc} onChange={e => setNewLoc(e.target.value)} />
             </div>
-            <div className="grid grid-cols-3 gap-2 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
               <div>
                 <label className="text-xs text-gray-500">Day</label>
                 <input type="number" min="1" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
@@ -321,15 +321,15 @@ export default function TripDetailPage() {
                 </select>
               </div>
             )}
-            <div className="flex gap-2">
-              <input className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+            <div className="flex flex-wrap gap-2">
+              <input className="flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                 placeholder="Item name" value={newItem} onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && newItem) { addPackMut.mutate({ trip_id: tripId, name: newItem, category: newCategory, packed: false }); setNewItem('') }}} />
-              <input className="w-36 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+              <input className="w-full sm:w-36 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                 placeholder="Category" value={newCategory} onChange={e => setNewCategory(e.target.value)} />
               <button disabled={!newItem || addPackMut.isPending}
                 onClick={() => { addPackMut.mutate({ trip_id: tripId, name: newItem, category: newCategory, packed: false }); setNewItem('') }}
-                className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-50">
+                className="w-full sm:w-auto px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-50">
                 Add
               </button>
             </div>
@@ -341,7 +341,7 @@ export default function TripDetailPage() {
       {tab === 'overview' && (
         <div className="bg-white rounded-xl border border-gray-100 p-6 max-w-2xl">
           <h3 className="font-semibold text-gray-900 mb-4">Trip Details</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
             <div><span className="text-gray-500">Destination:</span> <span className="font-medium ml-2">{trip.destination}</span></div>
             <div><span className="text-gray-500">Country:</span> <span className="font-medium ml-2">{trip.country || '—'}</span></div>
             <div><span className="text-gray-500">Start:</span> <span className="font-medium ml-2">{trip.start_date ? format(parseDate(trip.start_date), 'MMM d, yyyy') : '—'}</span></div>

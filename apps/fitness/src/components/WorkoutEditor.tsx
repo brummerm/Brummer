@@ -165,7 +165,7 @@ export default function WorkoutEditor({ initialDate, initialData, onSave, onCanc
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
 
       {/* Date & Type row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Date</label>
           <input
@@ -212,7 +212,7 @@ export default function WorkoutEditor({ initialDate, initialData, onSave, onCanc
       )}
 
       {/* Title & Status row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Title (optional)</label>
           <input
@@ -358,7 +358,7 @@ export default function WorkoutEditor({ initialDate, initialData, onSave, onCanc
       {showRun && (
         <div className="space-y-3">
           <label className="block text-xs font-medium text-gray-500">Run Details</label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-gray-400 mb-1">Distance (miles)</label>
               <input

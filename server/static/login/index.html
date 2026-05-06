@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Sign in — Brummer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="card">
+    <h1>Brummer</h1>
+    <p class="subtitle">Sign in to continue.</p>
+    <form id="login-form" autocomplete="on">
+      <label>
+        <span>Username</span>
+        <input id="username" name="username" type="text" autocomplete="username" required />
+      </label>
+      <label>
+        <span>Password</span>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+      </label>
+      <button id="submit" type="submit">Sign in</button>
+      <p id="error" class="error" role="alert" aria-live="polite"></p>
+    </form>
+  </main>
+  <script src="login.js"></script>
+</body>
+</html>

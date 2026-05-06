@@ -108,9 +108,9 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="flex w-full h-[calc(100vh-3.5rem)] overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-72 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+    <div className="flex flex-col sm:flex-row w-full h-[calc(100vh-3.5rem)] overflow-hidden">
+      {/* Sidebar — hidden on mobile when a note is selected */}
+      <div className={`${selectedNote ? 'hidden sm:flex' : 'flex'} w-full sm:w-72 flex-shrink-0 bg-white border-b sm:border-b-0 sm:border-r border-gray-200 flex-col overflow-hidden sm:h-full`}>
         {/* Search */}
         <div className="p-3 border-b border-gray-100">
           <input
@@ -189,9 +189,18 @@ export default function NotesPage() {
 
       {/* Editor */}
       {selectedNote ? (
-        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white min-h-0">
+          {/* Mobile back button */}
+          <div className="sm:hidden px-4 py-2 border-b border-gray-100 flex-shrink-0">
+            <button
+              onClick={() => setSelectedId(null)}
+              className="text-sm text-gray-500 hover:text-brand-600 flex items-center gap-1"
+            >
+              ← All Notes
+            </button>
+          </div>
           {/* Editor toolbar */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-gray-100 flex-shrink-0 gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="flex bg-gray-100 p-0.5 rounded-md">
                 {(['write', 'preview'] as EditorTab[]).map(t => (
@@ -204,9 +213,9 @@ export default function NotesPage() {
               {isDirty && <span className="text-xs text-gray-400">Saving…</span>}
               {!isDirty && updateMut.isSuccess && <span className="text-xs text-green-500">Saved</span>}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Tag picker */}
-              <div className="flex gap-1">
+              <div className="flex flex-wrap gap-1">
                 {tags.map(tag => (
                   <button key={tag.id} onClick={() => toggleTag(tag)}
                     className={`text-xs px-2 py-0.5 rounded-full transition-colors border ${(draft.tag_ids ?? []).includes(tag.id) ? 'text-white border-transparent' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`}
@@ -225,7 +234,7 @@ export default function NotesPage() {
           </div>
 
           {/* Title */}
-          <div className="px-8 pt-6 pb-2 flex-shrink-0">
+          <div className="px-4 sm:px-8 pt-4 sm:pt-6 pb-2 flex-shrink-0">
             <input
               className="w-full text-3xl font-display font-bold text-gray-900 focus:outline-none bg-transparent placeholder-gray-300"
               placeholder="Untitled"
@@ -238,7 +247,7 @@ export default function NotesPage() {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto px-8 pb-8">
+          <div className="flex-1 overflow-auto px-4 sm:px-8 pb-8">
             {editorTab === 'write' ? (
               <textarea
                 className="w-full h-full min-h-[400px] text-base text-gray-800 focus:outline-none bg-transparent resize-none leading-relaxed font-mono placeholder-gray-300"
@@ -258,7 +267,7 @@ export default function NotesPage() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center bg-gray-50 text-gray-400">
+        <div className="hidden sm:flex flex-1 items-center justify-center bg-gray-50 text-gray-400">
           <div className="text-center">
             <div className="text-6xl mb-4">📓</div>
             <p className="text-lg font-medium">Select a note or create a new one</p>

@@ -158,7 +158,7 @@ function DebtForm({ initial, onSave, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-dashed border-brand-300 p-5 space-y-4">
       <h3 className="font-semibold text-gray-800">{initial ? 'Edit Debt' : 'Add Debt Account'}</h3>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-xs text-gray-500 font-medium mb-1 block">Account Name</label>
           <input className={inputCls} required placeholder="e.g. Chase Sapphire" value={f.name} onChange={set('name')} />
