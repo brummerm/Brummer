@@ -83,10 +83,13 @@ export default function WorkoutEditor({ initialDate, initialData, onSave, onCanc
     mutationFn: createWorkout,
     onSuccess: (entry) => { qc.invalidateQueries({ queryKey: ['workouts'] }); onSave(entry) },
     onError: (err: unknown) => {
-      const e = err as { response?: { data?: { detail?: string }; status?: number } }
-      const detail = e?.response?.data?.detail
+      const e = err as { response?: { data?: { detail?: unknown }; status?: number } }
       const status = e?.response?.status
-      setError(detail ? `Save failed (${status}): ${detail}` : `Failed to save workout (${status ?? 'network error'}).`)
+      const raw = e?.response?.data?.detail
+      const detail = Array.isArray(raw)
+        ? raw.map((d: { loc?: string[]; msg?: string }) => `${(d.loc ?? []).slice(1).join('.')}: ${d.msg}`).join(' | ')
+        : typeof raw === 'string' ? raw : JSON.stringify(raw)
+      setError(`Save failed (${status}): ${detail || 'unknown error'}`)
     },
     onSettled: () => setSaving(false),
   })
@@ -95,10 +98,13 @@ export default function WorkoutEditor({ initialDate, initialData, onSave, onCanc
       updateWorkout(id, data),
     onSuccess: (entry) => { qc.invalidateQueries({ queryKey: ['workouts'] }); onSave(entry) },
     onError: (err: unknown) => {
-      const e = err as { response?: { data?: { detail?: string }; status?: number } }
-      const detail = e?.response?.data?.detail
+      const e = err as { response?: { data?: { detail?: unknown }; status?: number } }
       const status = e?.response?.status
-      setError(detail ? `Save failed (${status}): ${detail}` : `Failed to save workout (${status ?? 'network error'}).`)
+      const raw = e?.response?.data?.detail
+      const detail = Array.isArray(raw)
+        ? raw.map((d: { loc?: string[]; msg?: string }) => `${(d.loc ?? []).slice(1).join('.')}: ${d.msg}`).join(' | ')
+        : typeof raw === 'string' ? raw : JSON.stringify(raw)
+      setError(`Save failed (${status}): ${detail || 'unknown error'}`)
     },
     onSettled: () => setSaving(false),
   })

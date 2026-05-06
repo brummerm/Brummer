@@ -1,7 +1,6 @@
-from __future__ import annotations
 from pydantic import BaseModel, ConfigDict
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 
 class ExerciseIn(BaseModel):
