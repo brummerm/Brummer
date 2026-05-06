@@ -1,10 +1,11 @@
 from __future__ import annotations
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
 
 class ExerciseIn(BaseModel):
+    model_config = ConfigDict(extra='ignore')
     exercise_name: str
     sets: Optional[int] = None
     reps: Optional[str] = None
@@ -13,19 +14,21 @@ class ExerciseIn(BaseModel):
     sort_order: int = 0
 
 class ExerciseOut(ExerciseIn):
+    model_config = ConfigDict(extra='ignore', from_attributes=True)
     id: int
-    class Config: from_attributes = True
 
 class RunIn(BaseModel):
+    model_config = ConfigDict(extra='ignore')
     distance_miles: Optional[float] = None
     duration_minutes: Optional[float] = None
     notes: Optional[str] = None
 
 class RunOut(RunIn):
+    model_config = ConfigDict(extra='ignore', from_attributes=True)
     id: int
-    class Config: from_attributes = True
 
 class WorkoutEntryCreate(BaseModel):
+    model_config = ConfigDict(extra='ignore')
     date: date
     workout_type: str  # lift|run|rest|hike|custom
     custom_type_label: Optional[str] = None
@@ -36,6 +39,7 @@ class WorkoutEntryCreate(BaseModel):
     run: Optional[RunIn] = None
 
 class WorkoutEntryUpdate(BaseModel):
+    model_config = ConfigDict(extra='ignore')
     date: Optional[date] = None
     workout_type: Optional[str] = None
     custom_type_label: Optional[str] = None
@@ -46,6 +50,7 @@ class WorkoutEntryUpdate(BaseModel):
     run: Optional[RunIn] = None
 
 class WorkoutEntryOut(BaseModel):
+    model_config = ConfigDict(extra='ignore', from_attributes=True)
     id: int
     date: date
     workout_type: str
@@ -55,9 +60,9 @@ class WorkoutEntryOut(BaseModel):
     notes: Optional[str]
     exercises: list[ExerciseOut]
     run: Optional[RunOut]
-    class Config: from_attributes = True
 
 class TemplateExerciseIn(BaseModel):
+    model_config = ConfigDict(extra='ignore')
     exercise_name: str
     sets: Optional[int] = None
     reps: Optional[str] = None
@@ -66,10 +71,11 @@ class TemplateExerciseIn(BaseModel):
     sort_order: int = 0
 
 class TemplateExerciseOut(TemplateExerciseIn):
+    model_config = ConfigDict(extra='ignore', from_attributes=True)
     id: int
-    class Config: from_attributes = True
 
 class WorkoutTemplateCreate(BaseModel):
+    model_config = ConfigDict(extra='ignore')
     name: str
     workout_type: str
     custom_type_label: Optional[str] = None
@@ -77,6 +83,7 @@ class WorkoutTemplateCreate(BaseModel):
     exercises: list[TemplateExerciseIn] = []
 
 class WorkoutTemplateUpdate(BaseModel):
+    model_config = ConfigDict(extra='ignore')
     name: Optional[str] = None
     workout_type: Optional[str] = None
     custom_type_label: Optional[str] = None
@@ -84,10 +91,10 @@ class WorkoutTemplateUpdate(BaseModel):
     exercises: Optional[list[TemplateExerciseIn]] = None
 
 class WorkoutTemplateOut(BaseModel):
+    model_config = ConfigDict(extra='ignore', from_attributes=True)
     id: int
     name: str
     workout_type: str
     custom_type_label: Optional[str]
     notes: Optional[str]
     exercises: list[TemplateExerciseOut]
-    class Config: from_attributes = True

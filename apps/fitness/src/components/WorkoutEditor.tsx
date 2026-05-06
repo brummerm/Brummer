@@ -82,14 +82,24 @@ export default function WorkoutEditor({ initialDate, initialData, onSave, onCanc
   const createMut = useMutation({
     mutationFn: createWorkout,
     onSuccess: (entry) => { qc.invalidateQueries({ queryKey: ['workouts'] }); onSave(entry) },
-    onError: () => setError('Failed to save workout.'),
+    onError: (err: unknown) => {
+      const e = err as { response?: { data?: { detail?: string }; status?: number } }
+      const detail = e?.response?.data?.detail
+      const status = e?.response?.status
+      setError(detail ? `Save failed (${status}): ${detail}` : `Failed to save workout (${status ?? 'network error'}).`)
+    },
     onSettled: () => setSaving(false),
   })
   const updateMut = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateWorkout>[1] }) =>
       updateWorkout(id, data),
     onSuccess: (entry) => { qc.invalidateQueries({ queryKey: ['workouts'] }); onSave(entry) },
-    onError: () => setError('Failed to save workout.'),
+    onError: (err: unknown) => {
+      const e = err as { response?: { data?: { detail?: string }; status?: number } }
+      const detail = e?.response?.data?.detail
+      const status = e?.response?.status
+      setError(detail ? `Save failed (${status}): ${detail}` : `Failed to save workout (${status ?? 'network error'}).`)
+    },
     onSettled: () => setSaving(false),
   })
 

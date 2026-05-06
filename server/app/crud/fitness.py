@@ -49,17 +49,18 @@ def create_workout(db: Session, data: WorkoutEntryCreate) -> WorkoutEntry:
 def update_workout(db: Session, entry: WorkoutEntry, data: WorkoutEntryUpdate) -> WorkoutEntry:
     if data.date is not None: entry.date = data.date
     if data.workout_type is not None: entry.workout_type = data.workout_type
-    if data.custom_type_label is not None: entry.custom_type_label = data.custom_type_label
-    if data.title is not None: entry.title = data.title
+    entry.custom_type_label = data.custom_type_label
+    entry.title = data.title
     if data.status is not None: entry.status = data.status
-    if data.notes is not None: entry.notes = data.notes
+    entry.notes = data.notes
     if data.exercises is not None:
         db.query(WorkoutExercise).filter(WorkoutExercise.workout_entry_id == entry.id).delete()
         for i, ex in enumerate(data.exercises):
             db.add(WorkoutExercise(workout_entry_id=entry.id, exercise_name=ex.exercise_name,
                 sets=ex.sets, reps=ex.reps, weight=ex.weight, notes=ex.notes, sort_order=i))
+    # Always sync run: delete existing, re-add if new data provided
+    db.query(WorkoutRun).filter(WorkoutRun.workout_entry_id == entry.id).delete()
     if data.run is not None:
-        db.query(WorkoutRun).filter(WorkoutRun.workout_entry_id == entry.id).delete()
         db.add(WorkoutRun(workout_entry_id=entry.id, distance_miles=data.run.distance_miles,
             duration_minutes=data.run.duration_minutes, notes=data.run.notes))
     db.commit()
