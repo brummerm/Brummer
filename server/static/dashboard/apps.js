@@ -49,4 +49,12 @@ window.APPS = [
     href: "/apps/journal/",
     enabled: true,
   },
+  {
+    id: "code-learning",
+    title: "Code Lab",
+    desc: "Interactive coding lessons & IDE for Python, JS, HTML, CSS, Java, C++, and Docker.",
+    icon: "💻",
+    href: "/apps/code-learning/",
+    enabled: true,
+  },
 ];

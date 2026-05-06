@@ -92,7 +92,8 @@ FITNESS_DIR        = STATIC_DIR / "fitness"
 TRAVEL_DIR         = STATIC_DIR / "travel-planner"
 GRADES_DIR         = STATIC_DIR / "grades"
 JOURNAL_DIR        = STATIC_DIR / "journal"
-for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, GRADES_DIR, JOURNAL_DIR):
+CODE_LEARNING_DIR  = STATIC_DIR / "code-learning"
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, GRADES_DIR, JOURNAL_DIR, CODE_LEARNING_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -182,6 +183,7 @@ _SPA_DIRS = {
     "travel-planner": TRAVEL_DIR,
     "grades":        GRADES_DIR,
     "journal":       JOURNAL_DIR,
+    "code-learning": CODE_LEARNING_DIR,
 }
 
 

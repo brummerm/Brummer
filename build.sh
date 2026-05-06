@@ -53,6 +53,13 @@ echo "==> Building journal frontend"
 npm run build
 cd ../..
 
+echo "==> Installing Node deps for code learning app"
+cd apps/code-learning
+npm ci
+echo "==> Building code learning app"
+npm run build
+cd ../..
+
 echo "==> Copying dashboard static files"
 mkdir -p server/static/dashboard server/static/login
 cp -r dashboard/dashboard/. server/static/dashboard/
