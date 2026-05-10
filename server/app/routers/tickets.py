@@ -47,7 +47,7 @@ def get_label_or_404(label_id: int, db: Session = Depends(get_db)) -> Label:
 
 def _ticket_to_list_item(ticket: Ticket) -> dict:
     """Add computed fields for TicketListItem serialisation."""
-    data = {
+    return {
         "id": ticket.id,
         "space_id": ticket.space_id,
         "title": ticket.title,
@@ -56,13 +56,13 @@ def _ticket_to_list_item(ticket: Ticket) -> dict:
         "assignee": ticket.assignee,
         "due_date": ticket.due_date,
         "recurrence_json": ticket.recurrence_json,
+        "effort": ticket.effort,
         "labels": [tl.label for tl in ticket.ticket_labels if tl.label],
         "checklist_count": len(ticket.checklist),
         "comment_count": len(ticket.comments),
         "created_at": ticket.created_at,
         "updated_at": ticket.updated_at,
     }
-    return data
 
 
 # ── Spaces ────────────────────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ def get_space(space_id: int, db: Session = Depends(get_db)):
     return get_space_or_404(space_id, db)
 
 
-@router.put("/spaces/{space_id}", response_model=SpaceOut)
+@router.patch("/spaces/{space_id}", response_model=SpaceOut)
 def update_space(
     data: SpaceUpdate,
     space: Space = Depends(get_space_or_404),
@@ -154,7 +154,7 @@ def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
     return _hydrate_ticket_out(get_ticket_or_404(ticket_id, db))
 
 
-@router.put("/tickets/{ticket_id}", response_model=TicketOut)
+@router.patch("/tickets/{ticket_id}", response_model=TicketOut)
 def update_ticket(
     data: TicketUpdate,
     actor: str = Query("me"),
@@ -207,7 +207,7 @@ def add_checklist_item(
     )
 
 
-@router.put("/tickets/{ticket_id}/checklist/{item_id}", response_model=ChecklistItemOut)
+@router.patch("/tickets/{ticket_id}/checklist/{item_id}", response_model=ChecklistItemOut)
 def update_checklist_item(
     ticket_id: int,
     item_id: int,
@@ -328,7 +328,7 @@ def get_settings(db: Session = Depends(get_db)):
     return crud.tickets.get_settings(db)
 
 
-@router.put("/settings", response_model=HouseholdSettingsOut)
+@router.patch("/settings", response_model=HouseholdSettingsOut)
 def update_settings(data: HouseholdSettingsUpdate, db: Session = Depends(get_db)):
     settings = crud.tickets.get_settings(db)
     return crud.tickets.update_settings(db, settings, data)

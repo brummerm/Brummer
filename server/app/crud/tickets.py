@@ -232,15 +232,16 @@ def update_ticket(db: Session, ticket: Ticket, data: TicketUpdate, actor: str = 
                       "assignee", "reporter", "due_date", "recurrence_json", "effort", "sort_order"]
 
     for field in tracked_fields:
-        new_val = getattr(data, field, None)
-        if new_val is None:
+        # Only update fields that were explicitly sent in the payload
+        if field not in data.model_fields_set:
             continue
+        new_val = getattr(data, field)
         old_val = getattr(ticket, field)
         if old_val != new_val:
             _log(db, ticket.id, actor, "updated",
                  field=field,
                  old_value=str(old_val) if old_val is not None else None,
-                 new_value=str(new_val))
+                 new_value=str(new_val) if new_val is not None else None)
             setattr(ticket, field, new_val)
 
     # Handle label_ids separately (not a model column)

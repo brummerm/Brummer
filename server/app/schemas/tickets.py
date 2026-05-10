@@ -175,6 +175,7 @@ class TicketListItem(BaseModel):
     assignee: Optional[str] = None
     due_date: Optional[date_type] = None
     recurrence_json: Optional[str] = None
+    effort: Optional[str] = None
     labels: List[LabelOut] = []
     checklist_count: int = 0
     comment_count: int = 0
