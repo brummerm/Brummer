@@ -20,7 +20,7 @@ api.interceptors.response.use(
 
 export type Status = 'backlog' | 'todo' | 'in_progress' | 'waiting' | 'done'
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
-export type Assignee = 'me' | 'partner' | null
+export type Assignee = 'me' | 'partner' | 'shared' | null
 
 export interface Label {
   id: number

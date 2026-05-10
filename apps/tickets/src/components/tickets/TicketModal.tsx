@@ -475,6 +475,7 @@ export function TicketModal({ ticketId, onClose, onCreated }: TicketModalProps) 
                 <option value="">Unassigned</option>
                 <option value="me">{member1Name}</option>
                 <option value="partner">{member2Name}</option>
+                <option value="shared">👥 Both (Shared)</option>
               </select>
             </div>
 

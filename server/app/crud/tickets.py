@@ -175,6 +175,9 @@ def get_tickets(
     if assignee is not None:
         if assignee == "unassigned":
             q = q.filter(Ticket.assignee.is_(None))
+        elif assignee in ("me", "partner"):
+            # include shared tickets in per-member filters
+            q = q.filter(Ticket.assignee.in_([assignee, "shared"]))
         else:
             q = q.filter(Ticket.assignee == assignee)
     if priority is not None:
@@ -389,10 +392,10 @@ def get_dashboard_stats(db: Session, member: str = "me") -> dict:
                .order_by(Ticket.due_date, Ticket.sort_order)
                .all())
 
-    # My tasks: assigned to member, active
+    # My tasks: assigned to member or shared, active
     my_tasks = (db.query(Ticket)
                 .options(*base_opts)
-                .filter(Ticket.assignee == member,
+                .filter(Ticket.assignee.in_([member, "shared"]),
                         ~Ticket.status.in_(inactive_statuses))
                 .order_by(Ticket.priority, Ticket.due_date, Ticket.sort_order)
                 .all())

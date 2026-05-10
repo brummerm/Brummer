@@ -188,7 +188,10 @@ export function KanbanBoard({ tickets, spaceId, filters, onOpenTicket, onAddTick
   // Filter tickets
   const filteredTickets = useMemo(() => {
     return tickets.filter((t) => {
-      if (filters?.assignee && t.assignee !== filters.assignee) return false
+      if (filters?.assignee) {
+        // shared tickets appear in both members' views
+        if (t.assignee !== filters.assignee && t.assignee !== 'shared') return false
+      }
       if (filters?.priority && t.priority !== filters.priority) return false
       if (filters?.search) {
         const q = filters.search.toLowerCase()

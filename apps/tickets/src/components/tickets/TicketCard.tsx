@@ -20,13 +20,18 @@ function AssigneeAvatar({
   member2Name: string
 }) {
   if (!assignee) return null
+  if (assignee === 'shared') {
+    return (
+      <span
+        title="Shared — both"
+        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 bg-violet-100 text-violet-700"
+      >
+        👥
+      </span>
+    )
+  }
   const name = assignee === 'me' ? member1Name : member2Name
-  const initials = name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
+  const initials = name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
   const color = assignee === 'me' ? 'bg-brand-100 text-brand-700' : 'bg-emerald-100 text-emerald-700'
   return (
     <span
