@@ -94,7 +94,6 @@ function KanbanColumn({
 
   return (
     <div className={`flex flex-col w-72 flex-shrink-0 rounded-xl ${COLUMN_BG[status]}`}>
-      {/* Column header */}
       <div className="flex items-center gap-2 px-3 pt-3 pb-2">
         <button
           onClick={() => setCollapsed((c) => !c)}
@@ -123,7 +122,6 @@ function KanbanColumn({
         </button>
       </div>
 
-      {/* Cards */}
       {!collapsed && (
         <div className="flex-1 px-2 pb-3 min-h-[60px]">
           <SortableContext items={tickets.map((t) => t.id)} strategy={verticalListSortingStrategy}>
@@ -170,6 +168,7 @@ export function KanbanBoard({ tickets, spaceId, filters, onOpenTicket, onAddTick
   const { member1Name, member2Name } = useSettings()
   const { addToast } = useToast()
   const [activeTicket, setActiveTicket] = useState<TicketListItem | null>(null)
+  const [mobileColumn, setMobileColumn] = useState<Status>('todo')
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -185,11 +184,9 @@ export function KanbanBoard({ tickets, spaceId, filters, onOpenTicket, onAddTick
     onError: () => addToast('Failed to move ticket', 'error'),
   })
 
-  // Filter tickets
   const filteredTickets = useMemo(() => {
     return tickets.filter((t) => {
       if (filters?.assignee) {
-        // shared tickets appear in both members' views
         if (t.assignee !== filters.assignee && t.assignee !== 'shared') return false
       }
       if (filters?.priority && t.priority !== filters.priority) return false
@@ -224,21 +221,16 @@ export function KanbanBoard({ tickets, spaceId, filters, onOpenTicket, onAddTick
     const draggedTicket = tickets.find((t) => t.id === active.id)
     if (!draggedTicket) return
 
-    // Determine target status — over could be a column or another ticket
     let targetStatus: Status | null = null
-
-    // Check if over is a status (column drop area uses status as id)
     const columnStatuses = COLUMNS.map((c) => c.status) as string[]
     if (columnStatuses.includes(String(over.id))) {
       targetStatus = over.id as Status
     } else {
-      // over is a ticket id — find its status
       const overTicket = tickets.find((t) => t.id === over.id)
       if (overTicket) targetStatus = overTicket.status
     }
 
     if (targetStatus && targetStatus !== draggedTicket.status) {
-      // Optimistically update
       queryClient.setQueryData<TicketListItem[]>(
         ['tickets', spaceId],
         (old) => old?.map((t) => t.id === draggedTicket.id ? { ...t, status: targetStatus! } : t) ?? [],
@@ -247,41 +239,92 @@ export function KanbanBoard({ tickets, spaceId, filters, onOpenTicket, onAddTick
     }
   }
 
+  const mobileTickets = byStatus[mobileColumn]
+
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar min-h-0">
-        {COLUMNS.map(({ status, label }) => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            label={label}
-            tickets={byStatus[status]}
-            onOpenTicket={onOpenTicket}
-            onAddTicket={onAddTicket}
+    <>
+      {/* ── Mobile: column tab strip ── */}
+      <div className="md:hidden flex overflow-x-auto no-scrollbar border-b border-gray-200 bg-white -mx-4 px-1 flex-shrink-0">
+        {COLUMNS.map(({ status, label }) => {
+          const count = byStatus[status].length
+          return (
+            <button
+              key={status}
+              onClick={() => setMobileColumn(status)}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 -mb-px transition-colors whitespace-nowrap ${
+                mobileColumn === status
+                  ? `border-brand-500 ${COLUMN_COLORS[status]}`
+                  : 'border-transparent text-gray-500'
+              }`}
+            >
+              {label}
+              {count > 0 && (
+                <span className="bg-gray-100 text-gray-500 rounded-full px-1.5 py-0.5 text-[10px] font-medium">
+                  {count}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ── Mobile: single column cards ── */}
+      <div className="md:hidden space-y-2 pt-3">
+        {mobileTickets.map((ticket) => (
+          <TicketCard
+            key={ticket.id}
+            ticket={ticket}
+            onClick={() => onOpenTicket(ticket.id)}
             member1Name={member1Name}
             member2Name={member2Name}
           />
         ))}
+        {mobileTickets.length === 0 && (
+          <button
+            onClick={() => onAddTicket(mobileColumn)}
+            className="w-full py-8 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-brand-300 hover:text-brand-500 transition-colors"
+          >
+            + Add ticket to {COLUMNS.find(c => c.status === mobileColumn)?.label}
+          </button>
+        )}
       </div>
 
-      <DragOverlay>
-        {activeTicket && (
-          <div className="rotate-2 shadow-xl w-72">
-            <TicketCard
-              ticket={activeTicket}
-              onClick={() => {}}
+      {/* ── Desktop: DnD Kanban ── */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="hidden md:flex gap-4 overflow-x-auto pb-4 no-scrollbar min-h-0">
+          {COLUMNS.map(({ status, label }) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              label={label}
+              tickets={byStatus[status]}
+              onOpenTicket={onOpenTicket}
+              onAddTicket={onAddTicket}
               member1Name={member1Name}
               member2Name={member2Name}
-              dragging
             />
-          </div>
-        )}
-      </DragOverlay>
-    </DndContext>
+          ))}
+        </div>
+
+        <DragOverlay>
+          {activeTicket && (
+            <div className="rotate-2 shadow-xl w-72">
+              <TicketCard
+                ticket={activeTicket}
+                onClick={() => {}}
+                member1Name={member1Name}
+                member2Name={member2Name}
+                dragging
+              />
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
+    </>
   )
 }

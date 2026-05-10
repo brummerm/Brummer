@@ -36,6 +36,7 @@ export function ListPage({ onOpenTicket }: ListPageProps) {
   const [filterAssignee, setFilterAssignee] = useState('')
   const [filterPriority, setFilterPriority] = useState('')
   const [filterSearch, setFilterSearch] = useState(searchQ)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const { data: spaces = [] } = useQuery({ queryKey: ['spaces'], queryFn: () => getSpaces(false) })
 
@@ -55,6 +56,8 @@ export function ListPage({ onOpenTicket }: ListPageProps) {
   })
 
   const space = spaces.find((s) => s.id === id)
+  const activeFilterCount = [filterAssignee, filterPriority, filterSearch].filter(Boolean).length
+  const clearFilters = () => { setFilterAssignee(''); setFilterPriority(''); setFilterSearch('') }
 
   const filtered = useMemo(() => {
     return tickets.filter((t) => {
@@ -131,10 +134,10 @@ export function ListPage({ onOpenTicket }: ListPageProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
           {/* View toggle */}
           {id > 0 && (
-            <div className="flex bg-gray-100 rounded-lg p-0.5 mr-1">
+            <div className="flex bg-gray-100 rounded-lg p-0.5">
               <button
                 onClick={() => navigate(`/apps/tickets/board/${id}`)}
                 className="px-2.5 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
@@ -147,52 +150,127 @@ export function ListPage({ onOpenTicket }: ListPageProps) {
             </div>
           )}
 
-          <div className="relative">
-            <input
-              value={filterSearch}
-              onChange={(e) => setFilterSearch(e.target.value)}
-              placeholder="Search…"
-              className="pl-7 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300 w-36"
-            />
-            <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+          {/* Desktop: inline filters */}
+          <div className="hidden sm:flex items-center gap-2 flex-1">
+            <div className="relative">
+              <input
+                value={filterSearch}
+                onChange={(e) => setFilterSearch(e.target.value)}
+                placeholder="Search…"
+                className="pl-7 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300 w-36"
+              />
+              <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <select
+              value={filterAssignee}
+              onChange={(e) => setFilterAssignee(e.target.value)}
+              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
+            >
+              <option value="">All assignees</option>
+              <option value="me">{member1Name}</option>
+              <option value="partner">{member2Name}</option>
+              <option value="shared">👥 Shared</option>
+            </select>
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
+            >
+              <option value="">All priorities</option>
+              {PRIORITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            <select
+              value={groupBy}
+              onChange={(e) => setGroupBy(e.target.value as GroupBy)}
+              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
+            >
+              <option value="status">Group: Status</option>
+              <option value="priority">Group: Priority</option>
+              <option value="none">No grouping</option>
+            </select>
+            {activeFilterCount > 0 && (
+              <button onClick={clearFilters} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                Clear
+              </button>
+            )}
           </div>
 
-          <select
-            value={filterAssignee}
-            onChange={(e) => setFilterAssignee(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
+          {/* Mobile: filter button */}
+          <button
+            onClick={() => setFiltersOpen((o) => !o)}
+            className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
           >
-            <option value="">All assignees</option>
-            <option value="me">{member1Name}</option>
-            <option value="partner">{member2Name}</option>
-          </select>
-
-          <select
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
-          >
-            <option value="">All priorities</option>
-            {PRIORITY_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-
-          <select
-            value={groupBy}
-            onChange={(e) => setGroupBy(e.target.value as GroupBy)}
-            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
-          >
-            <option value="status">Group by Status</option>
-            <option value="priority">Group by Priority</option>
-            <option value="none">No grouping</option>
-          </select>
+            <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="bg-brand-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
 
           <div className="flex-1" />
-          <span className="text-xs text-gray-400">{sorted.length} tickets</span>
+          <span className="text-xs text-gray-400">{sorted.length}</span>
         </div>
+
+        {/* Mobile: expanded filter panel */}
+        {filtersOpen && (
+          <div className="sm:hidden mt-3 pt-3 border-t border-gray-100 flex flex-col gap-2">
+            <div className="relative">
+              <input
+                value={filterSearch}
+                onChange={(e) => setFilterSearch(e.target.value)}
+                placeholder="Search tickets…"
+                className="w-full pl-7 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={filterAssignee}
+                onChange={(e) => setFilterAssignee(e.target.value)}
+                className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none"
+              >
+                <option value="">All assignees</option>
+                <option value="me">{member1Name}</option>
+                <option value="partner">{member2Name}</option>
+                <option value="shared">👥 Shared</option>
+              </select>
+              <select
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+                className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none"
+              >
+                <option value="">All priorities</option>
+                {PRIORITY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              <select
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value as GroupBy)}
+                className="col-span-2 text-sm border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none"
+              >
+                <option value="status">Group by Status</option>
+                <option value="priority">Group by Priority</option>
+                <option value="none">No grouping</option>
+              </select>
+            </div>
+            {activeFilterCount > 0 && (
+              <button onClick={clearFilters} className="text-sm text-red-500 hover:text-red-700 text-left">
+                Clear all filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -240,6 +318,7 @@ export function ListPage({ onOpenTicket }: ListPageProps) {
 
                   const assigneeName = ticket.assignee === 'me' ? member1Name
                     : ticket.assignee === 'partner' ? member2Name
+                    : ticket.assignee === 'shared' ? '👥 Both'
                     : '—'
 
                   return (

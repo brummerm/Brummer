@@ -84,9 +84,10 @@ function MonthView({
     <div className="flex flex-col h-full">
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-          <div key={d} className="py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            {d}
+        {[['S','Sun'], ['M','Mon'], ['T','Tue'], ['W','Wed'], ['T','Thu'], ['F','Fri'], ['S','Sat']].map(([short, full]) => (
+          <div key={full} className="py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <span className="sm:hidden">{short}</span>
+            <span className="hidden sm:inline">{full}</span>
           </div>
         ))}
       </div>
@@ -102,7 +103,7 @@ function MonthView({
           return (
             <div
               key={key}
-              className={`border-b border-r border-gray-100 p-1.5 min-h-[90px] ${
+              className={`border-b border-r border-gray-100 p-1 sm:p-1.5 min-h-[52px] sm:min-h-[90px] ${
                 inMonth ? 'bg-white' : 'bg-gray-50'
               }`}
             >
@@ -121,8 +122,27 @@ function MonthView({
                 </span>
               </div>
 
-              {/* Tickets */}
-              <div className="space-y-0.5">
+              {/* Tickets — dots on mobile, chips on desktop */}
+              <div className="flex sm:hidden flex-wrap gap-0.5 mt-0.5">
+                {dayTickets.slice(0, 5).map((t) => {
+                  const dotColor: Record<string, string> = {
+                    urgent: 'bg-red-500', high: 'bg-orange-400',
+                    medium: 'bg-blue-400', low: 'bg-gray-300',
+                  }
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={(e) => { e.stopPropagation(); onOpenTicket(t.id) }}
+                      className={`w-2 h-2 rounded-full flex-shrink-0 ${dotColor[t.priority] ?? 'bg-gray-300'} ${t.status === 'done' ? 'opacity-40' : ''}`}
+                      title={t.title}
+                    />
+                  )
+                })}
+                {dayTickets.length > 5 && (
+                  <span className="text-[8px] text-gray-400 leading-none self-end">+{dayTickets.length - 5}</span>
+                )}
+              </div>
+              <div className="hidden sm:block space-y-0.5">
                 {dayTickets.slice(0, 3).map((t) => (
                   <TicketChip
                     key={t.id}
@@ -158,52 +178,54 @@ function WeekView({
   const days = eachDayOfInterval({ start: weekStart, end: addDays(weekStart, 6) })
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Day headers */}
-      <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-        {days.map((day) => {
-          const today = isToday(day)
-          return (
-            <div key={dateKey(day)} className="py-3 text-center border-r border-gray-100 last:border-r-0">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                {format(day, 'EEE')}
-              </p>
-              <span
-                className={`mt-1 text-lg font-bold w-9 h-9 mx-auto flex items-center justify-center rounded-full ${
-                  today ? 'bg-brand-600 text-white' : 'text-gray-800'
+    <div className="flex flex-col h-full overflow-x-auto">
+      <div className="flex flex-col h-full" style={{ minWidth: '560px' }}>
+        {/* Day headers */}
+        <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+          {days.map((day) => {
+            const today = isToday(day)
+            return (
+              <div key={dateKey(day)} className="py-2 sm:py-3 text-center border-r border-gray-100 last:border-r-0 min-w-[80px]">
+                <p className="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  {format(day, 'EEE')}
+                </p>
+                <span
+                  className={`mt-0.5 sm:mt-1 text-base sm:text-lg font-bold w-7 h-7 sm:w-9 sm:h-9 mx-auto flex items-center justify-center rounded-full ${
+                    today ? 'bg-brand-600 text-white' : 'text-gray-800'
+                  }`}
+                >
+                  {format(day, 'd')}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Ticket columns */}
+        <div className="grid grid-cols-7 flex-1 overflow-y-auto">
+          {days.map((day) => {
+            const key = dateKey(day)
+            const dayTickets = byDate[key] ?? []
+            const today = isToday(day)
+
+            return (
+              <div
+                key={key}
+                className={`border-r border-gray-100 last:border-r-0 p-1.5 sm:p-2 space-y-1 min-h-full min-w-[80px] ${
+                  today ? 'bg-brand-50/30' : ''
                 }`}
               >
-                {format(day, 'd')}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Ticket columns */}
-      <div className="grid grid-cols-7 flex-1 overflow-y-auto">
-        {days.map((day) => {
-          const key = dateKey(day)
-          const dayTickets = byDate[key] ?? []
-          const today = isToday(day)
-
-          return (
-            <div
-              key={key}
-              className={`border-r border-gray-100 last:border-r-0 p-2 space-y-1 min-h-full ${
-                today ? 'bg-brand-50/30' : ''
-              }`}
-            >
-              {dayTickets.length === 0 ? (
-                <p className="text-xs text-gray-300 text-center mt-4">—</p>
-              ) : (
-                dayTickets.map((t) => (
-                  <TicketChip key={t.id} ticket={t} onClick={() => onOpenTicket(t.id)} />
-                ))
-              )}
-            </div>
-          )
-        })}
+                {dayTickets.length === 0 ? (
+                  <p className="text-xs text-gray-300 text-center mt-4">—</p>
+                ) : (
+                  dayTickets.map((t) => (
+                    <TicketChip key={t.id} ticket={t} onClick={() => onOpenTicket(t.id)} />
+                  ))
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
