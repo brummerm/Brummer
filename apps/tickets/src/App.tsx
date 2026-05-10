@@ -7,6 +7,7 @@ import { BoardPage } from './pages/BoardPage'
 import { ListPage } from './pages/ListPage'
 import { SpacesPage } from './pages/SpacesPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { CalendarPage } from './pages/CalendarPage'
 import { TicketModal } from './components/tickets/TicketModal'
 import { QuickAddModal } from './components/tickets/QuickAddModal'
 import { SettingsProvider } from './context/SettingsContext'
@@ -17,6 +18,7 @@ function usePageTitle(pathname: string): string {
   if (pathname === '/apps/tickets/' || pathname === '/apps/tickets') return 'Dashboard'
   if (pathname.startsWith('/apps/tickets/board/')) return 'Board'
   if (pathname.startsWith('/apps/tickets/list/')) return 'List'
+  if (pathname.startsWith('/apps/tickets/calendar')) return 'Calendar'
   if (pathname.startsWith('/apps/tickets/spaces')) return 'Spaces'
   if (pathname.startsWith('/apps/tickets/settings')) return 'Settings'
   return 'Home Tickets'
@@ -77,6 +79,10 @@ function AppLayout() {
             <Route
               path="/apps/tickets/list/:spaceId"
               element={<ListPage onOpenTicket={handleOpenTicket} />}
+            />
+            <Route
+              path="/apps/tickets/calendar"
+              element={<CalendarPage onOpenTicket={handleOpenTicket} />}
             />
             <Route path="/apps/tickets/spaces" element={<SpacesPage />} />
             <Route path="/apps/tickets/settings" element={<SettingsPage />} />
