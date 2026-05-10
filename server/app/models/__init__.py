@@ -5,6 +5,7 @@ from .fitness import WorkoutEntry, WorkoutExercise, WorkoutRun, WorkoutTemplate,
 from .travel import Trip, ItineraryItem, PackingItem
 from .grades import Rubric, RubricCriterion, GradeEntry
 from .journal import Note, Tag  # note_tags_table registered via Note/Tag relationships
+from .tickets import Space, Label, Ticket, ChecklistItem, Comment, ActivityLog, TicketLabel, HouseholdSettings, SavedView
 
 __all__ = [
     "Recipe", "Ingredient", "RecipeIngredient", "WeekPlan", "MealSlot",

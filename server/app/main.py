@@ -31,7 +31,9 @@ from .models import body_weight  # noqa: F401 — registers body_weights table
 from .models import fitness  # noqa: F401 — registers workout tables
 from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness, travel, grades, journal
 from .routers import body_weight as body_weight_router
+from .routers import tickets as tickets_router
 from .crud import budget as budget_crud
+from .crud import tickets as tickets_crud
 from .auth import router as auth_router, get_current_user, is_authenticated
 from sqlalchemy.orm import Session
 
@@ -71,6 +73,7 @@ async def lifespan(app: FastAPI):
         budget_crud.migrate_data(db)
         migrate_recipe_nutrition(db)
         migrate_meal_slot_source(db)
+        tickets_crud.seed_defaults(db)
     except Exception:
         db.rollback()
         raise
@@ -93,7 +96,8 @@ TRAVEL_DIR         = STATIC_DIR / "travel-planner"
 GRADES_DIR         = STATIC_DIR / "grades"
 JOURNAL_DIR        = STATIC_DIR / "journal"
 CODE_LEARNING_DIR  = STATIC_DIR / "code-learning"
-for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, GRADES_DIR, JOURNAL_DIR, CODE_LEARNING_DIR):
+TICKETS_DIR        = STATIC_DIR / "tickets"
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, GRADES_DIR, JOURNAL_DIR, CODE_LEARNING_DIR, TICKETS_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -150,6 +154,9 @@ app.include_router(journal.router, prefix="/api/journal", dependencies=auth_dep,
 # ---- Body Weight API ----
 app.include_router(body_weight_router.router, prefix="/api", dependencies=auth_dep)
 
+# ---- Tickets API ----
+app.include_router(tickets_router.router, prefix="/api/tickets", dependencies=auth_dep, tags=["tickets"])
+
 
 # ---- Image static mount, with auth gate ----
 # StaticFiles can't easily depend on auth, so we wrap the path with a guard endpoint
@@ -184,6 +191,7 @@ _SPA_DIRS = {
     "grades":        GRADES_DIR,
     "journal":       JOURNAL_DIR,
     "code-learning": CODE_LEARNING_DIR,
+    "tickets":       TICKETS_DIR,
 }
 
 

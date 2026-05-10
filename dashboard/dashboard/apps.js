@@ -57,4 +57,12 @@ window.APPS = [
     href: "/apps/code-learning/",
     enabled: true,
   },
+  {
+    id: "tickets",
+    title: "Home Tickets",
+    desc: "Household task tracker — Kanban board, recurring tasks, and two-person collaboration.",
+    icon: "🏠",
+    href: "/apps/tickets/",
+    enabled: true,
+  },
 ];
