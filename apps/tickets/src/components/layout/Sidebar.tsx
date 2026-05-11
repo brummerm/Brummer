@@ -28,8 +28,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
       isActive
-        ? 'bg-brand-50 text-brand-700'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        ? 'bg-[#e4f0f6] text-[#0079bf]'
+        : 'text-[#44546f] hover:bg-[#f4f5f7] hover:text-[#172b4d]'
     }`
 
   const sidebarContent = (
@@ -72,7 +72,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         {/* Spaces list */}
         {spaces.length > 0 && (
           <div className="pt-3">
-            <p className="px-3 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Spaces</p>
+            <p className="px-3 mb-1 text-xs font-semibold text-[#5e6c84] uppercase tracking-wider">Boards</p>
             <div className="space-y-0.5">
               {spaces.map((space) => {
                 const isBoardActive = location.pathname === `/apps/tickets/board/${space.id}`
@@ -85,8 +85,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                       onClick={onClose}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isActive
-                          ? 'bg-brand-50 text-brand-700'
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-[#e4f0f6] text-[#0079bf]'
+                          : 'text-[#44546f] hover:bg-[#f4f5f7] hover:text-[#172b4d]'
                       }`}
                     >
                       <SpaceIcon space={space} />
@@ -100,7 +100,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                           onClick={onClose}
                           className={({ isActive }) =>
                             `text-xs px-2 py-0.5 rounded transition-colors ${
-                              isActive ? 'bg-brand-100 text-brand-700' : 'text-gray-500 hover:text-gray-700'
+                              isActive ? 'bg-[#e4f0f6] text-[#0079bf]' : 'text-[#5e6c84] hover:text-[#172b4d]'
                             }`
                           }
                         >
@@ -111,7 +111,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                           onClick={onClose}
                           className={({ isActive }) =>
                             `text-xs px-2 py-0.5 rounded transition-colors ${
-                              isActive ? 'bg-brand-100 text-brand-700' : 'text-gray-500 hover:text-gray-700'
+                              isActive ? 'bg-[#e4f0f6] text-[#0079bf]' : 'text-[#5e6c84] hover:text-[#172b4d]'
                             }`
                           }
                         >
@@ -128,7 +128,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       </nav>
 
       {/* Bottom links */}
-      <div className="px-3 pb-4 pt-2 border-t border-gray-100 space-y-1">
+      <div className="px-3 pb-4 pt-2 border-t border-[#dfe1e6] space-y-1">
         <NavLink to="/apps/tickets/settings" className={navLinkClass} onClick={onClose}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -152,7 +152,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-200 h-screen sticky top-0">
+      <aside className="hidden md:flex flex-col w-56 bg-[#f4f5f7] border-r border-[#dfe1e6] h-screen sticky top-0">
         {sidebarContent}
       </aside>
 
@@ -160,7 +160,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {open && (
         <div className="md:hidden fixed inset-0 z-40 flex">
           <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-          <aside className="relative z-50 flex flex-col w-64 bg-white h-full shadow-xl">
+          <aside className="relative z-50 flex flex-col w-64 bg-[#f4f5f7] h-full shadow-xl">
             {sidebarContent}
           </aside>
         </div>
