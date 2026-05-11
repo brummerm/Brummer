@@ -31,6 +31,7 @@ from .routers import body_weight as body_weight_router
 from .routers import tickets as tickets_router
 from .crud import budget as budget_crud
 from .crud import tickets as tickets_crud
+from .crud import fitness as fitness_crud
 from .auth import router as auth_router, get_current_user, is_authenticated
 from sqlalchemy.orm import Session
 
@@ -71,6 +72,7 @@ async def lifespan(app: FastAPI):
         migrate_recipe_nutrition(db)
         migrate_meal_slot_source(db)
         tickets_crud.seed_defaults(db)
+        fitness_crud.seed_warfighter_templates(db)
     except Exception:
         db.rollback()
         raise

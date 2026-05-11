@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   format,
   startOfMonth,
@@ -14,7 +14,7 @@ import {
   isSameMonth,
   parseISO,
 } from 'date-fns'
-import { getWorkoutsInRange, type WorkoutEntry, type WorkoutType } from '../api/fitness'
+import { getWorkoutsInRange, clearPlannedWorkouts, type WorkoutEntry, type WorkoutType } from '../api/fitness'
 import WorkoutEditor from '../components/WorkoutEditor'
 
 type CalView = 'month' | 'week' | 'day'
@@ -93,6 +93,15 @@ export default function CalendarPage() {
     qc.invalidateQueries({ queryKey: ['workout-today'] })
     setEditorOpen(false)
   }
+
+  const clearPlannedMut = useMutation({
+    mutationFn: clearPlannedWorkouts,
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['workouts'] })
+      qc.invalidateQueries({ queryKey: ['workout-today'] })
+      alert(`Cleared ${data.deleted} planned workout${data.deleted !== 1 ? 's' : ''} from the calendar.`)
+    },
+  })
 
   function headerLabel() {
     if (view === 'month') return format(currentDate, 'MMMM yyyy')
@@ -336,6 +345,18 @@ export default function CalendarPage() {
             Today
           </button>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (confirm('Delete all planned (non-completed) workouts from the calendar?')) {
+                clearPlannedMut.mutate()
+              }
+            }}
+            disabled={clearPlannedMut.isPending}
+            className="px-3 py-1.5 text-sm rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+          >
+            {clearPlannedMut.isPending ? 'Clearing…' : 'Clear Planned'}
+          </button>
         <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
           {(['month', 'week', 'day'] as CalView[]).map(v => (
             <button
@@ -348,6 +369,7 @@ export default function CalendarPage() {
               {v.charAt(0).toUpperCase() + v.slice(1)}
             </button>
           ))}
+        </div>
         </div>
       </div>
 

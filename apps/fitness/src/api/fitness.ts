@@ -83,6 +83,9 @@ export const updateWorkout = (id: number, data: Partial<Omit<WorkoutEntry, 'id'>
 
 export const deleteWorkout = (id: number) => api.delete(`/workouts/${id}`)
 
+export const clearPlannedWorkouts = () =>
+  api.delete<{ deleted: number }>('/workouts/planned').then(r => r.data)
+
 // ── Templates ─────────────────────────────────────────────────────────────────
 
 export const getTemplates = () =>

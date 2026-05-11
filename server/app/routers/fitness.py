@@ -49,6 +49,12 @@ def update_workout(entry_id: int, data: WorkoutEntryUpdate, db: Session = Depend
     return crud.update_workout(db, entry, data)
 
 
+@router.delete("/workouts/planned", status_code=200)
+def clear_planned_workouts(db: Session = Depends(get_db)):
+    count = crud.clear_planned_workouts(db)
+    return {"deleted": count}
+
+
 @router.delete("/workouts/{entry_id}", status_code=204)
 def delete_workout(entry_id: int, db: Session = Depends(get_db)):
     entry = db.query(WorkoutEntry).filter(WorkoutEntry.id == entry_id).first()
