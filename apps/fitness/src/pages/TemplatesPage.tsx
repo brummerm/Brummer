@@ -221,15 +221,50 @@ function TemplateEditor({ initial, onSave, onCancel }: TemplateEditorProps) {
   )
 }
 
+type SortKey = 'name-asc' | 'name-desc' | 'type' | 'category'
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'name-asc', label: 'Name A→Z' },
+  { value: 'name-desc', label: 'Name Z→A' },
+  { value: 'type', label: 'Type' },
+  { value: 'category', label: 'Category' },
+]
+
+function sortTemplates(templates: WorkoutTemplate[], key: SortKey): WorkoutTemplate[] {
+  return [...templates].sort((a, b) => {
+    if (key === 'name-asc') return a.name.localeCompare(b.name)
+    if (key === 'name-desc') return b.name.localeCompare(a.name)
+    if (key === 'type') return a.workout_type.localeCompare(b.workout_type) || a.name.localeCompare(b.name)
+    if (key === 'category') {
+      const ca = a.custom_type_label || a.workout_type
+      const cb = b.custom_type_label || b.workout_type
+      return ca.localeCompare(cb) || a.name.localeCompare(b.name)
+    }
+    return 0
+  })
+}
+
 export default function TemplatesPage() {
   const qc = useQueryClient()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | undefined>(undefined)
+  const [sortKey, setSortKey] = useState<SortKey>('name-asc')
+  const [search, setSearch] = useState('')
 
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ['templates'],
     queryFn: getTemplates,
   })
+
+  const visibleTemplates = sortTemplates(
+    search.trim()
+      ? templates.filter(t =>
+          t.name.toLowerCase().includes(search.toLowerCase()) ||
+          (t.custom_type_label ?? t.workout_type).toLowerCase().includes(search.toLowerCase())
+        )
+      : templates,
+    sortKey
+  )
 
   const deleteMut = useMutation({
     mutationFn: deleteTemplate,
@@ -254,7 +289,7 @@ export default function TemplatesPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="font-display text-3xl font-bold text-gray-900">Workout Templates</h1>
         <button
           onClick={openNew}
@@ -262,6 +297,38 @@ export default function TemplatesPage() {
         >
           + New Template
         </button>
+      </div>
+
+      {/* Search + Sort bar */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-6">
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search templates…"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500 whitespace-nowrap font-medium">Sort by</label>
+          <select
+            value={sortKey}
+            onChange={e => setSortKey(e.target.value as SortKey)}
+            className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-300"
+          >
+            {SORT_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+        {templates.length > 0 && (
+          <span className="text-xs text-gray-400 self-center whitespace-nowrap">
+            {visibleTemplates.length} of {templates.length}
+          </span>
+        )}
       </div>
 
       {isLoading && <div className="text-center py-12 text-gray-400">Loading…</div>}
@@ -278,8 +345,14 @@ export default function TemplatesPage() {
         </div>
       )}
 
+      {!isLoading && templates.length > 0 && visibleTemplates.length === 0 && (
+        <div className="text-center py-12 text-gray-400">
+          No templates match "{search}"
+        </div>
+      )}
+
       <div className="grid sm:grid-cols-2 gap-4">
-        {templates.map(t => (
+        {visibleTemplates.map(t => (
           <div key={t.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div className="flex items-start justify-between mb-3">
               <div>

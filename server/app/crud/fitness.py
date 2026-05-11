@@ -530,7 +530,7 @@ _WARFIGHTER_TEMPLATES = [
             {"exercise_name": "Hammer Curls (Superset C)", "sets": 3, "reps": "12", "weight": "12.5-15kg", "notes": "Rest 90s after hammer curls"},
         ]
     },
-    # ── Leg Workouts (new) ────────────────────────────────────────────────────
+    # ── Leg Workouts (batch 1) ────────────────────────────────────────────────
     {
         "name": "L-01 Heavy Squat Day", "workout_type": "lift", "custom_type_label": "Legs",
         "notes": "Quad-dominant strength session. Heaviest squat day of the week. Rest 3 min between main squat sets.",
@@ -640,10 +640,121 @@ _WARFIGHTER_TEMPLATES = [
 ]
 
 
+_LEG_TEMPLATES_2 = [
+    {
+        "name": "L-11 Quad Isolation Day", "workout_type": "lift", "custom_type_label": "Legs",
+        "notes": "Quad-dominant isolation session. No heavy compound movements — pure quad development and detail work. Rest 60-90s between sets.",
+        "exercises": [
+            {"exercise_name": "Leg Extension", "sets": 5, "reps": "15", "weight": "Moderate-heavy", "notes": "Slow eccentric (3 count), hold 1s at peak, full ROM"},
+            {"exercise_name": "Hack Squat", "sets": 4, "reps": "10", "weight": "80-100kg", "notes": "Feet low on platform — emphasizes quads over glutes"},
+            {"exercise_name": "Leg Press (narrow stance)", "sets": 3, "reps": "15", "weight": "100-120kg", "notes": "Feet together, high on platform — quad focus"},
+            {"exercise_name": "Sissy Squat", "sets": 3, "reps": "12", "weight": "Bodyweight or light plate", "notes": "Lean back, knees forward — brutal quad isolation"},
+            {"exercise_name": "Terminal Knee Extension", "sets": 3, "reps": "20", "weight": "Band", "notes": "VMO activation — great as a finisher or prehab"},
+        ]
+    },
+    {
+        "name": "L-12 Calf Specialization", "workout_type": "lift", "custom_type_label": "Legs",
+        "notes": "Calf-focused session. Calves need high volume and full ROM to grow. Slow the reps down — no bouncing. Rest 60s between sets.",
+        "exercises": [
+            {"exercise_name": "Standing Calf Raise", "sets": 5, "reps": "20", "weight": "Heavy (machine or barbell)", "notes": "Full stretch at bottom, 2s pause — no bouncing"},
+            {"exercise_name": "Seated Calf Raise", "sets": 4, "reps": "15", "weight": "Moderate", "notes": "Targets soleus — different angle from standing"},
+            {"exercise_name": "Single-Leg Calf Raise", "sets": 3, "reps": "20 each leg", "weight": "Bodyweight or hold DB", "notes": "Full ROM, expose any side imbalances"},
+            {"exercise_name": "Donkey Calf Raise", "sets": 3, "reps": "15", "weight": "Bodyweight or loaded", "notes": "Hinge forward 90° at hip — great stretch position"},
+            {"exercise_name": "Jump Rope", "sets": 3, "reps": "2 min", "weight": None, "notes": "Achilles conditioning and calf endurance — steady pace"},
+        ]
+    },
+    {
+        "name": "L-13 Plyometric Leg Day", "workout_type": "custom", "custom_type_label": "Legs",
+        "notes": "Explosive power development session. Quality over quantity — each rep should be max effort. Rest fully between sets (2+ min). Do not do this after heavy lifting.",
+        "exercises": [
+            {"exercise_name": "Box Jumps", "sets": 5, "reps": "8", "weight": "24in / 30in box", "notes": "Max height, soft landing, step down — do NOT rebound"},
+            {"exercise_name": "Depth Jumps", "sets": 4, "reps": "6", "weight": "Bodyweight", "notes": "Step off box, absorb, immediately jump — fast ground contact"},
+            {"exercise_name": "Broad Jumps", "sets": 4, "reps": "5", "weight": "Bodyweight", "notes": "Max horizontal distance — stick the landing"},
+            {"exercise_name": "Split Squat Jumps", "sets": 3, "reps": "10 each leg", "weight": "Bodyweight", "notes": "Lunge position, jump and switch legs — explosive"},
+            {"exercise_name": "Lateral Bounds", "sets": 3, "reps": "8 each direction", "weight": "Bodyweight", "notes": "Single-leg push, land soft on opposite foot"},
+            {"exercise_name": "Squat Jumps", "sets": 3, "reps": "12", "weight": "Bodyweight", "notes": "Finisher — squat deep, jump as high as possible"},
+        ]
+    },
+    {
+        "name": "L-14 Leg Strength Peaking", "workout_type": "lift", "custom_type_label": "Legs",
+        "notes": "Strength peaking using 5/3/1-style loading. Build to a heavy single then back down. Rest 3-5 min on main sets. Log your working max every session.",
+        "exercises": [
+            {"exercise_name": "Back Squat (main)", "sets": None, "reps": "5 @ 65%, 3 @ 75%, 1+ @ 85-90%", "weight": "% of 1RM", "notes": "The + set: go to failure with good form — this is your data"},
+            {"exercise_name": "Pause Squat", "sets": 3, "reps": "3", "weight": "70% 1RM", "notes": "3s pause at the bottom — builds strength out of the hole"},
+            {"exercise_name": "Box Squat", "sets": 3, "reps": "5", "weight": "75% 1RM", "notes": "Sit back onto box, explode up — teaches proper squat mechanics"},
+            {"exercise_name": "Romanian Deadlift", "sets": 3, "reps": "8", "weight": "65% DL 1RM", "notes": "Accessory posterior chain — controlled and intentional"},
+        ]
+    },
+    {
+        "name": "L-15 Metabolic Leg Conditioning", "workout_type": "custom", "custom_type_label": "Legs",
+        "notes": "4 rounds for time — legs meet cardio. Score: Total time. Rest 90s between rounds only. This will make your legs scream.",
+        "exercises": [
+            {"exercise_name": "KB Goblet Squat", "sets": 4, "reps": "20", "weight": "24-32kg KB", "notes": "Deep squat, elbows inside knees, chest tall — no rest before next"},
+            {"exercise_name": "Box Jumps", "sets": 4, "reps": "10", "weight": "24in box", "notes": "Full extension, step down — go right into lunges"},
+            {"exercise_name": "Walking Lunges", "sets": 4, "reps": "20 steps", "weight": "Bodyweight or 10-15kg DBs", "notes": "Continuous — go right into wall sit"},
+            {"exercise_name": "Wall Sit", "sets": 4, "reps": "30 sec", "weight": "Bodyweight (add plate if easy)", "notes": "90° knee angle — hold hard, then rest 90s"},
+        ]
+    },
+    {
+        "name": "L-16 Olympic Lift Leg Day", "workout_type": "lift", "custom_type_label": "Legs",
+        "notes": "Olympic lifting focused leg session. Technique first — if form breaks down, drop the weight. Rest 2-3 min between sets. Warm up the hips extensively.",
+        "exercises": [
+            {"exercise_name": "Power Clean", "sets": 5, "reps": "3", "weight": "70% 1RM", "notes": "Hip extension is the engine — fast elbows, catch high"},
+            {"exercise_name": "Front Squat", "sets": 5, "reps": "5", "weight": "70% 1RM", "notes": "Elbows high, upright torso — the catch position squat"},
+            {"exercise_name": "Hang Squat Clean", "sets": 4, "reps": "3", "weight": "65% 1RM", "notes": "From the hang — reinforces the second pull and squat receipt"},
+            {"exercise_name": "Overhead Squat", "sets": 3, "reps": "5", "weight": "50% 1RM", "notes": "Mobility test and full-body stability — wide grip, active shoulders"},
+        ]
+    },
+    {
+        "name": "L-17 Posterior Chain Blitz", "workout_type": "lift", "custom_type_label": "Legs",
+        "notes": "Hamstring and glute dominant session with heavy deadlift. Posterior chain is often the weak link — this fixes it. Rest 2-3 min on main lifts.",
+        "exercises": [
+            {"exercise_name": "Conventional Deadlift", "sets": 4, "reps": "4", "weight": "85% 1RM", "notes": "Heaviest pull of the week — perfect setup every rep"},
+            {"exercise_name": "Hip Thrust", "sets": 4, "reps": "8", "weight": "90-110kg barbell", "notes": "Shoulders on bench, drive hips high, squeeze 2s at top"},
+            {"exercise_name": "Good Mornings", "sets": 3, "reps": "10", "weight": "40-50kg", "notes": "Bar on back, hinge until stretch, drive hips through"},
+            {"exercise_name": "Leg Curl (machine)", "sets": 4, "reps": "12", "weight": "Moderate", "notes": "Full ROM, slow eccentric — don't let weight drop fast"},
+            {"exercise_name": "Glute-Ham Raise", "sets": 3, "reps": "8", "weight": "Bodyweight", "notes": "Finisher — lower slowly, use hamstrings to curl back up"},
+        ]
+    },
+    {
+        "name": "L-18 Leg Endurance Day", "workout_type": "lift", "custom_type_label": "Legs",
+        "notes": "High-rep, low-weight endurance session. This builds the aerobic capacity of the legs and mental toughness. The 100-rep squat is the centrepiece.",
+        "exercises": [
+            {"exercise_name": "Back Squat", "sets": 3, "reps": "20", "weight": "50% 1RM", "notes": "20-rep squats — one of the hardest things you'll do in a gym"},
+            {"exercise_name": "Walking Lunges", "sets": 4, "reps": "20 each leg", "weight": "10-15kg DBs", "notes": "Continuous, no rest between legs"},
+            {"exercise_name": "Step-Ups", "sets": 4, "reps": "15 each leg", "weight": "15-20kg DBs", "notes": "Drive through lead heel, control the descent"},
+            {"exercise_name": "Bodyweight Squat", "sets": 1, "reps": "100 total", "weight": "Bodyweight", "notes": "Partition as needed — this is your finisher and mental test"},
+        ]
+    },
+    {
+        "name": "L-19 Loaded Carry Leg Day", "workout_type": "custom", "custom_type_label": "Legs",
+        "notes": "Strongman-style loaded carry session. Builds real-world strength, stability, and work capacity. Rest 90s-2 min between sets.",
+        "exercises": [
+            {"exercise_name": "Farmer Carry", "sets": 5, "reps": "50m", "weight": "28-32kg each hand", "notes": "Tall posture, short quick steps, breathe at turnaround"},
+            {"exercise_name": "Barbell Yoke Walk (or heavy carry)", "sets": 4, "reps": "40m", "weight": "Heavy — as loaded as possible", "notes": "Stay tight and upright — if no yoke, use loaded barbell on back"},
+            {"exercise_name": "Sled Push", "sets": 4, "reps": "30m", "weight": "Moderate-heavy", "notes": "Low handles, lean into it, powerful leg drive"},
+            {"exercise_name": "KB Front Rack Carry", "sets": 3, "reps": "50m", "weight": "20-24kg each hand", "notes": "Elbows high, core braced — harder than it looks"},
+        ]
+    },
+    {
+        "name": "L-20 Barbell Leg Complex", "workout_type": "custom", "custom_type_label": "Legs",
+        "notes": "4 rounds barbell complex — no putting the bar down within a round. Rest 2-3 min between rounds. Select a weight you can handle for the weakest movement (usually push press). Brutal and efficient.",
+        "exercises": [
+            {"exercise_name": "Barbell Complex (4 rounds, no rest within)", "sets": 4, "reps": "8 each movement", "weight": "40-60kg", "notes": "RDL → Hang Clean → Front Squat → Push Press — flow without dropping bar"},
+            {"exercise_name": "Box Step-Ups", "sets": 3, "reps": "12 each leg", "weight": "20-25kg DBs", "notes": "Drive through heel, squeeze glute at top"},
+            {"exercise_name": "Nordic Hamstring Curl", "sets": 3, "reps": "8", "weight": "Bodyweight", "notes": "Finisher — partner anchors feet, lower as slowly as possible"},
+        ]
+    },
+]
+
+_ALL_TEMPLATES = _WARFIGHTER_TEMPLATES + _LEG_TEMPLATES_2
+
+
 def seed_warfighter_templates(db: Session) -> None:
-    if db.query(WorkoutTemplate).count() > 0:
-        return
-    for tmpl in _WARFIGHTER_TEMPLATES:
+    existing_names = {row[0] for row in db.query(WorkoutTemplate.name).all()}
+    for tmpl in _ALL_TEMPLATES:
+        if tmpl["name"] in existing_names:
+            continue
         t = WorkoutTemplate(
             name=tmpl["name"],
             workout_type=tmpl["workout_type"],
