@@ -9,12 +9,9 @@ Layout served at runtime:
   /apps/budget/...           -> built React app for the budget tracker
   /apps/fitness/...          -> built React app for the fitness tracker
   /apps/travel-planner/...   -> built React app for travel planner
-  /apps/grades/...           -> built React app for grade calculator
-  /apps/journal/...          -> built React app for journal
+  /apps/tickets/...          -> built React app for home tickets
   /api/auth/...              -> login/logout/me
   /api/travel/...            -> travel planner API (auth required)
-  /api/grades/...            -> grade calculator API (auth required)
-  /api/journal/...           -> journal API (auth required)
   /images/...                -> recipe images (auth required)
 """
 from contextlib import asynccontextmanager
@@ -29,7 +26,7 @@ from .database import Base, engine, SessionLocal
 from . import models  # noqa: F401 — registers ORM tables before create_all
 from .models import body_weight  # noqa: F401 — registers body_weights table
 from .models import fitness  # noqa: F401 — registers workout tables
-from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness, travel, grades, journal
+from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness, travel
 from .routers import body_weight as body_weight_router
 from .routers import tickets as tickets_router
 from .crud import budget as budget_crud
@@ -93,11 +90,8 @@ MEAL_PLANNER_DIR = STATIC_DIR / "meal-planner"
 BUDGET_DIR         = STATIC_DIR / "budget"
 FITNESS_DIR        = STATIC_DIR / "fitness"
 TRAVEL_DIR         = STATIC_DIR / "travel-planner"
-GRADES_DIR         = STATIC_DIR / "grades"
-JOURNAL_DIR        = STATIC_DIR / "journal"
-CODE_LEARNING_DIR  = STATIC_DIR / "code-learning"
 TICKETS_DIR        = STATIC_DIR / "tickets"
-for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, GRADES_DIR, JOURNAL_DIR, CODE_LEARNING_DIR, TICKETS_DIR):
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, TICKETS_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -145,12 +139,6 @@ app.include_router(fitness.router, prefix="/api/fitness", dependencies=auth_dep,
 # ---- Travel Planner API ----
 app.include_router(travel.router,  prefix="/api/travel",  dependencies=auth_dep, tags=["travel"])
 
-# ---- Grade Calculator API ----
-app.include_router(grades.router,  prefix="/api/grades",  dependencies=auth_dep, tags=["grades"])
-
-# ---- Journal API ----
-app.include_router(journal.router, prefix="/api/journal", dependencies=auth_dep, tags=["journal"])
-
 # ---- Body Weight API ----
 app.include_router(body_weight_router.router, prefix="/api", dependencies=auth_dep)
 
@@ -188,9 +176,6 @@ _SPA_DIRS = {
     "budget":        BUDGET_DIR,
     "fitness":       FITNESS_DIR,
     "travel-planner": TRAVEL_DIR,
-    "grades":        GRADES_DIR,
-    "journal":       JOURNAL_DIR,
-    "code-learning": CODE_LEARNING_DIR,
     "tickets":       TICKETS_DIR,
 }
 

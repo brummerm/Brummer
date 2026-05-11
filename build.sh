@@ -39,27 +39,6 @@ echo "==> Building travel planner frontend"
 npm run build
 cd ../..
 
-echo "==> Installing Node deps for grade calculator"
-cd apps/grades
-npm ci
-echo "==> Building grade calculator frontend"
-npm run build
-cd ../..
-
-echo "==> Installing Node deps for journal"
-cd apps/journal
-npm ci
-echo "==> Building journal frontend"
-npm run build
-cd ../..
-
-echo "==> Installing Node deps for code learning app"
-cd apps/code-learning
-npm ci
-echo "==> Building code learning app"
-npm run build
-cd ../..
-
 echo "==> Installing Node deps for tickets app"
 cd apps/tickets
 npm ci

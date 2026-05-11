@@ -3,8 +3,6 @@ from .meal_plan import WeekPlan, MealSlot
 from .budget import IncomeItem, ExpenseItem, SurplusAllocation, RetirementEntry
 from .fitness import WorkoutEntry, WorkoutExercise, WorkoutRun, WorkoutTemplate, WorkoutTemplateExercise
 from .travel import Trip, ItineraryItem, PackingItem
-from .grades import Rubric, RubricCriterion, GradeEntry
-from .journal import Note, Tag  # note_tags_table registered via Note/Tag relationships
 from .tickets import Space, Label, Ticket, ChecklistItem, Comment, ActivityLog, TicketLabel, HouseholdSettings, SavedView
 
 __all__ = [
@@ -12,6 +10,4 @@ __all__ = [
     "IncomeItem", "ExpenseItem", "SurplusAllocation", "RetirementEntry",
     "WorkoutEntry", "WorkoutExercise", "WorkoutRun", "WorkoutTemplate", "WorkoutTemplateExercise",
     "Trip", "ItineraryItem", "PackingItem",
-    "Rubric", "RubricCriterion", "GradeEntry",
-    "Note", "Tag",
 ]
