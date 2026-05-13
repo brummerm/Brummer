@@ -63,6 +63,18 @@ def migrate_meal_slot_source(db: Session):
         db.commit()
 
 
+def migrate_itinerary_notes(db: Session):
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.bind)
+    try:
+        cols = {c['name'] for c in inspector.get_columns('itinerary_items')}
+        if 'notes' not in cols:
+            db.execute(text("ALTER TABLE itinerary_items ADD COLUMN notes TEXT DEFAULT ''"))
+            db.commit()
+    except Exception:
+        db.rollback()
+
+
 def migrate_household_settings_emails(db: Session):
     from sqlalchemy import text, inspect
     inspector = inspect(db.bind)
@@ -87,6 +99,7 @@ async def lifespan(app: FastAPI):
         budget_crud.migrate_data(db)
         migrate_recipe_nutrition(db)
         migrate_meal_slot_source(db)
+        migrate_itinerary_notes(db)
         migrate_household_settings_emails(db)
         tickets_crud.seed_defaults(db)
         fitness_crud.seed_warfighter_templates(db)

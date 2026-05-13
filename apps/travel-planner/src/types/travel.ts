@@ -28,6 +28,7 @@ export interface ItineraryItem {
   description: string
   location: string
   estimated_cost: number
+  notes: string
   created_at: string
 }
 

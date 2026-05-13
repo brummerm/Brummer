@@ -40,6 +40,7 @@ class ItineraryItem(Base):
     description = Column(Text, default="")
     location = Column(String, default="")
     estimated_cost = Column(Float, default=0.0)
+    notes = Column(Text, default="")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     trip = relationship("Trip", back_populates="itinerary")

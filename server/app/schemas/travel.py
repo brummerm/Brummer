@@ -11,6 +11,7 @@ class ItineraryItemBase(BaseModel):
     description: str = ""
     location: str = ""
     estimated_cost: float = 0.0
+    notes: str = ""
 
 
 class ItineraryItemCreate(ItineraryItemBase):
@@ -24,6 +25,7 @@ class ItineraryItemUpdate(BaseModel):
     description: Optional[str] = None
     location: Optional[str] = None
     estimated_cost: Optional[float] = None
+    notes: Optional[str] = None
 
 
 class ItineraryItemOut(ItineraryItemBase):
