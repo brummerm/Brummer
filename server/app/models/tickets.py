@@ -111,6 +111,9 @@ class HouseholdSettings(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     member1_name: Mapped[str] = mapped_column(String, default="Me")
     member2_name: Mapped[str] = mapped_column(String, default="Partner")
+    member1_email: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    member2_email: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    notifications_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
 class SavedView(Base):

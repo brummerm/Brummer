@@ -201,12 +201,18 @@ class HouseholdSettingsOut(BaseModel):
     id: int
     member1_name: str
     member2_name: str
+    member1_email: Optional[str] = None
+    member2_email: Optional[str] = None
+    notifications_enabled: bool = True
 
 
 class HouseholdSettingsUpdate(BaseModel):
     model_config = ConfigDict(extra='ignore')
     member1_name: Optional[str] = None
     member2_name: Optional[str] = None
+    member1_email: Optional[str] = None
+    member2_email: Optional[str] = None
+    notifications_enabled: Optional[bool] = None
 
 
 # ── Saved Views ───────────────────────────────────────────────────────────────

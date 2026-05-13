@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -18,6 +18,7 @@ from ..schemas.tickets import (
     ReorderRequest,
 )
 from .. import crud
+from ..utils.email import send_ticket_notification
 
 router = APIRouter(tags=["tickets"])
 
@@ -130,10 +131,51 @@ def list_tickets(
 @router.post("/tickets", response_model=TicketOut, status_code=status.HTTP_201_CREATED)
 def create_ticket(
     data: TicketCreate,
+    background_tasks: BackgroundTasks,
     actor: str = Query("me"),
     db: Session = Depends(get_db),
 ):
     ticket = crud.tickets.create_ticket(db, data, actor=actor)
+
+    # ── Email notification ─────────────────────────────────────────────────────
+    if data.assignee in ("me", "partner", "shared"):
+        settings = crud.tickets.get_settings(db)
+        if settings.notifications_enabled:
+            space = crud.tickets.get_space(db, data.space_id)
+            space_name = space.name if space else "Unknown"
+
+            # Determine which email addresses to notify
+            to_emails: list[str] = []
+            if data.assignee in ("me", "shared") and settings.member1_email:
+                to_emails.append(settings.member1_email)
+            if data.assignee in ("partner", "shared") and settings.member2_email:
+                to_emails.append(settings.member2_email)
+
+            if to_emails:
+                due_str = str(data.due_date) if data.due_date else None
+                assignee_name = (
+                    settings.member1_name if data.assignee == "me"
+                    else settings.member2_name if data.assignee == "partner"
+                    else f"{settings.member1_name} & {settings.member2_name}"
+                )
+                created_by_name = (
+                    settings.member1_name if actor == "me" else settings.member2_name
+                )
+                background_tasks.add_task(
+                    send_ticket_notification,
+                    to_emails=to_emails,
+                    ticket_title=ticket.title,
+                    ticket_id=ticket.id,
+                    priority=ticket.priority,
+                    ticket_status=ticket.status,
+                    due_date=due_str,
+                    space_name=space_name,
+                    assignee_name=assignee_name,
+                    created_by_name=created_by_name,
+                    member1_name=settings.member1_name,
+                    member2_name=settings.member2_name,
+                )
+
     return _hydrate_ticket_out(ticket)
 
 

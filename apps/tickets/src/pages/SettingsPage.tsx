@@ -27,16 +27,28 @@ export function SettingsPage() {
 
   const [member1, setMember1] = useState('')
   const [member2, setMember2] = useState('')
+  const [email1, setEmail1] = useState('')
+  const [email2, setEmail2] = useState('')
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
 
   useEffect(() => {
     if (settings) {
       setMember1(settings.member1_name)
       setMember2(settings.member2_name)
+      setEmail1(settings.member1_email ?? '')
+      setEmail2(settings.member2_email ?? '')
+      setNotificationsEnabled(settings.notifications_enabled)
     }
   }, [settings])
 
   const updateSettingsMut = useMutation({
-    mutationFn: () => updateSettings({ member1_name: member1.trim(), member2_name: member2.trim() }),
+    mutationFn: () => updateSettings({
+      member1_name: member1.trim(),
+      member2_name: member2.trim(),
+      member1_email: email1.trim() || null,
+      member2_email: email2.trim() || null,
+      notifications_enabled: notificationsEnabled,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
       addToast('Settings saved!', 'success')
@@ -105,31 +117,79 @@ export function SettingsPage() {
         <h2 className="text-sm font-semibold text-gray-700 mb-4">Household Members</h2>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Member 1</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Member 1 Name</label>
             <input
               value={member1}
               onChange={(e) => setMember1(e.target.value)}
               placeholder="e.g. Matt"
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-300"
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0079bf]/30"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Member 2</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Member 2 Name</label>
             <input
               value={member2}
               onChange={(e) => setMember2(e.target.value)}
               placeholder="e.g. Partner"
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-300"
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0079bf]/30"
             />
           </div>
         </div>
+
+        {/* Email notification section */}
+        <div className="border-t border-gray-100 pt-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs font-semibold text-gray-700">Email Notifications</p>
+              <p className="text-xs text-gray-400 mt-0.5">Get notified by email when a ticket is assigned to you</p>
+            </div>
+            <button
+              onClick={() => setNotificationsEnabled(v => !v)}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                notificationsEnabled ? 'bg-[#0079bf]' : 'bg-gray-200'
+              }`}
+              role="switch"
+              aria-checked={notificationsEnabled}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
+                  notificationsEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className={`grid grid-cols-2 gap-4 transition-opacity ${notificationsEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{member1 || 'Member 1'} Email</label>
+              <input
+                type="email"
+                value={email1}
+                onChange={(e) => setEmail1(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0079bf]/30"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{member2 || 'Member 2'} Email</label>
+              <input
+                type="email"
+                value={email2}
+                onChange={(e) => setEmail2(e.target.value)}
+                placeholder="partner@example.com"
+                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0079bf]/30"
+              />
+            </div>
+          </div>
+        </div>
+
         <button
           onClick={() => updateSettingsMut.mutate()}
           disabled={!member1.trim() || !member2.trim() || updateSettingsMut.isPending}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-40 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0079bf] hover:bg-[#026aa7] text-white text-sm font-medium rounded-lg disabled:opacity-40 transition-colors"
         >
           {updateSettingsMut.isPending && <Spinner size="sm" />}
-          Save Names
+          Save Settings
         </button>
       </section>
 

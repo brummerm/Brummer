@@ -99,6 +99,9 @@ export interface HouseholdSettings {
   id: number
   member1_name: string
   member2_name: string
+  member1_email: string | null
+  member2_email: string | null
+  notifications_enabled: boolean
 }
 
 export interface SavedView {
@@ -288,7 +291,7 @@ export async function getSettings(): Promise<HouseholdSettings> {
 }
 
 export async function updateSettings(
-  payload: Partial<Pick<HouseholdSettings, 'member1_name' | 'member2_name'>>,
+  payload: Partial<Pick<HouseholdSettings, 'member1_name' | 'member2_name' | 'member1_email' | 'member2_email' | 'notifications_enabled'>>,
 ): Promise<HouseholdSettings> {
   const { data } = await api.patch('/settings', payload)
   return data

@@ -63,6 +63,22 @@ def migrate_meal_slot_source(db: Session):
         db.commit()
 
 
+def migrate_household_settings_emails(db: Session):
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.bind)
+    try:
+        cols = {c['name'] for c in inspector.get_columns('household_settings')}
+        if 'member1_email' not in cols:
+            db.execute(text("ALTER TABLE household_settings ADD COLUMN member1_email TEXT"))
+        if 'member2_email' not in cols:
+            db.execute(text("ALTER TABLE household_settings ADD COLUMN member2_email TEXT"))
+        if 'notifications_enabled' not in cols:
+            db.execute(text("ALTER TABLE household_settings ADD COLUMN notifications_enabled BOOLEAN DEFAULT 1"))
+        db.commit()
+    except Exception:
+        db.rollback()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = SessionLocal()
@@ -71,6 +87,7 @@ async def lifespan(app: FastAPI):
         budget_crud.migrate_data(db)
         migrate_recipe_nutrition(db)
         migrate_meal_slot_source(db)
+        migrate_household_settings_emails(db)
         tickets_crud.seed_defaults(db)
         fitness_crud.seed_warfighter_templates(db)
     except Exception:

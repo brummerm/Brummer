@@ -439,6 +439,12 @@ def update_settings(db: Session, settings: HouseholdSettings, data: HouseholdSet
         settings.member1_name = data.member1_name
     if data.member2_name is not None:
         settings.member2_name = data.member2_name
+    if data.member1_email is not None:
+        settings.member1_email = data.member1_email
+    if data.member2_email is not None:
+        settings.member2_email = data.member2_email
+    if data.notifications_enabled is not None:
+        settings.notifications_enabled = data.notifications_enabled
     db.commit()
     db.refresh(settings)
     return settings
