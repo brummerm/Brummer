@@ -6,13 +6,14 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner'
 export interface MealSlot {
   id: number
   day_of_week: number  // 0=Mon … 6=Sun
-  meal_type: MealType
+  meal_type: string    // free-form label (e.g. "Breakfast", "Snack", custom)
   slot_type: SlotType
   recipe_id?: number
   recipe?: RecipeListItem
   servings_override?: number
   notes?: string
   source_slot_id?: number
+  sort_order: number
 }
 
 export interface WeekPlan {

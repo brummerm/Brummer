@@ -38,7 +38,8 @@ export async function randomizeSlot(
   return data
 }
 
-export async function clearSlot(planId: number, slotId: number): Promise<MealSlot> {
-  const { data } = await client.delete(`/meal-plans/${planId}/slots/${slotId}`)
-  return data
-}
+export const deleteSlot = (planId: number, slotId: number) =>
+  client.delete(`/meal-plans/${planId}/slots/${slotId}`)
+
+export const addSlot = (planId: number, data: { day_of_week: number; label: string }) =>
+  client.post<MealSlot>(`/meal-plans/${planId}/slots`, data).then(r => r.data)

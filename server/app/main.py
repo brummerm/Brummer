@@ -91,6 +91,48 @@ def migrate_household_settings_emails(db: Session):
         db.rollback()
 
 
+def migrate_meal_slots_flexible(db: Session):
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.bind)
+    try:
+        cols = {c['name'] for c in inspector.get_columns('meal_slots')}
+        if 'sort_order' in cols:
+            return  # already migrated
+        # Recreate table without UniqueConstraint, with sort_order
+        db.execute(text("""
+            CREATE TABLE meal_slots_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                week_plan_id INTEGER NOT NULL REFERENCES week_plans(id) ON DELETE CASCADE,
+                day_of_week INTEGER NOT NULL,
+                meal_type TEXT NOT NULL,
+                slot_type TEXT NOT NULL DEFAULT 'empty',
+                recipe_id INTEGER REFERENCES recipes(id) ON DELETE SET NULL,
+                servings_override INTEGER,
+                notes TEXT,
+                source_slot_id INTEGER,
+                sort_order INTEGER NOT NULL DEFAULT 0
+            )
+        """))
+        db.execute(text("""
+            INSERT INTO meal_slots_new
+                (id, week_plan_id, day_of_week, meal_type, slot_type, recipe_id,
+                 servings_override, notes, source_slot_id, sort_order)
+            SELECT id, week_plan_id, day_of_week, meal_type, slot_type, recipe_id,
+                   servings_override, notes, source_slot_id,
+                   CASE meal_type WHEN 'breakfast' THEN 0 WHEN 'lunch' THEN 1
+                                  WHEN 'dinner' THEN 2 ELSE 3 END
+            FROM meal_slots
+        """))
+        db.execute(text("DROP TABLE meal_slots"))
+        db.execute(text("ALTER TABLE meal_slots_new RENAME TO meal_slots"))
+        db.execute(text("CREATE INDEX IF NOT EXISTS idx_meal_slots_week_plan_id ON meal_slots (week_plan_id)"))
+        db.execute(text("CREATE INDEX IF NOT EXISTS idx_meal_slots_recipe_id ON meal_slots (recipe_id)"))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = SessionLocal()
@@ -101,6 +143,7 @@ async def lifespan(app: FastAPI):
         migrate_meal_slot_source(db)
         migrate_itinerary_notes(db)
         migrate_household_settings_emails(db)
+        migrate_meal_slots_flexible(db)
         tickets_crud.seed_defaults(db)
         fitness_crud.seed_warfighter_templates(db)
     except Exception:

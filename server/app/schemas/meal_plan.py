@@ -13,6 +13,11 @@ class MealSlotUpdate(BaseModel):
     source_slot_id: Optional[int] = None
 
 
+class MealSlotCreate(BaseModel):
+    day_of_week: int
+    label: str = "Meal"
+
+
 class MealSlotResponse(BaseModel):
     id: int
     day_of_week: int
@@ -23,6 +28,7 @@ class MealSlotResponse(BaseModel):
     servings_override: Optional[int] = None
     notes: Optional[str] = None
     source_slot_id: Optional[int] = None
+    sort_order: int = 0
 
     model_config = {"from_attributes": True}
 

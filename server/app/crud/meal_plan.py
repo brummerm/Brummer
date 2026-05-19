@@ -3,34 +3,58 @@ import random
 from datetime import date
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
-from ..models.meal_plan import WeekPlan, MealSlot, MEAL_TYPES
+from ..models.meal_plan import WeekPlan, MealSlot
 from ..models.recipe import Recipe
 from ..schemas.meal_plan import MealSlotUpdate, WeekPlanCreate
 
 
 def get_or_create_week(db: Session, week_start: date) -> WeekPlan:
-    """Get or create a week plan + all 21 empty slots for the given Monday date."""
     plan = db.query(WeekPlan).filter(WeekPlan.week_start == week_start).first()
     if plan:
         return plan
-
     plan = WeekPlan(week_start=week_start)
     db.add(plan)
-    db.flush()
-
-    for day in range(7):
-        for meal_type in MEAL_TYPES:
-            slot = MealSlot(
-                week_plan_id=plan.id,
-                day_of_week=day,
-                meal_type=meal_type,
-                slot_type="empty",
-            )
-            db.add(slot)
-
     db.commit()
     db.refresh(plan)
     return plan
+
+
+def add_slot(db: Session, week_plan_id: int, day_of_week: int, label: str = "Meal") -> MealSlot:
+    from sqlalchemy import func as sqlfunc
+    # Get next sort_order for this day
+    max_order = db.query(sqlfunc.max(MealSlot.sort_order)).filter(
+        MealSlot.week_plan_id == week_plan_id,
+        MealSlot.day_of_week == day_of_week,
+    ).scalar()
+    next_order = (max_order + 1) if max_order is not None else 0
+
+    # Ensure unique meal_type label within this day (constraint still exists in old DBs)
+    final_label = label
+    counter = 2
+    while db.query(MealSlot).filter(
+        MealSlot.week_plan_id == week_plan_id,
+        MealSlot.day_of_week == day_of_week,
+        MealSlot.meal_type == final_label,
+    ).first():
+        final_label = f"{label} {counter}"
+        counter += 1
+
+    slot = MealSlot(
+        week_plan_id=week_plan_id,
+        day_of_week=day_of_week,
+        meal_type=final_label,
+        slot_type="empty",
+        sort_order=next_order,
+    )
+    db.add(slot)
+    db.commit()
+    db.refresh(slot)
+    return db.query(MealSlot).options(joinedload(MealSlot.recipe)).filter(MealSlot.id == slot.id).first()
+
+
+def delete_slot(db: Session, slot: MealSlot) -> None:
+    db.delete(slot)
+    db.commit()
 
 
 def get_week_plan(db: Session, plan_id: int) -> WeekPlan | None:

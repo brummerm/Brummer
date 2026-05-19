@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { updateSlot, randomizeSlot, clearSlot } from '../../api/mealPlan'
+import { updateSlot, randomizeSlot, deleteSlot } from '../../api/mealPlan'
 import type { MealSlot, SlotType } from '../../types/mealPlan'
 import type { RecipeListItem } from '../../types/recipe'
-import { imageUrl, SLOT_TYPE_LABELS, SLOT_TYPE_COLORS } from '../../utils/formatters'
+import { imageUrl } from '../../utils/formatters'
 import RecipePicker from './RecipePicker'
 import clsx from 'clsx'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const MEAL_LABELS: Record<string, string> = { breakfast: 'Bkfst', lunch: 'Lunch', dinner: 'Dinner' }
 
 interface Props {
   slot: MealSlot
@@ -17,8 +16,6 @@ interface Props {
   weekKey: string
   allSlots?: MealSlot[]
 }
-
-const SLOT_TYPES: SlotType[] = ['recipe', 'leftovers', 'going_out', 'empty']
 
 export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -40,149 +37,125 @@ export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: P
     onSuccess: invalidate,
   })
 
-  const clearMutation = useMutation({
-    mutationFn: () => clearSlot(planId, slot.id),
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteSlot(planId, slot.id),
     onSuccess: invalidate,
   })
 
-  function handleTypeChange(type: SlotType) {
-    if (type === 'recipe') {
-      setPickerOpen(true)
-    } else {
-      updateMutation.mutate({ slot_type: type })
-    }
-  }
-
   function handlePickRecipe(recipe: RecipeListItem) {
     updateMutation.mutate({ slot_type: 'recipe', recipe_id: recipe.id })
+    setPickerOpen(false)
   }
 
-  function handleSourceSlotChange(sourceSlotId: number | undefined) {
-    updateMutation.mutate({ slot_type: 'leftovers', source_slot_id: sourceSlotId })
-  }
-
-  const isLoading = updateMutation.isPending || randomMutation.isPending || clearMutation.isPending
+  const isLoading = updateMutation.isPending || randomMutation.isPending || deleteMutation.isPending
   const img = imageUrl(slot.recipe?.image_filename)
-
-  // Nutrition display — only shown when recipe has calories
   const calories = (slot.recipe as any)?.calories as number | undefined
 
-  // All recipe slots other than this one, for leftover source picker
-  const recipeSlots = allSlots.filter(
-    (s) => s.id !== slot.id && s.slot_type === 'recipe' && s.recipe
-  )
+  const recipeSlots = allSlots.filter(s => s.id !== slot.id && s.slot_type === 'recipe' && s.recipe)
 
   return (
     <>
       <div className={clsx(
-        'rounded-lg border p-2 min-h-[90px] flex flex-col gap-1 text-xs transition-all',
-        slot.slot_type === 'empty' ? 'border-dashed border-gray-200 bg-white' : 'border-gray-200 bg-white shadow-sm',
+        'rounded-lg border bg-white p-2 flex flex-col gap-1.5 text-xs transition-all group',
+        slot.slot_type === 'empty' ? 'border-dashed border-gray-200' : 'border-[#dfe1e6] shadow-sm',
         isLoading && 'opacity-60'
       )}>
-        {/* Slot type selector */}
-        <div className="flex items-center justify-between">
-          <select
-            value={slot.slot_type}
-            onChange={(e) => handleTypeChange(e.target.value as SlotType)}
-            className={clsx(
-              'text-xs rounded px-1 py-0.5 border-0 font-medium cursor-pointer focus:ring-1 focus:ring-brand-400',
-              SLOT_TYPE_COLORS[slot.slot_type]
-            )}
-          >
-            {SLOT_TYPES.map((t) => (
-              <option key={t} value={t}>{SLOT_TYPE_LABELS[t]}</option>
-            ))}
-          </select>
-          <div className="flex gap-1">
-            <button
-              title="Random recipe"
-              onClick={() => randomMutation.mutate()}
-              className="text-gray-300 hover:text-brand-400 transition-colors text-base leading-none"
-              disabled={isLoading}
-            >
-              🎲
-            </button>
-            {slot.slot_type !== 'empty' && (
-              <button
-                title="Clear"
-                onClick={() => clearMutation.mutate()}
-                className="text-gray-300 hover:text-red-400 transition-colors"
-                disabled={isLoading}
-              >
-                ✕
-              </button>
-            )}
+        {/* Header row: label + actions */}
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide truncate">
+            {slot.meal_type}
+          </span>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button title="Random recipe" onClick={() => randomMutation.mutate()}
+              className="text-gray-300 hover:text-[#0079bf] transition-colors text-sm leading-none"
+              disabled={isLoading}>🎲</button>
+            <button title="Delete" onClick={() => deleteMutation.mutate()}
+              className="text-gray-300 hover:text-red-400 transition-colors leading-none"
+              disabled={isLoading}>✕</button>
           </div>
         </div>
 
         {/* Content */}
         {slot.slot_type === 'recipe' && slot.recipe && (
-          <div className="flex flex-col gap-0.5 mt-0.5">
-            <Link to={`/recipes/${slot.recipe.id}`} className="flex items-center gap-1.5 group">
-              <div className="w-8 h-8 rounded overflow-hidden shrink-0 bg-gray-100">
+          <div className="flex flex-col gap-0.5">
+            <Link to={`/recipes/${slot.recipe.id}`} className="flex items-center gap-1.5 group/link">
+              <div className="w-8 h-8 rounded overflow-hidden shrink-0 bg-gray-100 flex-shrink-0">
                 {img
                   ? <img src={img} alt="" className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-gray-300">🍽</div>
-                }
+                  : <div className="w-full h-full flex items-center justify-center text-gray-300">🍽</div>}
               </div>
-              <span className="text-gray-700 group-hover:text-brand-600 line-clamp-2 leading-tight font-medium">
+              <span className="text-gray-700 group-hover/link:text-[#0079bf] line-clamp-2 leading-tight font-medium text-xs">
                 {slot.recipe.title}
               </span>
             </Link>
-            {calories != null && (
-              <p className="text-gray-400 text-[10px] leading-tight pl-0.5">{calories} cal</p>
-            )}
+            {calories != null && <p className="text-gray-400 text-[10px]">{calories} cal</p>}
+            <button onClick={() => setPickerOpen(true)}
+              className="text-[10px] text-gray-400 hover:text-[#0079bf] text-left mt-0.5">
+              change →
+            </button>
           </div>
         )}
 
-        {slot.slot_type === 'recipe' && !slot.recipe && (
-          <button
-            onClick={() => setPickerOpen(true)}
-            className="text-brand-400 hover:text-brand-600 text-xs mt-1"
-          >
-            + Pick a recipe
-          </button>
+        {(slot.slot_type === 'empty' || (slot.slot_type === 'recipe' && !slot.recipe)) && (
+          <div className="flex gap-1.5 mt-0.5">
+            <button onClick={() => setPickerOpen(true)}
+              className="text-[#0079bf] hover:text-[#026aaa] text-xs font-medium">
+              + Pick recipe
+            </button>
+            <span className="text-gray-200">|</span>
+            <button onClick={() => randomMutation.mutate()}
+              className="text-gray-400 hover:text-[#0079bf] text-xs">
+              🎲 Random
+            </button>
+          </div>
         )}
 
         {slot.slot_type === 'leftovers' && (
-          <div className="mt-1 flex flex-col gap-1">
-            <p className="text-blue-400">🥡 Leftovers</p>
+          <div className="mt-0.5">
+            <p className="text-blue-500 font-medium">🥡 Leftovers</p>
             {recipeSlots.length > 0 && (
               <select
                 value={slot.source_slot_id ?? ''}
-                onChange={(e) => handleSourceSlotChange(e.target.value ? Number(e.target.value) : undefined)}
-                className="text-xs rounded border border-gray-200 px-1 py-0.5 text-gray-600 bg-white focus:ring-1 focus:ring-brand-400 w-full"
+                onChange={(e) => updateMutation.mutate({
+                  slot_type: 'leftovers',
+                  source_slot_id: e.target.value ? Number(e.target.value) : undefined
+                })}
+                className="text-xs rounded border border-gray-200 px-1 py-0.5 text-gray-600 bg-white w-full mt-1"
               >
                 <option value="">From which meal?</option>
-                {recipeSlots.map((s) => (
+                {recipeSlots.map(s => (
                   <option key={s.id} value={s.id}>
-                    {DAY_NAMES[s.day_of_week]} {MEAL_LABELS[s.meal_type]}: {s.recipe?.title}
+                    {DAY_NAMES[s.day_of_week]}: {s.recipe?.title}
                   </option>
                 ))}
               </select>
             )}
+            <button onClick={() => updateMutation.mutate({ slot_type: 'recipe' })}
+              className="text-[10px] text-gray-400 hover:text-gray-600 mt-1">change type</button>
           </div>
         )}
 
         {slot.slot_type === 'going_out' && (
-          <p className="text-purple-400 mt-1">🍜 Going Out</p>
+          <div className="mt-0.5">
+            <p className="text-purple-500 font-medium">🍜 Going Out</p>
+            <button onClick={() => updateMutation.mutate({ slot_type: 'empty' })}
+              className="text-[10px] text-gray-400 hover:text-gray-600 mt-1">change type</button>
+          </div>
         )}
 
+        {/* Slot type switcher — small links at bottom for empty slots */}
         {slot.slot_type === 'empty' && (
-          <button
-            onClick={() => setPickerOpen(true)}
-            className="text-gray-300 hover:text-gray-400 text-xs mt-1"
-          >
-            + Add meal
-          </button>
+          <div className="flex gap-1.5 text-[10px] text-gray-300">
+            <button onClick={() => updateMutation.mutate({ slot_type: 'leftovers' })}
+              className="hover:text-blue-400">leftovers</button>
+            <span>·</span>
+            <button onClick={() => updateMutation.mutate({ slot_type: 'going_out' })}
+              className="hover:text-purple-400">going out</button>
+          </div>
         )}
       </div>
 
-      <RecipePicker
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        onSelect={handlePickRecipe}
-      />
+      <RecipePicker open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={handlePickRecipe} />
     </>
   )
 }

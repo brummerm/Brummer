@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, Text, Date, DateTime, ForeignKey,
-    UniqueConstraint, Index, func,
+    Index, func,
 )
 from sqlalchemy.orm import relationship
 from ..database import Base
@@ -19,7 +19,7 @@ class WeekPlan(Base):
         "MealSlot",
         back_populates="week_plan",
         cascade="all, delete-orphan",
-        order_by="MealSlot.day_of_week, MealSlot.meal_type",
+        order_by="MealSlot.day_of_week, MealSlot.sort_order, MealSlot.id",
     )
 
     __table_args__ = (
@@ -47,13 +47,13 @@ class MealSlot(Base):
     servings_override = Column(Integer)
     notes = Column(Text)
     source_slot_id = Column(Integer, ForeignKey("meal_slots.id"), nullable=True)
+    sort_order = Column(Integer, nullable=False, default=0)
 
     week_plan = relationship("WeekPlan", back_populates="slots")
     recipe = relationship("Recipe", back_populates="meal_slots")
     source_slot = relationship("MealSlot", foreign_keys=[source_slot_id], remote_side="MealSlot.id")
 
     __table_args__ = (
-        UniqueConstraint("week_plan_id", "day_of_week", "meal_type"),
         Index("idx_meal_slots_week_plan_id", "week_plan_id"),
         Index("idx_meal_slots_recipe_id", "recipe_id"),
     )

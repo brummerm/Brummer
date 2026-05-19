@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..crud import meal_plan as mp_crud
 from ..schemas.meal_plan import (
-    WeekPlanCreate, WeekPlanResponse, WeekPlanListItem, MealSlotUpdate, MealSlotResponse,
+    WeekPlanCreate, WeekPlanResponse, WeekPlanListItem,
+    MealSlotUpdate, MealSlotCreate, MealSlotResponse,
 )
 
 router = APIRouter(tags=["meal-plans"])
@@ -44,6 +45,14 @@ def delete_week_plan(plan_id: int, db: Session = Depends(get_db)):
     mp_crud.delete_week_plan(db, plan)
 
 
+@router.post("/{plan_id}/slots", response_model=MealSlotResponse, status_code=201)
+def add_slot(plan_id: int, data: MealSlotCreate, db: Session = Depends(get_db)):
+    plan = mp_crud.get_week_plan(db, plan_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Week plan not found")
+    return mp_crud.add_slot(db, plan_id, data.day_of_week, data.label)
+
+
 @router.put("/{plan_id}/slots/{slot_id}", response_model=MealSlotResponse)
 def update_slot(
     plan_id: int,
@@ -75,13 +84,9 @@ def randomize_slot(
     return mp_crud.get_slot(db, updated.id)
 
 
-@router.delete("/{plan_id}/slots/{slot_id}", response_model=MealSlotResponse)
-def clear_slot(
-    plan_id: int,
-    slot_id: int,
-    db: Session = Depends(get_db),
-):
+@router.delete("/{plan_id}/slots/{slot_id}", status_code=204)
+def delete_slot(plan_id: int, slot_id: int, db: Session = Depends(get_db)):
     slot = mp_crud.get_slot(db, slot_id)
     if not slot or slot.week_plan_id != plan_id:
         raise HTTPException(status_code=404, detail="Slot not found")
-    return mp_crud.clear_slot(db, slot)
+    mp_crud.delete_slot(db, slot)
