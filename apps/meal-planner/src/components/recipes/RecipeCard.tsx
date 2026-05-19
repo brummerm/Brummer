@@ -14,7 +14,7 @@ export default function RecipeCard({ recipe, onDelete, compact, onSelect }: Reci
   const img = imageUrl(recipe.image_filename)
 
   const inner = (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow ${onSelect ? 'cursor-pointer' : ''}`}
+    <div className={`bg-white rounded-xl border border-[#dfe1e6] overflow-hidden hover:border-[#0079bf]/30 hover:shadow-md transition-all ${onSelect ? 'cursor-pointer' : ''}`}
       onClick={onSelect ? () => onSelect(recipe) : undefined}
     >
       <div className="h-40 bg-gray-100 overflow-hidden">
@@ -25,7 +25,7 @@ export default function RecipeCard({ recipe, onDelete, compact, onSelect }: Reci
         )}
       </div>
       <div className="p-3">
-        <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 mb-2">
+        <h3 className="font-semibold text-[#172b4d] text-sm leading-tight line-clamp-2 mb-2">
           {recipe.title}
         </h3>
         <div className="flex flex-wrap gap-1 mb-2">
@@ -45,14 +45,14 @@ export default function RecipeCard({ recipe, onDelete, compact, onSelect }: Reci
         <div className="px-3 pb-3 flex gap-2">
           <Link
             to={`/recipes/${recipe.id}`}
-            className="text-xs text-brand-600 hover:underline font-medium"
+            className="text-xs text-[#0079bf] hover:underline font-medium"
             onClick={(e) => e.stopPropagation()}
           >
             View
           </Link>
           <Link
             to={`/recipes/${recipe.id}/edit`}
-            className="text-xs text-gray-500 hover:underline"
+            className="text-xs text-[#5e6c84] hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
             Edit

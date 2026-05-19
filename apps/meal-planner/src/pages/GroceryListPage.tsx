@@ -29,8 +29,6 @@ const STORE_SECTIONS = ['Produce', 'Meat & Seafood', 'Dairy & Eggs', 'Bakery', '
 interface CustomItem {
   id: string
   name: string
-  quantity: string
-  unit: string
 }
 
 function GroceryItem({ item, checked, onToggle, planId }: {
@@ -109,11 +107,6 @@ function CustomGroceryItem({ item, checked, onToggle, onRemove }: {
       </div>
       <div className="flex-1 cursor-pointer" onClick={onToggle}>
         <span className="font-medium text-gray-800">{item.name}</span>
-        {(item.quantity || item.unit) && (
-          <span className="text-gray-500 text-sm ml-2">
-            {[item.quantity, item.unit].filter(Boolean).join(' ')}
-          </span>
-        )}
       </div>
       <button
         onClick={onRemove}
@@ -131,17 +124,13 @@ function AddItemForm({ onAdd, onCancel }: {
   onCancel: () => void
 }) {
   const [name, setName] = useState('')
-  const [quantity, setQuantity] = useState('')
-  const [unit, setUnit] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const trimmed = name.trim()
     if (!trimmed) return
-    onAdd({ name: trimmed, quantity: quantity.trim(), unit: unit.trim() })
+    onAdd({ name: trimmed })
     setName('')
-    setQuantity('')
-    setUnit('')
   }
 
   return (
@@ -153,20 +142,6 @@ function AddItemForm({ onAdd, onCancel }: {
         onChange={(e) => setName(e.target.value)}
         className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-brand-400 focus:border-transparent outline-none flex-1 min-w-32"
         autoFocus
-      />
-      <input
-        type="text"
-        placeholder="Qty"
-        value={quantity}
-        onChange={(e) => setQuantity(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-brand-400 focus:border-transparent outline-none w-16"
-      />
-      <input
-        type="text"
-        placeholder="Unit"
-        value={unit}
-        onChange={(e) => setUnit(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-brand-400 focus:border-transparent outline-none w-20"
       />
       <Button type="submit" size="sm" disabled={!name.trim()}>Add</Button>
       <button type="button" onClick={onCancel} className="text-sm text-gray-400 hover:text-gray-600">
@@ -200,7 +175,7 @@ export default function GroceryListPage() {
   const isLoading = planLoading || groceryLoading
 
   function addCustomItem(item: Omit<CustomItem, 'id'>) {
-    setCustomItems((prev) => [...prev, { ...item, id: Date.now().toString(36) + Math.random().toString(36).slice(2) }])
+    setCustomItems((prev) => [...prev, { name: item.name, id: Date.now().toString(36) + Math.random().toString(36).slice(2) }])
     setShowAddForm(false)
   }
 
@@ -237,8 +212,7 @@ export default function GroceryListPage() {
       lines.push('🛒 Additional Items')
       lines.push('-'.repeat(20))
       for (const item of customItems) {
-        const qty = [item.quantity, item.unit].filter(Boolean).join(' ')
-        lines.push(`- ${item.name}${qty ? `  (${qty})` : ''}`)
+        lines.push(`- ${item.name}`)
       }
       lines.push('')
     }

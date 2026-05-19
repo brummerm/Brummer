@@ -1,92 +1,54 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-
-const DASHBOARD_URL = '/dashboard/'
+import { NavLink } from 'react-router-dom'
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-      isActive
-        ? 'bg-brand-500 text-white'
-        : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
-    }`
-
-  const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `block px-4 py-3 rounded-md text-sm font-medium transition-colors ${
-      isActive
-        ? 'bg-brand-500 text-white'
-        : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
-    }`
-
+  const [open, setOpen] = useState(false)
   const navLinks = [
-    { to: '/recipes', label: 'Recipes' },
     { to: '/planner', label: 'Planner' },
-    { to: '/grocery', label: 'Grocery List' },
+    { to: '/recipes', label: 'Recipes' },
+    { to: '/grocery', label: 'Grocery' },
     { to: '/settings', label: 'Settings' },
   ]
-
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 no-print">
+    <nav className="bg-[#0079bf] sticky top-0 z-40 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <a
-              href={DASHBOARD_URL}
-              className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <span>←</span>
-              <span>Dashboard</span>
-            </a>
-            <Link to="/recipes" className="flex items-center gap-2">
-              <span className="text-2xl">🍽️</span>
-              <span className="font-display text-xl font-bold text-brand-600">
-                Meal Planner
-              </span>
-            </Link>
-          </div>
-
-          {/* Desktop nav links */}
+        <div className="flex items-center h-14 gap-4">
+          <a href="/dashboard/" className="text-white/70 hover:text-white text-sm flex items-center gap-1 transition-colors flex-shrink-0">
+            <span>←</span><span className="hidden sm:inline">Dashboard</span>
+          </a>
+          <span className="text-white/30 hidden sm:inline">|</span>
+          <span className="text-white font-bold text-base flex items-center gap-2 flex-shrink-0">
+            <span>🍽️</span><span>Meal Planner</span>
+          </span>
+          <div className="flex-1" />
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map(({ to, label }) => (
-              <NavLink key={to} to={to} className={linkClass}>
-                {label}
-              </NavLink>
+              <NavLink key={to} to={to}
+                className={({ isActive }) =>
+                  `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    isActive ? 'bg-white/25 text-white' : 'text-white/80 hover:bg-white/15 hover:text-white'
+                  }`
+                }
+              >{label}</NavLink>
             ))}
           </div>
-
-          {/* Hamburger button */}
-          <button
-            className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label="Toggle menu"
-          >
-            <div className={`w-5 h-0.5 bg-current transition-all ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-            <div className={`w-5 h-0.5 bg-current my-1 transition-all ${menuOpen ? 'opacity-0' : ''}`} />
-            <div className={`w-5 h-0.5 bg-current transition-all ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          <button className="md:hidden p-2 text-white/80 hover:text-white" onClick={() => setOpen(o => !o)} aria-label="Menu">
+            <div className={`w-5 h-0.5 bg-current transition-all ${open ? 'rotate-45 translate-y-1.5' : ''}`} />
+            <div className={`w-5 h-0.5 bg-current my-1 transition-all ${open ? 'opacity-0' : ''}`} />
+            <div className={`w-5 h-0.5 bg-current transition-all ${open ? '-rotate-45 -translate-y-1.5' : ''}`} />
           </button>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white px-4 py-2 flex flex-col gap-1">
-          <a
-            href={DASHBOARD_URL}
-            className="block px-4 py-2 text-xs text-gray-500 hover:text-brand-600"
-          >
-            ← Dashboard
-          </a>
+      {open && (
+        <div className="md:hidden bg-[#026aaa] border-t border-white/10 px-4 py-2 space-y-1">
           {navLinks.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={mobileLinkClass}
-              onClick={() => setMenuOpen(false)}
-            >
-              {label}
-            </NavLink>
+            <NavLink key={to} to={to} onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white/25 text-white' : 'text-white/80 hover:bg-white/15 hover:text-white'
+                }`
+              }
+            >{label}</NavLink>
           ))}
         </div>
       )}

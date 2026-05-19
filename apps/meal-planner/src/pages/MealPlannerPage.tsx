@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { getWeekPlanByDate } from '../api/mealPlan'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getWeekPlanByDate, randomizeSlot } from '../api/mealPlan'
 import { useUIStore } from '../store/uiStore'
 import {
+  currentWeekStart, nextWeekStart, prevWeekStart,
   currentMonthStr, nextMonthStr, prevMonthStr, monthLabel,
   monthStrFromWeekStart, weekLabel, dayDate, DAY_SHORT,
 } from '../utils/weekDates'
@@ -20,6 +21,8 @@ const MEAL_LABELS = { breakfast: '☀️ Breakfast', lunch: '🌤️ Lunch', din
 
 export default function MealPlannerPage() {
   const { weekStart: weekParam } = useParams<{ weekStart?: string }>()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const {
     activeWeek, setActiveWeek,
     activeMonth, setActiveMonth,
@@ -45,6 +48,15 @@ export default function MealPlannerPage() {
     enabled: plannerView === 'week',
   })
 
+  const randomizeAllMut = useMutation({
+    mutationFn: async () => {
+      if (!plan) return
+      const empty = plan.slots.filter(s => s.slot_type === 'empty')
+      await Promise.all(empty.map(s => randomizeSlot(plan.id, s.id)))
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['meal-plan', weekStart] }),
+  })
+
   function goMonth(dir: 'prev' | 'next') {
     setActiveMonth(dir === 'next' ? nextMonthStr(activeMonth) : prevMonthStr(activeMonth))
   }
@@ -67,16 +79,32 @@ export default function MealPlannerPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-display font-bold">Meal Planner</h1>
           {plannerView === 'week' && (
-            <p className="text-sm text-gray-500 mt-0.5">{weekLabel(weekStart)}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <button onClick={() => { const w = prevWeekStart(weekStart); setActiveWeek(w); navigate(`/planner/${w}`) }}
+                className="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors text-lg leading-none">‹</button>
+              <p className="text-sm text-gray-500">{weekLabel(weekStart)}</p>
+              <button onClick={() => { const w = nextWeekStart(weekStart); setActiveWeek(w); navigate(`/planner/${w}`) }}
+                className="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors text-lg leading-none">›</button>
+              <button onClick={() => { const w = currentWeekStart(); setActiveWeek(w); navigate(`/planner/${w}`) }}
+                className="text-xs text-[#0079bf] hover:underline font-medium px-1">Today</button>
+            </div>
           )}
         </div>
-
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Grocery list shortcut (week view only) */}
           {plan && plannerView === 'week' && (
-            <Link to={`/grocery/${plan.id}`}>
-              <Button variant="secondary" size="sm">🛒 Grocery List</Button>
-            </Link>
+            <>
+              <Link to={`/grocery/${plan.id}`}>
+                <Button variant="secondary" size="sm">🛒 Grocery List</Button>
+              </Link>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => randomizeAllMut.mutate()}
+                disabled={randomizeAllMut.isPending}
+              >
+                🎲 Randomize Week
+              </Button>
+            </>
           )}
 
           {/* View toggle */}
@@ -88,7 +116,7 @@ export default function MealPlannerPage() {
                 className={clsx(
                   'px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors capitalize',
                   plannerView === v
-                    ? 'bg-white shadow text-brand-600'
+                    ? 'bg-white shadow text-[#0079bf]'
                     : 'text-gray-500 hover:text-gray-700'
                 )}
               >

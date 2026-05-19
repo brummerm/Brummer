@@ -185,6 +185,14 @@ def _normalize_ingredient_name(name: str) -> str:
 
     # Filter every prep/descriptor word out of the name regardless of position
     words = name.lower().split()
+    # Strip leading quantity tokens embedded in ingredient names (e.g. "2 cups rice" → "rice")
+    while words and (
+        re.match(r'^[\d/½¼¾⅓⅔⅛⅜⅝⅞.,]+$', words[0])
+        or words[0] in UNIT_NORM
+    ):
+        words = words[1:]
+    if not words:
+        words = name.lower().split()  # safety fallback
     core = [w for w in words if w not in PREP_WORDS]
 
     # If filtering wiped everything (e.g. a name that was only prep words),

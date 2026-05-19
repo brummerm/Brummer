@@ -23,7 +23,7 @@ export default function App() {
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route element={<AppShell />}>
-            <Route path="/" element={<Navigate to="/recipes" replace />} />
+            <Route path="/" element={<Navigate to="/planner" replace />} />
             <Route path="/recipes" element={<RecipeIndexPage />} />
             <Route path="/recipes/new" element={<RecipeFormPage />} />
             <Route path="/recipes/:id" element={<RecipeDetailPage />} />
