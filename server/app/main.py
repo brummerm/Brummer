@@ -288,7 +288,7 @@ app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="logi
 def serve_dashboard():
     return FileResponse(
         str(DASHBOARD_DIR / "index.html"),
-        headers={"Cache-Control": "no-cache, must-revalidate"},
+        headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
     )
 
 app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
@@ -319,11 +319,10 @@ def serve_spa(app_name: str, full_path: str = ""):
         headers = {"Cache-Control": "public, max-age=31536000, immutable"}
         return FileResponse(target, headers=headers)
     # index.html must never be cached — it references the current asset hashes.
-    # no-cache means "revalidate before using"; the browser still makes a request
-    # but avoids re-downloading if the ETag matches (304 Not Modified).
+    # no-store prevents any storage; Pragma: no-cache covers HTTP/1.0 proxies.
     return FileResponse(
         base / "index.html",
-        headers={"Cache-Control": "no-cache, must-revalidate"},
+        headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
     )
 
 
