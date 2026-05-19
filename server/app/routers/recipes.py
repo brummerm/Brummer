@@ -96,6 +96,13 @@ def patch_recipe(
     return recipe_crud.update(db, recipe, data)
 
 
+@router.delete("", status_code=200)
+def delete_all_recipes(db: Session = Depends(get_db)):
+    """Delete every recipe. Returns count of deleted recipes."""
+    count = recipe_crud.delete_all(db)
+    return {"deleted": count}
+
+
 @router.delete("/{recipe_id}", status_code=204)
 def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     recipe = recipe_crud.get_by_id(db, recipe_id)

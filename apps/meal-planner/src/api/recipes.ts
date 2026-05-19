@@ -25,6 +25,11 @@ export async function deleteRecipe(id: number): Promise<void> {
   await client.delete(`/recipes/${id}`)
 }
 
+export async function deleteAllRecipes(): Promise<{ deleted: number }> {
+  const { data } = await client.delete('/recipes')
+  return data
+}
+
 export async function getRandomRecipe(category?: string): Promise<RecipeListItem> {
   const { data } = await client.get('/recipes/random', { params: category ? { category } : {} })
   return data

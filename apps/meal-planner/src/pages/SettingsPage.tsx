@@ -1,16 +1,40 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSeedStatus, runSeed, importFromUrl } from '../api/seed'
+import { deleteAllRecipes } from '../api/recipes'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 
 export default function SettingsPage() {
+  const queryClient = useQueryClient()
   const [seedResult, setSeedResult] = useState<{ imported: number; skipped: number; errors: string[] } | null>(null)
   const [seeding, setSeeding] = useState(false)
 
   const [urlInput, setUrlInput] = useState('')
   const [urlLoading, setUrlLoading] = useState(false)
   const [urlResult, setUrlResult] = useState<{ status: string; title?: string; message?: string } | null>(null)
+
+  const [clearConfirm, setClearConfirm] = useState(false)
+  const [clearing, setClearing] = useState(false)
+  const [clearResult, setClearResult] = useState<{ deleted: number } | null>(null)
+
+  async function handleClearAll() {
+    if (!clearConfirm) { setClearConfirm(true); return }
+    setClearing(true)
+    setClearResult(null)
+    try {
+      const result = await deleteAllRecipes()
+      setClearResult(result)
+      setClearConfirm(false)
+      queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      queryClient.invalidateQueries({ queryKey: ['seed-status'] })
+      refetch()
+    } catch {
+      setClearResult({ deleted: -1 })
+    } finally {
+      setClearing(false)
+    }
+  }
 
   const { data: status, isLoading, refetch } = useQuery({
     queryKey: ['seed-status'],
@@ -126,6 +150,49 @@ export default function SettingsPage() {
               {urlResult.status === 'skipped' && <p>{urlResult.message}</p>}
               {urlResult.status === 'error' && <p>{urlResult.message}</p>}
             </div>
+          )}
+        </div>
+
+        {/* Danger zone */}
+        <div className="border-t border-red-100 pt-4 space-y-3">
+          <h3 className="font-medium text-red-600">Danger Zone</h3>
+          <p className="text-sm text-gray-500">
+            Permanently delete all recipes. This cannot be undone. Any meal plan slots using these recipes will be cleared.
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleClearAll}
+              disabled={clearing}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                clearConfirm
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+              }`}
+            >
+              {clearing
+                ? <span className="flex items-center gap-2"><Spinner size="sm" /> Deleting…</span>
+                : clearConfirm
+                ? 'Yes, delete everything'
+                : 'Clear all recipes'}
+            </button>
+            {clearConfirm && !clearing && (
+              <button
+                onClick={() => setClearConfirm(false)}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+          {clearResult && clearResult.deleted >= 0 && (
+            <p className="text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2">
+              ✓ Deleted <strong>{clearResult.deleted}</strong> recipe{clearResult.deleted !== 1 ? 's' : ''}.
+            </p>
+          )}
+          {clearResult && clearResult.deleted === -1 && (
+            <p className="text-sm text-red-700 bg-red-50 rounded-lg px-3 py-2">
+              Something went wrong. Please try again.
+            </p>
           )}
         </div>
       </div>

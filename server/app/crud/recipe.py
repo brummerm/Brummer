@@ -130,6 +130,19 @@ def delete(db: Session, recipe: Recipe):
     db.commit()
 
 
+def delete_all(db: Session) -> int:
+    """Delete every recipe (and cascade to recipe_ingredients). Returns count deleted."""
+    from ..services.image_handler import delete_image
+    recipes = db.query(Recipe).all()
+    count = len(recipes)
+    for r in recipes:
+        if r.image_filename:
+            delete_image(r.image_filename)
+        db.delete(r)
+    db.commit()
+    return count
+
+
 def get_categories(db: Session) -> list[str]:
     rows = (
         db.query(distinct(Recipe.category))
