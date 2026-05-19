@@ -396,6 +396,15 @@ def delete_saved_view(view_id: int, db: Session = Depends(get_db)):
     crud.tickets.delete_saved_view(db, view)
 
 
+# ── Maintenance ───────────────────────────────────────────────────────────────
+
+@router.post("/maintenance/archive-completed")
+def run_archive_completed(db: Session = Depends(get_db)):
+    """Move done tickets older than 30 days into the Completed Tickets archive space."""
+    moved = crud.tickets.archive_old_completed_tickets(db)
+    return {"moved": moved}
+
+
 # ── Internal helper ───────────────────────────────────────────────────────────
 
 def _hydrate_ticket_out(ticket: Ticket) -> TicketOut:

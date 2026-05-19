@@ -47,6 +47,7 @@ class SpaceOut(BaseModel):
     icon: str
     color: str
     is_archived: bool
+    is_completed_archive: bool = False
     sort_order: int
     ticket_count: int = 0
     created_at: datetime

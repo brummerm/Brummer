@@ -13,6 +13,7 @@ class Space(Base):
     icon: Mapped[str] = mapped_column(String, default="📋")
     color: Mapped[str] = mapped_column(String, default="#6366f1")
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_completed_archive: Mapped[bool] = mapped_column(Boolean, default=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

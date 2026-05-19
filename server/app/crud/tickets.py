@@ -469,6 +469,68 @@ def delete_saved_view(db: Session, view: SavedView) -> None:
     db.commit()
 
 
+# ── Completed-ticket archive ──────────────────────────────────────────────────
+
+ARCHIVE_SPACE_NAME = "Completed Tickets"
+ARCHIVE_SPACE_ICON = "✅"
+ARCHIVE_SPACE_COLOR = "#64748b"
+COMPLETED_ARCHIVE_DAYS = 30
+
+
+def get_or_create_completed_archive(db: Session) -> Space:
+    """Return the special completed-archive space, creating it if needed."""
+    space = db.query(Space).filter(Space.is_completed_archive == True).first()
+    if space:
+        return space
+    space = Space(
+        name=ARCHIVE_SPACE_NAME,
+        description=f"Completed tickets auto-moved here after {COMPLETED_ARCHIVE_DAYS} days.",
+        icon=ARCHIVE_SPACE_ICON,
+        color=ARCHIVE_SPACE_COLOR,
+        is_completed_archive=True,
+        sort_order=9999,
+    )
+    db.add(space)
+    db.commit()
+    db.refresh(space)
+    return space
+
+
+def archive_old_completed_tickets(db: Session) -> int:
+    """Move done tickets older than COMPLETED_ARCHIVE_DAYS to the archive space.
+
+    Returns the number of tickets moved.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=COMPLETED_ARCHIVE_DAYS)
+    archive = get_or_create_completed_archive(db)
+
+    stale = (
+        db.query(Ticket)
+        .filter(
+            Ticket.status == "done",
+            Ticket.completed_at <= cutoff,
+            Ticket.space_id != archive.id,
+        )
+        .all()
+    )
+
+    for ticket in stale:
+        old_space_id = ticket.space_id
+        ticket.space_id = archive.id
+        ticket.updated_at = datetime.now(timezone.utc)
+        _log(
+            db, ticket.id, "system", "archived",
+            field="space_id",
+            old_value=str(old_space_id),
+            new_value=str(archive.id),
+        )
+
+    if stale:
+        db.commit()
+
+    return len(stale)
+
+
 # ── Seed Defaults ─────────────────────────────────────────────────────────────
 
 def seed_defaults(db: Session) -> None:

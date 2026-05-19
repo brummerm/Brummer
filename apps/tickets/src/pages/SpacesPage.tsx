@@ -271,8 +271,9 @@ export function SpacesPage() {
 
   if (isLoading) return <PageSpinner />
 
-  const active = spaces.filter((s) => !s.is_archived)
-  const archived = spaces.filter((s) => s.is_archived)
+  const active = spaces.filter((s) => !s.is_archived && !s.is_completed_archive)
+  const archived = spaces.filter((s) => s.is_archived && !s.is_completed_archive)
+  const completedArchive = spaces.find((s) => s.is_completed_archive)
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -343,6 +344,40 @@ export function SpacesPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Completed-ticket archive */}
+      {completedArchive && (
+        <div className="border-t border-gray-100 pt-6 mt-2">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Auto-Archive</h2>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
+            <span
+              className="text-2xl w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: completedArchive.color + '20' }}
+            >
+              {completedArchive.icon}
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-gray-900">{completedArchive.name}</h3>
+                <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Auto-managed</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Completed tickets are automatically moved here 30 days after being marked done.
+                Tickets here are read-only and kept for reference.
+              </p>
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-sm text-gray-500">{completedArchive.ticket_count} tickets</span>
+                <Link
+                  to={`/apps/tickets/list/${completedArchive.id}`}
+                  className="text-xs text-brand-600 hover:text-brand-700 px-2 py-1 rounded hover:bg-brand-50 transition-colors"
+                >
+                  View all →
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

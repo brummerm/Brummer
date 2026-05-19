@@ -35,6 +35,7 @@ export interface Space {
   icon: string
   color: string
   is_archived: boolean
+  is_completed_archive: boolean
   sort_order: number
   ticket_count: number
   created_at: string

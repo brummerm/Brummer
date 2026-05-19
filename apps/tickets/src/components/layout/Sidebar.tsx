@@ -74,7 +74,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <div className="pt-3">
             <p className="px-3 mb-1 text-xs font-semibold text-[#5e6c84] uppercase tracking-wider">Boards</p>
             <div className="space-y-0.5">
-              {spaces.map((space) => {
+              {spaces.filter(s => !s.is_completed_archive).map((space) => {
                 const isBoardActive = location.pathname === `/apps/tickets/board/${space.id}`
                 const isListActive = location.pathname === `/apps/tickets/list/${space.id}`
                 const isActive = isBoardActive || isListActive
@@ -123,6 +123,31 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 )
               })}
             </div>
+
+            {/* Completed archive space — shown separately */}
+            {spaces.filter(s => s.is_completed_archive).map((space) => {
+              const isActive =
+                location.pathname === `/apps/tickets/board/${space.id}` ||
+                location.pathname === `/apps/tickets/list/${space.id}`
+              return (
+                <div key={space.id} className="mt-3 pt-3 border-t border-[#dfe1e6]">
+                  <p className="px-3 mb-1 text-xs font-semibold text-[#5e6c84] uppercase tracking-wider">Archive</p>
+                  <NavLink
+                    to={`/apps/tickets/list/${space.id}`}
+                    onClick={onClose}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-[#e4f0f6] text-[#0079bf]'
+                        : 'text-[#44546f] hover:bg-[#f4f5f7] hover:text-[#172b4d]'
+                    }`}
+                  >
+                    <SpaceIcon space={space} />
+                    <span className="flex-1 truncate">{space.name}</span>
+                    <span className="text-xs text-gray-400">{space.ticket_count}</span>
+                  </NavLink>
+                </div>
+              )
+            })}
           </div>
         )}
       </nav>

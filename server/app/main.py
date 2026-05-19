@@ -14,6 +14,7 @@ Layout served at runtime:
   /api/travel/...            -> travel planner API (auth required)
   /images/...                -> recipe images (auth required)
 """
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Depends, Request
@@ -91,6 +92,18 @@ def migrate_household_settings_emails(db: Session):
         db.rollback()
 
 
+def migrate_completed_archive_column(db: Session):
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.bind)
+    try:
+        cols = {c['name'] for c in inspector.get_columns('ticket_spaces')}
+        if 'is_completed_archive' not in cols:
+            db.execute(text("ALTER TABLE ticket_spaces ADD COLUMN is_completed_archive BOOLEAN DEFAULT 0"))
+            db.commit()
+    except Exception:
+        db.rollback()
+
+
 def migrate_meal_slots_flexible(db: Session):
     from sqlalchemy import text, inspect
     inspector = inspect(db.bind)
@@ -133,6 +146,22 @@ def migrate_meal_slots_flexible(db: Session):
         raise
 
 
+async def _periodic_archive_job(interval_seconds: int = 43200):
+    """Run archive_old_completed_tickets every `interval_seconds` (default 12 h)."""
+    while True:
+        await asyncio.sleep(interval_seconds)
+        db = SessionLocal()
+        try:
+            moved = tickets_crud.archive_old_completed_tickets(db)
+            if moved:
+                print(f"[archive-job] Moved {moved} completed ticket(s) to archive.")
+        except Exception as exc:
+            print(f"[archive-job] Error: {exc}")
+            db.rollback()
+        finally:
+            db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = SessionLocal()
@@ -144,14 +173,27 @@ async def lifespan(app: FastAPI):
         migrate_itinerary_notes(db)
         migrate_household_settings_emails(db)
         migrate_meal_slots_flexible(db)
+        migrate_completed_archive_column(db)
         tickets_crud.seed_defaults(db)
+        # Ensure the completed-archive space exists
+        tickets_crud.get_or_create_completed_archive(db)
+        # Run archival immediately on startup, then schedule periodic runs
+        tickets_crud.archive_old_completed_tickets(db)
         fitness_crud.seed_warfighter_templates(db)
     except Exception:
         db.rollback()
         raise
     finally:
         db.close()
+
+    # Start background archival task (every 12 hours)
+    archive_task = asyncio.create_task(_periodic_archive_job())
     yield
+    archive_task.cancel()
+    try:
+        await archive_task
+    except asyncio.CancelledError:
+        pass
 
 # Make sure image directories exist
 Path(settings.IMAGES_DIR, "custom").mkdir(parents=True, exist_ok=True)
