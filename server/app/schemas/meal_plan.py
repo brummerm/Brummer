@@ -6,7 +6,7 @@ from .recipe import RecipeListItem
 
 
 class MealSlotUpdate(BaseModel):
-    slot_type: Literal["recipe", "leftovers", "going_out", "empty"]
+    slot_type: Literal["recipe", "leftovers", "going_out", "empty", "custom"]
     recipe_id: Optional[int] = None
     servings_override: Optional[int] = None
     notes: Optional[str] = None

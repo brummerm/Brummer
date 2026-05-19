@@ -28,7 +28,7 @@ class WeekPlan(Base):
 
 
 MEAL_TYPES = ["breakfast", "lunch", "dinner"]
-SLOT_TYPES = ["recipe", "leftovers", "going_out", "empty"]
+SLOT_TYPES = ["recipe", "leftovers", "going_out", "empty", "custom"]
 
 
 class MealSlot(Base):

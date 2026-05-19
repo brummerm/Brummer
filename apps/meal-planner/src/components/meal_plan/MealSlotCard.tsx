@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { updateSlot, randomizeSlot, deleteSlot } from '../../api/mealPlan'
@@ -19,7 +19,15 @@ interface Props {
 
 export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [customDraft, setCustomDraft] = useState('')
+  const [editingCustom, setEditingCustom] = useState(false)
+  const customInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
+
+  // Focus input when entering custom edit mode
+  useEffect(() => {
+    if (editingCustom) customInputRef.current?.focus()
+  }, [editingCustom])
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: ['meal-plan', weekKey] })
@@ -27,7 +35,7 @@ export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: P
   }
 
   const updateMutation = useMutation({
-    mutationFn: (data: { slot_type: SlotType; recipe_id?: number; source_slot_id?: number }) =>
+    mutationFn: (data: { slot_type: SlotType; recipe_id?: number; source_slot_id?: number; notes?: string }) =>
       updateSlot(planId, slot.id, data),
     onSuccess: invalidate,
   })
@@ -45,6 +53,17 @@ export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: P
   function handlePickRecipe(recipe: RecipeListItem) {
     updateMutation.mutate({ slot_type: 'recipe', recipe_id: recipe.id })
     setPickerOpen(false)
+  }
+
+  function handleStartCustom() {
+    setCustomDraft(slot.notes ?? '')
+    setEditingCustom(true)
+    updateMutation.mutate({ slot_type: 'custom', notes: slot.notes ?? '' })
+  }
+
+  function handleSaveCustom() {
+    updateMutation.mutate({ slot_type: 'custom', notes: customDraft })
+    setEditingCustom(false)
   }
 
   const isLoading = updateMutation.isPending || randomMutation.isPending || deleteMutation.isPending
@@ -97,7 +116,7 @@ export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: P
         )}
 
         {(slot.slot_type === 'empty' || (slot.slot_type === 'recipe' && !slot.recipe)) && (
-          <div className="flex gap-1.5 mt-0.5">
+          <div className="flex gap-1.5 mt-0.5 flex-wrap">
             <button onClick={() => setPickerOpen(true)}
               className="text-[#0079bf] hover:text-[#026aaa] text-xs font-medium">
               + Pick recipe
@@ -106,6 +125,11 @@ export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: P
             <button onClick={() => randomMutation.mutate()}
               className="text-gray-400 hover:text-[#0079bf] text-xs">
               🎲 Random
+            </button>
+            <span className="text-gray-200">|</span>
+            <button onClick={handleStartCustom}
+              className="text-gray-400 hover:text-[#0079bf] text-xs">
+              ✏️ Write in
             </button>
           </div>
         )}
@@ -140,6 +164,55 @@ export default function MealSlotCard({ slot, planId, weekKey, allSlots = [] }: P
             <p className="text-purple-500 font-medium">🍜 Going Out</p>
             <button onClick={() => updateMutation.mutate({ slot_type: 'empty' })}
               className="text-[10px] text-gray-400 hover:text-gray-600 mt-1">change type</button>
+          </div>
+        )}
+
+        {slot.slot_type === 'custom' && (
+          <div className="mt-0.5 space-y-1">
+            {editingCustom ? (
+              <div className="flex flex-col gap-1">
+                <input
+                  ref={customInputRef}
+                  type="text"
+                  value={customDraft}
+                  onChange={e => setCustomDraft(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleSaveCustom()
+                    if (e.key === 'Escape') setEditingCustom(false)
+                  }}
+                  placeholder="e.g. Grandma's pasta, leftovers stir fry…"
+                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#0079bf] w-full"
+                />
+                <div className="flex gap-1.5">
+                  <button onClick={handleSaveCustom}
+                    className="text-[10px] text-[#0079bf] hover:text-[#026aaa] font-medium">
+                    save
+                  </button>
+                  <button onClick={() => setEditingCustom(false)}
+                    className="text-[10px] text-gray-400 hover:text-gray-600">
+                    cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-gray-700 font-medium leading-tight break-words">
+                  {slot.notes ? `✏️ ${slot.notes}` : <span className="text-gray-400 italic">No meal written yet</span>}
+                </p>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => { setCustomDraft(slot.notes ?? ''); setEditingCustom(true) }}
+                    className="text-[10px] text-gray-400 hover:text-[#0079bf]">
+                    edit
+                  </button>
+                  <span className="text-gray-200 text-[10px]">·</span>
+                  <button onClick={() => updateMutation.mutate({ slot_type: 'empty' })}
+                    className="text-[10px] text-gray-400 hover:text-gray-600">
+                    change type
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 

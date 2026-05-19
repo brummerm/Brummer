@@ -1,6 +1,6 @@
 import type { RecipeListItem } from './recipe'
 
-export type SlotType = 'recipe' | 'leftovers' | 'going_out' | 'empty'
+export type SlotType = 'recipe' | 'leftovers' | 'going_out' | 'empty' | 'custom'
 export type MealType = 'breakfast' | 'lunch' | 'dinner'
 
 export interface MealSlot {
