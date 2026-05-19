@@ -51,6 +51,19 @@ mkdir -p server/static/dashboard server/static/login
 cp -r dashboard/dashboard/. server/static/dashboard/
 cp -r dashboard/login/.     server/static/login/
 
+echo "==> Stamping app links with build version (busts browser cache on every deploy)"
+# Use git commit hash if available, otherwise fall back to unix timestamp.
+BUILD_VERSION=$(git rev-parse --short HEAD 2>/dev/null || date +%s)
+python3 - <<PYEOF
+import re, pathlib
+path = pathlib.Path("server/static/dashboard/apps.js")
+text = path.read_text()
+# Replace existing ?v=... params or bare trailing slash hrefs
+text = re.sub(r'(href: "/apps/[^/"]+/)(?:\?v=[^"]*)?(")', rf'\1?v=${BUILD_VERSION}\2', text)
+path.write_text(text)
+print(f"  Stamped hrefs with v=${BUILD_VERSION}")
+PYEOF
+
 echo "==> Ensuring persistent dirs exist"
 mkdir -p /var/data/images/custom /var/data/images/seeded || true
 

@@ -288,7 +288,7 @@ app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="logi
 def serve_dashboard():
     return FileResponse(
         str(DASHBOARD_DIR / "index.html"),
-        headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
+        headers={"Cache-Control": "no-cache, must-revalidate"},
     )
 
 app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
@@ -322,7 +322,7 @@ def serve_spa(app_name: str, full_path: str = ""):
     # no-store prevents any storage; Pragma: no-cache covers HTTP/1.0 proxies.
     return FileResponse(
         base / "index.html",
-        headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
+        headers={"Cache-Control": "no-cache, must-revalidate"},
     )
 
 
