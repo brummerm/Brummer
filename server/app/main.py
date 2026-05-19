@@ -282,7 +282,15 @@ def serve_image(path: str, request: Request, _: str = Depends(get_current_user))
 # The login page is the only static area that's public.
 app.mount("/login", StaticFiles(directory=str(LOGIN_DIR), html=True), name="login")
 
-# Dashboard uses StaticFiles (no deep client-side routes).
+# Dashboard — serve index.html with no-cache, static assets with long TTL.
+@app.get("/dashboard/")
+@app.get("/dashboard")
+def serve_dashboard():
+    return FileResponse(
+        str(DASHBOARD_DIR / "index.html"),
+        headers={"Cache-Control": "no-cache, must-revalidate"},
+    )
+
 app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
 
 
@@ -306,8 +314,17 @@ def serve_spa(app_name: str, full_path: str = ""):
     base = static_dir.resolve()
     target = (base / full_path).resolve()
     if str(target).startswith(str(base)) and target.is_file():
-        return FileResponse(target)
-    return FileResponse(base / "index.html")
+        # Hashed assets (e.g. index-Dj3BY-gT.js) can be cached forever —
+        # their filename changes with every build so stale content is impossible.
+        headers = {"Cache-Control": "public, max-age=31536000, immutable"}
+        return FileResponse(target, headers=headers)
+    # index.html must never be cached — it references the current asset hashes.
+    # no-cache means "revalidate before using"; the browser still makes a request
+    # but avoids re-downloading if the ETag matches (304 Not Modified).
+    return FileResponse(
+        base / "index.html",
+        headers={"Cache-Control": "no-cache, must-revalidate"},
+    )
 
 
 @app.get("/")
