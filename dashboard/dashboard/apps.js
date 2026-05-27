@@ -41,4 +41,12 @@ window.APPS = [
     href: "/apps/tickets/",
     enabled: true,
   },
+  {
+    id: "osrs",
+    title: "OSRS Max Tracker",
+    desc: "Track The BrummJob's journey to the max cape.",
+    icon: "⚔️",
+    href: "/apps/osrs/",
+    enabled: true,
+  },
 ];

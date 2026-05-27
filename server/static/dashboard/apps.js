@@ -20,7 +20,7 @@ window.APPS = [
   {
     id: "fitness",
     title: "Fitness Tracker",
-    desc: "12-week training plan with workout logging.",
+    desc: "Training plan with workout logging.",
     icon: "🏋️",
     href: "/apps/fitness/",
     enabled: true,
@@ -35,9 +35,9 @@ window.APPS = [
   },
   {
     id: "tickets",
-    title: "Tickets",
-    desc: "Track tasks and issues with a Kanban board.",
-    icon: "🎫",
+    title: "Home Tickets",
+    desc: "Household task tracker — Kanban board, recurring tasks, and two-person collaboration.",
+    icon: "🏠",
     href: "/apps/tickets/",
     enabled: true,
   },
