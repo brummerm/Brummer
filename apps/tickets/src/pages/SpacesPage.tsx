@@ -364,7 +364,7 @@ export function SpacesPage() {
                 <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Auto-managed</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Completed tickets are automatically moved here 30 days after being marked done.
+                Completed tickets are automatically moved here 10 days after being marked done.
                 Tickets here are read-only and kept for reference.
               </p>
               <div className="flex items-center gap-3 mt-3">

@@ -175,8 +175,12 @@ async def lifespan(app: FastAPI):
         migrate_meal_slots_flexible(db)
         migrate_completed_archive_column(db)
         tickets_crud.seed_defaults(db)
-        # Ensure the completed-archive space exists
-        tickets_crud.get_or_create_completed_archive(db)
+        # Ensure the completed-archive space exists and description is current
+        archive_space = tickets_crud.get_or_create_completed_archive(db)
+        expected_desc = f"Completed tickets auto-moved here after {tickets_crud.COMPLETED_ARCHIVE_DAYS} days."
+        if archive_space.description != expected_desc:
+            archive_space.description = expected_desc
+            db.commit()
         # Run archival immediately on startup, then schedule periodic runs
         tickets_crud.archive_old_completed_tickets(db)
         fitness_crud.seed_warfighter_templates(db)

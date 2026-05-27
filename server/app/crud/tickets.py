@@ -474,7 +474,7 @@ def delete_saved_view(db: Session, view: SavedView) -> None:
 ARCHIVE_SPACE_NAME = "Completed Tickets"
 ARCHIVE_SPACE_ICON = "✅"
 ARCHIVE_SPACE_COLOR = "#64748b"
-COMPLETED_ARCHIVE_DAYS = 30
+COMPLETED_ARCHIVE_DAYS = 10
 
 
 def get_or_create_completed_archive(db: Session) -> Space:
