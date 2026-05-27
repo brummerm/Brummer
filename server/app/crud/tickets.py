@@ -496,6 +496,75 @@ def get_or_create_completed_archive(db: Session) -> Space:
     return space
 
 
+def notify_overdue_tickets(db: Session) -> int:
+    """Send overdue-ticket email digest. Notifies each assignee once per overdue ticket.
+
+    A ticket qualifies if:
+      - due_date < today
+      - status not in ('done', 'backlog')
+      - overdue_notified_at is NULL  (never notified)
+      - notifications_enabled is True in HouseholdSettings
+
+    Returns the number of tickets that triggered notifications.
+    """
+    from ..utils.email import send_overdue_notification
+
+    settings = db.query(HouseholdSettings).first()
+    if not settings or not settings.notifications_enabled:
+        return 0
+
+    today = date.today()
+    now = datetime.now(timezone.utc)
+
+    overdue = (
+        db.query(Ticket)
+        .options(joinedload(Ticket.space))
+        .filter(
+            Ticket.due_date < today,
+            ~Ticket.status.in_(["done", "backlog"]),
+            Ticket.overdue_notified_at.is_(None),
+            Ticket.assignee.isnot(None),
+        )
+        .all()
+    )
+
+    if not overdue:
+        return 0
+
+    # Build per-assignee ticket lists
+    me_tickets: list[dict] = []
+    partner_tickets: list[dict] = []
+
+    for ticket in overdue:
+        days_overdue = (today - ticket.due_date).days
+        entry = {
+            "title": ticket.title,
+            "space_name": ticket.space.name if ticket.space else "Unknown",
+            "priority": ticket.priority,
+            "due_date": ticket.due_date.strftime("%b %-d, %Y"),
+            "days_overdue": days_overdue,
+        }
+        if ticket.assignee in ("me", "shared"):
+            me_tickets.append(entry)
+        if ticket.assignee in ("partner", "shared"):
+            partner_tickets.append(entry)
+
+    # Send to member1
+    if me_tickets and settings.member1_email:
+        send_overdue_notification(to_emails=[settings.member1_email], tickets=me_tickets)
+
+    # Send to member2
+    if partner_tickets and settings.member2_email:
+        send_overdue_notification(to_emails=[settings.member2_email], tickets=partner_tickets)
+
+    # Mark all notified tickets so we don't send again
+    for ticket in overdue:
+        ticket.overdue_notified_at = now
+    db.commit()
+
+    return len(overdue)
+
+
 def archive_old_completed_tickets(db: Session) -> int:
     """Move done tickets older than COMPLETED_ARCHIVE_DAYS to the archive space.
 

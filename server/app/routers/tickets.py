@@ -400,9 +400,26 @@ def delete_saved_view(view_id: int, db: Session = Depends(get_db)):
 
 @router.post("/maintenance/archive-completed")
 def run_archive_completed(db: Session = Depends(get_db)):
-    """Move done tickets older than 30 days into the Completed Tickets archive space."""
+    """Move done tickets older than 10 days into the Completed Tickets archive space."""
     moved = crud.tickets.archive_old_completed_tickets(db)
     return {"moved": moved}
+
+
+@router.post("/maintenance/notify-overdue")
+def run_notify_overdue(db: Session = Depends(get_db)):
+    """Send overdue-ticket email digest for any newly overdue tickets."""
+    notified = crud.tickets.notify_overdue_tickets(db)
+    return {"notified": notified}
+
+
+@router.post("/maintenance/reset-overdue-notifications")
+def reset_overdue_notifications(db: Session = Depends(get_db)):
+    """Clear overdue_notified_at on all tickets — useful for testing."""
+    db.query(Ticket).filter(
+        Ticket.completed_at.is_(None)
+    ).update({"overdue_notified_at": None})
+    db.commit()
+    return {"reset": True}
 
 
 # ── Internal helper ───────────────────────────────────────────────────────────

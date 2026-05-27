@@ -139,6 +139,147 @@ def _build_html(
 </html>"""
 
 
+def _build_overdue_html(
+    tickets: list[dict],
+    base_url: str,
+) -> str:
+    rows = ""
+    for t in tickets:
+        priority_color = _PRIORITY_COLOR.get(t["priority"], "#94a3b8")
+        priority_label = _PRIORITY_LABEL.get(t["priority"], t["priority"].capitalize())
+        days_overdue = t.get("days_overdue", 0)
+        overdue_label = f"{days_overdue} day{'s' if days_overdue != 1 else ''} overdue"
+        rows += f"""
+        <tr>
+          <td style="padding:12px 0;border-bottom:1px solid #f1f2f4;vertical-align:top;">
+            <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#172b4d;">{t['title']}</p>
+            <p style="margin:0;font-size:12px;color:#5e6c84;">{t['space_name']}</p>
+          </td>
+          <td style="padding:12px 8px;border-bottom:1px solid #f1f2f4;vertical-align:top;white-space:nowrap;">
+            <span style="display:inline-block;padding:2px 8px;border-radius:999px;
+                         background:{priority_color}20;color:{priority_color};
+                         font-size:11px;font-weight:600;">{priority_label}</span>
+          </td>
+          <td style="padding:12px 0;border-bottom:1px solid #f1f2f4;vertical-align:top;white-space:nowrap;text-align:right;">
+            <span style="font-size:12px;color:#ef4444;font-weight:600;">⚠ {overdue_label}</span>
+            <p style="margin:2px 0 0;font-size:11px;color:#97a0af;">Due {t['due_date']}</p>
+          </td>
+        </tr>"""
+
+    link_section = ""
+    if base_url:
+        link_section = f"""
+        <p style="margin:24px 0 0;">
+          <a href="{base_url}/apps/tickets/"
+             style="display:inline-block;padding:10px 20px;background:#0079bf;color:#fff;
+                    text-decoration:none;border-radius:6px;font-size:14px;font-weight:600;">
+            Open Home Tickets →
+          </a>
+        </p>"""
+
+    count = len(tickets)
+    subtitle = f"{count} ticket{'s are' if count != 1 else ' is'} past their due date"
+
+    return f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f7;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#fff;border-radius:12px;overflow:hidden;
+                    box-shadow:0 1px 4px rgba(0,0,0,.12);max-width:560px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#ef4444;padding:20px 28px;">
+            <p style="margin:0;color:#fff;font-size:18px;font-weight:700;">⚠️ Overdue Tickets</p>
+            <p style="margin:4px 0 0;color:rgba(255,255,255,.85);font-size:13px;">{subtitle}</p>
+          </td>
+        </tr>
+        <tr><td style="height:3px;background:#dc2626;"></td></tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:24px 28px 8px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              {rows}
+            </table>
+            {link_section}
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 28px;border-top:1px solid #dfe1e6;margin-top:24px;">
+            <p style="margin:0;font-size:11px;color:#97a0af;">
+              You're receiving this because overdue notifications are enabled in Home Tickets settings.
+              Notifications are sent once per overdue ticket.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+
+def send_overdue_notification(
+    *,
+    to_emails: list[str],
+    tickets: list[dict],
+) -> None:
+    """Send a digest email listing all overdue tickets. No-op if SMTP not configured."""
+    smtp_host = os.getenv("SMTP_HOST", "").strip()
+    smtp_user = os.getenv("SMTP_USER", "").strip()
+    smtp_password = os.getenv("SMTP_PASSWORD", "").strip()
+
+    if not smtp_host or not smtp_user or not smtp_password:
+        logger.debug("Email notifications not configured — skipping overdue alert.")
+        return
+
+    if not tickets:
+        return
+
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    from_addr = os.getenv("SMTP_FROM", smtp_user).strip()
+    base_url = os.getenv("APP_BASE_URL", "").rstrip("/")
+
+    count = len(tickets)
+    subject = f"⚠️ {count} overdue ticket{'s' if count != 1 else ''} need your attention"
+    html_body = _build_overdue_html(tickets=tickets, base_url=base_url)
+
+    lines = [f"You have {count} overdue ticket{'s' if count != 1 else ''}:\n"]
+    for t in tickets:
+        lines.append(f"  • {t['title']} ({t['space_name']}) — {t['days_overdue']}d overdue, due {t['due_date']}")
+    if base_url:
+        lines.append(f"\nOpen app: {base_url}/apps/tickets/")
+    text_body = "\n".join(lines)
+
+    for to_email in to_emails:
+        if not to_email or "@" not in to_email:
+            continue
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"Home Tickets <{from_addr}>"
+            msg["To"] = to_email
+            msg.attach(MIMEText(text_body, "plain"))
+            msg.attach(MIMEText(html_body, "html"))
+
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(smtp_user, smtp_password)
+                server.sendmail(from_addr, to_email, msg.as_string())
+
+            logger.info(f"Overdue notification sent to {to_email} ({count} ticket(s))")
+        except Exception as exc:
+            logger.error(f"Failed to send overdue notification to {to_email}: {exc}")
+
+
 def send_ticket_notification(
     *,
     to_emails: list[str],

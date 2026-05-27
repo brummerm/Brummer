@@ -92,6 +92,18 @@ def migrate_household_settings_emails(db: Session):
         db.rollback()
 
 
+def migrate_overdue_notified_at(db: Session):
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.bind)
+    try:
+        cols = {c['name'] for c in inspector.get_columns('tickets')}
+        if 'overdue_notified_at' not in cols:
+            db.execute(text("ALTER TABLE tickets ADD COLUMN overdue_notified_at DATETIME"))
+            db.commit()
+    except Exception:
+        db.rollback()
+
+
 def migrate_completed_archive_column(db: Session):
     from sqlalchemy import text, inspect
     inspector = inspect(db.bind)
@@ -146,17 +158,20 @@ def migrate_meal_slots_flexible(db: Session):
         raise
 
 
-async def _periodic_archive_job(interval_seconds: int = 43200):
-    """Run archive_old_completed_tickets every `interval_seconds` (default 12 h)."""
+async def _periodic_tickets_job(interval_seconds: int = 86400):
+    """Run daily ticket maintenance: archive completed + notify overdue."""
     while True:
         await asyncio.sleep(interval_seconds)
         db = SessionLocal()
         try:
             moved = tickets_crud.archive_old_completed_tickets(db)
             if moved:
-                print(f"[archive-job] Moved {moved} completed ticket(s) to archive.")
+                print(f"[tickets-job] Archived {moved} completed ticket(s).")
+            notified = tickets_crud.notify_overdue_tickets(db)
+            if notified:
+                print(f"[tickets-job] Sent overdue notifications for {notified} ticket(s).")
         except Exception as exc:
-            print(f"[archive-job] Error: {exc}")
+            print(f"[tickets-job] Error: {exc}")
             db.rollback()
         finally:
             db.close()
@@ -173,6 +188,7 @@ async def lifespan(app: FastAPI):
         migrate_itinerary_notes(db)
         migrate_household_settings_emails(db)
         migrate_meal_slots_flexible(db)
+        migrate_overdue_notified_at(db)
         migrate_completed_archive_column(db)
         tickets_crud.seed_defaults(db)
         # Ensure the completed-archive space exists and description is current
@@ -181,8 +197,9 @@ async def lifespan(app: FastAPI):
         if archive_space.description != expected_desc:
             archive_space.description = expected_desc
             db.commit()
-        # Run archival immediately on startup, then schedule periodic runs
+        # Run archival + overdue check immediately on startup
         tickets_crud.archive_old_completed_tickets(db)
+        tickets_crud.notify_overdue_tickets(db)
         fitness_crud.seed_warfighter_templates(db)
     except Exception:
         db.rollback()
@@ -190,12 +207,12 @@ async def lifespan(app: FastAPI):
     finally:
         db.close()
 
-    # Start background archival task (every 12 hours)
-    archive_task = asyncio.create_task(_periodic_archive_job())
+    # Daily background job: archive completed + send overdue notifications
+    tickets_task = asyncio.create_task(_periodic_tickets_job())
     yield
-    archive_task.cancel()
+    tickets_task.cancel()
     try:
-        await archive_task
+        await tickets_task
     except asyncio.CancelledError:
         pass
 

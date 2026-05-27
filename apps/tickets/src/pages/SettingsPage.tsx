@@ -141,7 +141,7 @@ export function SettingsPage() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-xs font-semibold text-gray-700">Email Notifications</p>
-              <p className="text-xs text-gray-400 mt-0.5">Get notified by email when a ticket is assigned to you</p>
+              <p className="text-xs text-gray-400 mt-0.5">Get notified when a ticket is assigned to you or becomes overdue</p>
             </div>
             <button
               onClick={() => setNotificationsEnabled(v => !v)}

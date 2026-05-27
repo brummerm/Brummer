@@ -40,6 +40,7 @@ class Ticket(Base):
     reporter: Mapped[str] = mapped_column(String, default="me")
     due_date: Mapped[Optional[object]] = mapped_column(Date, nullable=True)
     completed_at: Mapped[Optional[object]] = mapped_column(DateTime(timezone=True), nullable=True)
+    overdue_notified_at: Mapped[Optional[object]] = mapped_column(DateTime(timezone=True), nullable=True)
     recurrence_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     effort: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # small/medium/large
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
