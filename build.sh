@@ -63,12 +63,21 @@ echo "==> Stamping app links with build version (busts browser cache on every de
 BUILD_VERSION=$(git rev-parse --short HEAD 2>/dev/null || date +%s)
 python3 - <<PYEOF
 import re, pathlib
-path = pathlib.Path("server/static/dashboard/apps.js")
-text = path.read_text()
-# Replace existing ?v=... params or bare trailing slash hrefs
+
+# 1. Stamp app hrefs inside apps.js
+apps_path = pathlib.Path("server/static/dashboard/apps.js")
+text = apps_path.read_text()
 text = re.sub(r'(href: "/apps/[^/"]+/)(?:\?v=[^"]*)?(")', rf'\1?v=${BUILD_VERSION}\2', text)
-path.write_text(text)
+apps_path.write_text(text)
 print(f"  Stamped hrefs with v=${BUILD_VERSION}")
+
+# 2. Stamp the apps.js script tag in index.html so the file itself is re-fetched
+html_path = pathlib.Path("server/static/dashboard/index.html")
+html = html_path.read_text()
+html = re.sub(r'<script src="apps\.js(?:\?v=[^"]*)?">',
+              f'<script src="apps.js?v=${BUILD_VERSION}">', html)
+html_path.write_text(html)
+print(f"  Stamped apps.js script tag with v=${BUILD_VERSION}")
 PYEOF
 
 echo "==> Ensuring persistent dirs exist"
