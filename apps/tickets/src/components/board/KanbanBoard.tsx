@@ -61,8 +61,6 @@ function SortableTicketCard({ ticket, onOpenTicket, member1Name, member2Name }: 
       style={style}
       {...attributes}
       {...listeners}
-      // Prevent the click from firing while dragging
-      onPointerDown={(e) => e.stopPropagation()}
     >
       <TicketCard
         ticket={ticket}
