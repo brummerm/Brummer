@@ -46,6 +46,13 @@ echo "==> Building tickets app"
 npm run build
 cd ../..
 
+echo "==> Installing Node deps for OSRS tracker"
+cd apps/osrs
+npm ci
+echo "==> Building OSRS tracker"
+npm run build
+cd ../..
+
 echo "==> Copying dashboard static files"
 mkdir -p server/static/dashboard server/static/login
 cp -r dashboard/dashboard/. server/static/dashboard/

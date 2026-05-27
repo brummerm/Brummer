@@ -30,6 +30,7 @@ from .models import fitness  # noqa: F401 — registers workout tables
 from .routers import recipes, ingredients, meal_plans, grocery, images, seed, budget, fitness, travel
 from .routers import body_weight as body_weight_router
 from .routers import tickets as tickets_router
+from .routers import osrs as osrs_router
 from .crud import budget as budget_crud
 from .crud import tickets as tickets_crud
 from .crud import fitness as fitness_crud
@@ -229,7 +230,8 @@ BUDGET_DIR         = STATIC_DIR / "budget"
 FITNESS_DIR        = STATIC_DIR / "fitness"
 TRAVEL_DIR         = STATIC_DIR / "travel-planner"
 TICKETS_DIR        = STATIC_DIR / "tickets"
-for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, TICKETS_DIR):
+OSRS_DIR           = STATIC_DIR / "osrs"
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, TICKETS_DIR, OSRS_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -283,6 +285,9 @@ app.include_router(body_weight_router.router, prefix="/api", dependencies=auth_d
 # ---- Tickets API ----
 app.include_router(tickets_router.router, prefix="/api/tickets", dependencies=auth_dep, tags=["tickets"])
 
+# ---- OSRS API ----
+app.include_router(osrs_router.router, prefix="/api/osrs", dependencies=auth_dep, tags=["osrs"])
+
 
 # ---- Image static mount, with auth gate ----
 # StaticFiles can't easily depend on auth, so we wrap the path with a guard endpoint
@@ -323,6 +328,7 @@ _SPA_DIRS = {
     "fitness":       FITNESS_DIR,
     "travel-planner": TRAVEL_DIR,
     "tickets":       TICKETS_DIR,
+    "osrs":          OSRS_DIR,
 }
 
 

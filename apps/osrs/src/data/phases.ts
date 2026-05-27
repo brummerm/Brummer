@@ -1,0 +1,58 @@
+import type { PhaseData } from '../types'
+
+export const PHASES: PhaseData[] = [
+  {
+    phase: 1,
+    title: 'Quick Wins',
+    subtitle: '~1–2 months',
+    skills: ['Farming', 'Prayer', 'Cooking', 'Construction'],
+    estimatedHours: 90,
+    gpDelta: -198_000,
+    notes: 'Start daily farm runs immediately — they run in background throughout the entire max. Knock out Prayer (Libation Bowl ~57 hrs), Cooking (jugs of wine ~20 hrs), and Construction (~9 hrs on mahogany benches) for 3 quick capes. Farm runs are passive throughout all phases.',
+  },
+  {
+    phase: 2,
+    title: 'GP Engine',
+    subtitle: '~1–2 months',
+    skills: ['Thieving'],
+    estimatedHours: 44,
+    gpDelta: 150_000,
+    notes: 'Thieve Vyres in Darkmeyer for ~60 hours. This banks ~150M+ GP to fund Construction, Herblore, Prayer, and most other grinds. Sins of the Father quest + full Rogues outfit + Hard Morytania diary required.',
+  },
+  {
+    phase: 3,
+    title: 'Combat Block',
+    subtitle: '~6–8 months',
+    skills: ['Slayer', 'Attack', 'Strength', 'Defence'],
+    estimatedHours: 250,
+    gpDelta: -5_000,
+    notes: 'Slayer 82→99 is your main quest. It naturally carries Attack/Strength/Defence to ~96+. After Slayer, NMZ Dharok cleans up remaining melee XP overnight. Perilous Moons quest unlocks Sulphur Naguas (170k XP/hr) for fast top-up.',
+  },
+  {
+    phase: 4,
+    title: 'Resource Synergy',
+    subtitle: '~10–12 months',
+    skills: ['Hunter', 'Herblore', 'Mining', 'Crafting', 'Woodcutting'],
+    estimatedHours: 500,
+    gpDelta: -55_000,
+    notes: 'Run Hunter (Herbiboar) and Herblore in parallel — Herbiboar herbs directly feed Herblore potions, cutting costs by ~30%. Pair Mining amethyst with Crafting dart tips for dual XP at zero cost. Stack Woodcutting (redwoods) alongside any AFK combat sessions.',
+  },
+  {
+    phase: 5,
+    title: 'Profitable AFK',
+    subtitle: '~5–6 months',
+    skills: ['Smithing', 'Fishing'],
+    estimatedHours: 218,
+    gpDelta: 30_000,
+    notes: 'Smithing at Blast Furnace (~38 hrs) runs at near break-even. Fishing at Tempoross then Minnows (~180 hrs) generates passive income. Both are watch-TV level AFK. Farming cap should complete naturally during this phase.',
+  },
+  {
+    phase: 6,
+    title: 'The Final Grind',
+    subtitle: '~12–14 months',
+    skills: ['Runecraft', 'Agility', 'Farming'],
+    estimatedHours: 355,
+    gpDelta: 140_000,
+    notes: 'Runecraft (GotR + Bloods/Souls, ~200 hrs) and Agility (Sepulchre F4/F5, ~155 hrs) are saved for last when they have the most reward value. Farming should complete passively during this phase from daily runs. MAX CAPE at the end.',
+  },
+]
