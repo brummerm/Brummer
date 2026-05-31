@@ -1,21 +1,22 @@
 """
-Zillow scraper using Playwright.
+Zillow scraper — two-layer approach.
 
-Strategy:
-  1. Launch headless Chromium with anti-detection settings.
-  2. Load each search URL and wait for the page to settle.
-  3. Extract structured data from Zillow's embedded __NEXT_DATA__ JSON blob —
-     this is far more reliable than CSS selectors that change with every deploy.
-  4. Fall back to a second JSON blob (window.__data__ / searchPageData) if the
-     primary path is missing.
-  5. Return a list of normalised listing dicts ready for upsert.
+Layer 1 (httpx, fast):
+  Hit the Zillow search URL directly using httpx with HTTP/2 and full
+  browser-like headers. Zillow uses Next.js SSR, so __NEXT_DATA__ is
+  embedded in the raw HTML before any JS runs. No browser automation
+  fingerprint → often gets through bot detection that Playwright trips.
 
-Limitations / gotchas:
-  - Zillow actively fights scrapers. The stealth settings below reduce but do
-    not eliminate the chance of a CAPTCHA or empty result. If listings come back
-    empty, check the scrape log's error_msg for clues.
-  - If you start seeing consistent blocks, enabling a residential proxy is the
-    reliable long-term fix (set PROXY_URL env var).
+Layer 2 (Playwright + stealth, fallback):
+  If httpx returns a blocked/empty page, launch a headless Chromium with
+  playwright-stealth applied. This patches every known automation telltale
+  (webdriver flag, plugins array, chrome object, permissions API, etc.)
+  and handles JS-challenge pages that httpx cannot.
+
+Proxy support:
+  Set PROXY_URL env var (e.g. http://user:pass@host:port) to route all
+  requests through a residential proxy — most reliable long-term fix if
+  Zillow tightens detection further.
 """
 
 import asyncio
@@ -25,10 +26,11 @@ import os
 import random
 import re
 from typing import Optional
+import httpx
 
 logger = logging.getLogger(__name__)
 
-# ── Target searches ───────────────────────────────────────────────────────────
+# ── Search targets ────────────────────────────────────────────────────────────
 
 SEARCH_TARGETS = [
     {
@@ -66,34 +68,23 @@ SEARCH_TARGETS = [
     },
 ]
 
-# ── Stealth helpers ───────────────────────────────────────────────────────────
-
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 ]
 
-STEALTH_SCRIPT = """
-Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
-Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
-window.chrome = { runtime: {} };
-"""
+# ── Data extraction helpers ───────────────────────────────────────────────────
 
-
-# ── JSON extraction helpers ───────────────────────────────────────────────────
-
-def _dig(obj: dict, *keys):
-    """Safely traverse nested dicts/lists."""
+def _dig(obj, *keys):
     cur = obj
     for k in keys:
         if isinstance(cur, dict):
             cur = cur.get(k)
-        elif isinstance(cur, list) and isinstance(k, int):
-            cur = cur[k] if k < len(cur) else None
+        elif isinstance(cur, list) and isinstance(k, int) and k < len(cur):
+            cur = cur[k]
         else:
             return None
         if cur is None:
@@ -106,113 +97,228 @@ def _parse_price(raw) -> Optional[int]:
         return None
     if isinstance(raw, (int, float)):
         return int(raw)
-    s = str(raw).replace("$", "").replace(",", "").strip()
-    m = re.search(r"(\d+)", s)
-    return int(m.group(1)) if m else None
+    s = re.sub(r"[^\d]", "", str(raw))
+    return int(s) if s else None
 
 
-def _parse_int(raw) -> Optional[int]:
-    if raw is None:
-        return None
+def _int(v) -> Optional[int]:
     try:
-        return int(raw)
+        return int(v) if v is not None else None
     except (ValueError, TypeError):
         return None
 
 
-def _parse_float(raw) -> Optional[float]:
-    if raw is None:
-        return None
+def _float(v) -> Optional[float]:
     try:
-        return float(raw)
+        return float(v) if v is not None else None
     except (ValueError, TypeError):
         return None
 
 
-def _extract_listings_from_next_data(data: dict, neighborhood: str) -> list[dict]:
-    """
-    Try the known __NEXT_DATA__ paths that Zillow has used.
-    Returns a list of normalised listing dicts.
-    """
-    raw_listings = []
+def _extract_listings(data: dict, neighborhood: str) -> list[dict]:
+    """Try all known __NEXT_DATA__ paths and return normalised listing dicts."""
+    raw: list = []
+    for path in (
+        ("props", "pageProps", "searchPageState", "cat1", "searchResults", "listResults"),
+        ("props", "pageProps", "searchPageState", "cat1", "searchResults", "mapResults"),
+        ("props", "pageProps", "searchPageState", "listResults"),
+        ("props", "pageProps", "initialReduxState", "listings", "listResults"),
+    ):
+        found = _dig(data, *path)
+        if found:
+            raw = found
+            break
 
-    # Path 1: cat1.searchResults.listResults (most common)
-    r1 = _dig(data, "props", "pageProps", "searchPageState", "cat1", "searchResults", "listResults")
-    if r1:
-        raw_listings = r1
-
-    # Path 2: cat1.searchResults.mapResults
-    if not raw_listings:
-        r2 = _dig(data, "props", "pageProps", "searchPageState", "cat1", "searchResults", "mapResults")
-        if r2:
-            raw_listings = r2
-
-    # Path 3: newer format with a flat results array
-    if not raw_listings:
-        r3 = _dig(data, "props", "pageProps", "searchPageState", "listResults")
-        if r3:
-            raw_listings = r3
-
-    # Path 4: even newer format
-    if not raw_listings:
-        r4 = _dig(data, "props", "pageProps", "initialReduxState", "listings", "listResults")
-        if r4:
-            raw_listings = r4
-
-    if not raw_listings:
-        logger.warning(f"[zillow] No listing results found in __NEXT_DATA__ for {neighborhood}")
+    if not raw:
+        logger.warning("[zillow] No listResults found in __NEXT_DATA__ for %s", neighborhood)
         return []
 
     results = []
-    for item in raw_listings:
-        # Skip non-property entries (ads, "loading" placeholders, etc.)
+    for item in raw:
         zpid = item.get("zpid") or item.get("id")
         if not zpid:
             continue
-
         price = _parse_price(item.get("unformattedPrice") or item.get("price"))
         if not price:
             continue
-
-        detail_url = item.get("detailUrl", "")
-        if detail_url and not detail_url.startswith("http"):
-            detail_url = "https://www.zillow.com" + detail_url
-
-        lat_long = item.get("latLong") or {}
-        lat = _parse_float(lat_long.get("latitude") or item.get("latitude"))
-        lng = _parse_float(lat_long.get("longitude") or item.get("longitude"))
-
+        detail = item.get("detailUrl", "")
+        if detail and not detail.startswith("http"):
+            detail = "https://www.zillow.com" + detail
+        ll = item.get("latLong") or {}
         results.append({
             "zillow_id": str(zpid),
             "address": item.get("address") or item.get("streetAddress", "Unknown"),
             "neighborhood": neighborhood,
             "price": price,
-            "beds": _parse_int(item.get("beds") or item.get("bedrooms")),
-            "baths": _parse_float(item.get("baths") or item.get("bathrooms")),
-            "sqft": _parse_int(item.get("area") or item.get("livingArea")),
-            "days_on_market": _parse_int(item.get("daysOnZillow") or item.get("daysOnMarket")),
+            "beds": _int(item.get("beds") or item.get("bedrooms")),
+            "baths": _float(item.get("baths") or item.get("bathrooms")),
+            "sqft": _int(item.get("area") or item.get("livingArea")),
+            "days_on_market": _int(item.get("daysOnZillow") or item.get("daysOnMarket")),
             "listing_agent": item.get("brokerName") or item.get("agentName"),
             "property_type": item.get("statusType") or item.get("homeType", "FOR_SALE"),
-            "zillow_url": detail_url,
-            "image_url": item.get("imgSrc") or item.get("carouselPhotos", [{}])[0].get("url"),
-            "latitude": lat,
-            "longitude": lng,
+            "zillow_url": detail,
+            "image_url": (
+                item.get("imgSrc")
+                or (_dig(item, "carouselPhotos", 0, "url"))
+            ),
+            "latitude": _float(ll.get("latitude") or item.get("latitude")),
+            "longitude": _float(ll.get("longitude") or item.get("longitude")),
         })
-
     return results
 
 
-# ── Main scrape function ───────────────────────────────────────────────────────
+def _parse_next_data_from_html(html: str, neighborhood: str) -> list[dict]:
+    m = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', html, re.DOTALL)
+    if not m:
+        return []
+    try:
+        data = json.loads(m.group(1))
+        return _extract_listings(data, neighborhood)
+    except json.JSONDecodeError:
+        return []
 
-async def scrape_neighborhood(neighborhood: str, url: str) -> list[dict]:
-    """Scrape a single Zillow search page. Returns list of listing dicts."""
+
+# ── Layer 1: httpx (no browser fingerprint) ───────────────────────────────────
+
+def _browser_headers(ua: str, referer: str = "") -> dict:
+    h = {
+        "User-Agent": ua,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "max-age=0",
+        "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"Windows"',
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+        "Connection": "keep-alive",
+    }
+    if referer:
+        h["Referer"] = referer
+        h["Sec-Fetch-Site"] = "same-origin"
+    return h
+
+
+async def _httpx_scrape(url: str, neighborhood: str) -> list[dict]:
+    """
+    Attempt to get listings via plain HTTP (no browser).
+    Zillow SSRs __NEXT_DATA__ into the HTML, so this works when the request
+    is not flagged as a bot.
+    """
+    ua = random.choice(USER_AGENTS)
+    proxy = os.getenv("PROXY_URL", "").strip() or None
+
+    client_kwargs: dict = {
+        "http2": True,
+        "follow_redirects": True,
+        "timeout": 30.0,
+    }
+    if proxy:
+        client_kwargs["proxies"] = proxy
+
+    try:
+        async with httpx.AsyncClient(**client_kwargs) as client:
+            # Step 1: hit Zillow homepage to seed cookies
+            await client.get(
+                "https://www.zillow.com/",
+                headers=_browser_headers(ua),
+            )
+            await asyncio.sleep(random.uniform(1.5, 3.0))
+
+            # Step 2: fetch the actual search page
+            resp = await client.get(url, headers=_browser_headers(ua, "https://www.zillow.com/"))
+            logger.info("[zillow][httpx] %s → HTTP %d (%d bytes)",
+                        neighborhood, resp.status_code, len(resp.content))
+
+            if resp.status_code != 200:
+                logger.warning("[zillow][httpx] Non-200 for %s: %d", neighborhood, resp.status_code)
+                return []
+
+            listings = _parse_next_data_from_html(resp.text, neighborhood)
+            if listings:
+                logger.info("[zillow][httpx] %s: %d listings", neighborhood, len(listings))
+            else:
+                logger.warning("[zillow][httpx] %s: no listings in HTML (may be blocked)", neighborhood)
+            return listings
+
+    except Exception as exc:
+        logger.warning("[zillow][httpx] %s failed: %s", neighborhood, exc)
+        return []
+
+
+# ── Layer 2: Playwright + stealth (fallback) ──────────────────────────────────
+
+PLAYWRIGHT_STEALTH_SCRIPT = """
+// Mask webdriver
+Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+
+// Realistic plugins
+const makePlugin = (name, filename, mimeTypes=[]) => {
+    const plugin = {name, filename, length: mimeTypes.length};
+    mimeTypes.forEach((mt, i) => { plugin[i] = mt; });
+    return plugin;
+};
+Object.defineProperty(navigator, 'plugins', {
+    get: () => {
+        const plugins = [
+            makePlugin('Chrome PDF Plugin', 'internal-pdf-viewer'),
+            makePlugin('Chrome PDF Viewer', 'mhjfbmdgcfjbbpaeojofohoefgiehjai'),
+            makePlugin('Native Client', 'internal-nacl-plugin'),
+        ];
+        plugins.length = 3;
+        plugins.item = (i) => plugins[i];
+        plugins.namedItem = (n) => plugins.find(p => p.name === n) || null;
+        plugins.refresh = () => {};
+        return plugins;
+    }
+});
+
+// Language
+Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+
+// Chrome object
+window.chrome = {
+    runtime: {id: undefined, connect: ()=>{}, sendMessage: ()=>{}},
+    loadTimes: () => ({}),
+    csi: () => ({}),
+    app: {isInstalled: false},
+};
+
+// Permissions
+const _origQuery = window.navigator.permissions ? window.navigator.permissions.query.bind(window.navigator.permissions) : null;
+if (_origQuery) {
+    window.navigator.permissions.query = (params) =>
+        params.name === 'notifications'
+            ? Promise.resolve({state: Notification.permission, onchange: null})
+            : _origQuery(params);
+}
+
+// iFrame check
+HTMLIFrameElement.prototype.__defineGetter__('contentWindow', function() {
+    return window;
+});
+
+// Screen
+Object.defineProperty(screen, 'width', {get: () => 1920});
+Object.defineProperty(screen, 'height', {get: () => 1080});
+Object.defineProperty(screen, 'availWidth', {get: () => 1920});
+Object.defineProperty(screen, 'availHeight', {get: () => 1040});
+Object.defineProperty(screen, 'colorDepth', {get: () => 24});
+Object.defineProperty(screen, 'pixelDepth', {get: () => 24});
+"""
+
+
+async def _playwright_scrape(url: str, neighborhood: str) -> list[dict]:
+    """Playwright fallback with stealth patches."""
     from playwright.async_api import async_playwright
 
+    ua = random.choice(USER_AGENTS)
     proxy_url = os.getenv("PROXY_URL", "").strip()
     proxy = {"server": proxy_url} if proxy_url else None
-
-    ua = random.choice(USER_AGENTS)
-    listings: list[dict] = []
 
     try:
         async with async_playwright() as p:
@@ -225,74 +331,100 @@ async def scrape_neighborhood(neighborhood: str, url: str) -> list[dict]:
                     "--disable-dev-shm-usage",
                     "--disable-gpu",
                     "--disable-extensions",
+                    "--disable-infobars",
+                    "--window-size=1920,1080",
+                    "--start-maximized",
                 ],
             )
             context = await browser.new_context(
                 user_agent=ua,
                 viewport={"width": 1920, "height": 1080},
+                locale="en-US",
+                timezone_id="America/New_York",
                 java_script_enabled=True,
                 **({"proxy": proxy} if proxy else {}),
             )
-            await context.add_init_script(STEALTH_SCRIPT)
+            # Apply stealth script to every new page
+            await context.add_init_script(PLAYWRIGHT_STEALTH_SCRIPT)
 
-            page = await context.new_page()
+            # Try to also apply playwright-stealth if available
+            try:
+                from playwright_stealth import stealth_async
+                page = await context.new_page()
+                await stealth_async(page)
+            except ImportError:
+                page = await context.new_page()
 
-            # Intercept and abort heavy unnecessary resources to speed up load
+            # Block heavy resources but allow the page to load JS
             await page.route(
-                "**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,mp4,mp3}",
-                lambda route: route.abort()
-                if "maps" not in route.request.url
-                else route.continue_(),
+                re.compile(r"\.(png|jpg|jpeg|gif|webp|svg|woff2?|ttf|eot|mp4|mp3)$"),
+                lambda r: r.abort(),
             )
 
-            logger.info(f"[zillow] Fetching {neighborhood}: {url[:80]}...")
+            logger.info("[zillow][playwright] Fetching %s…", neighborhood)
             try:
-                await page.goto(url, wait_until="domcontentloaded", timeout=45_000)
+                await page.goto(url, wait_until="networkidle", timeout=60_000)
             except Exception as nav_err:
-                logger.warning(f"[zillow] Navigation warning for {neighborhood}: {nav_err}")
-                # Don't bail — the page may still have usable content
+                logger.warning("[zillow][playwright] Navigation warning %s: %s", neighborhood, nav_err)
 
-            # Random delay to appear human
-            await asyncio.sleep(random.uniform(2.5, 5.0))
+            await asyncio.sleep(random.uniform(2, 4))
 
-            # Check for CAPTCHA / block page
+            # Scroll to trigger any lazy-load
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+            await asyncio.sleep(1)
+
             title = await page.title()
-            if any(kw in title.lower() for kw in ("captcha", "robot", "access denied", "blocked")):
-                logger.warning(f"[zillow] Bot detection triggered for {neighborhood} (title: {title!r})")
+            if any(kw in title.lower() for kw in ("captcha", "robot", "blocked", "access denied")):
+                logger.warning("[zillow][playwright] Blocked for %s (title: %r)", neighborhood, title)
                 await browser.close()
                 return []
 
-            # Extract __NEXT_DATA__
-            next_data_raw = await page.evaluate("""
+            # Try __NEXT_DATA__ via JS eval
+            raw = await page.evaluate("""
                 () => {
                     const el = document.getElementById('__NEXT_DATA__');
                     return el ? el.textContent : null;
                 }
             """)
 
-            if next_data_raw:
+            listings = []
+            if raw:
                 try:
-                    next_data = json.loads(next_data_raw)
-                    listings = _extract_listings_from_next_data(next_data, neighborhood)
-                    logger.info(f"[zillow] {neighborhood}: {len(listings)} listings via __NEXT_DATA__")
+                    data = json.loads(raw)
+                    listings = _extract_listings(data, neighborhood)
+                    logger.info("[zillow][playwright] %s: %d listings", neighborhood, len(listings))
                 except json.JSONDecodeError as e:
-                    logger.error(f"[zillow] JSON parse error for {neighborhood}: {e}")
+                    logger.error("[zillow][playwright] JSON error %s: %s", neighborhood, e)
             else:
-                logger.warning(f"[zillow] No __NEXT_DATA__ found for {neighborhood}")
+                # Last resort: parse from page HTML
+                html = await page.content()
+                listings = _parse_next_data_from_html(html, neighborhood)
+                if listings:
+                    logger.info("[zillow][playwright] %s: %d listings (from HTML)", neighborhood, len(listings))
+                else:
+                    logger.warning("[zillow][playwright] %s: no data found", neighborhood)
 
             await browser.close()
+            return listings
 
     except Exception as exc:
-        logger.error(f"[zillow] Scraper error for {neighborhood}: {exc}", exc_info=True)
+        logger.error("[zillow][playwright] Error for %s: %s", neighborhood, exc, exc_info=True)
+        return []
 
+
+# ── Combined scrape function ──────────────────────────────────────────────────
+
+async def scrape_neighborhood(neighborhood: str, url: str) -> list[dict]:
+    """Try httpx first, fall back to Playwright if empty."""
+    listings = await _httpx_scrape(url, neighborhood)
+    if not listings:
+        logger.info("[zillow] httpx empty for %s, trying Playwright…", neighborhood)
+        listings = await _playwright_scrape(url, neighborhood)
     return listings
 
 
 async def run_full_scrape() -> dict:
-    """
-    Scrape all three neighborhoods. Returns summary dict.
-    Adds a staggered delay between requests to be polite.
-    """
+    """Scrape all three neighborhoods with staggered delays."""
     all_listings: list[dict] = []
     errors: list[str] = []
 
@@ -302,13 +434,14 @@ async def run_full_scrape() -> dict:
             all_listings.extend(results)
         except Exception as exc:
             msg = f"{target['neighborhood']}: {exc}"
-            logger.error(f"[zillow] {msg}")
+            logger.error("[zillow] %s", msg)
             errors.append(msg)
-        # Stagger requests: 8–15s between neighborhoods
-        await asyncio.sleep(random.uniform(8, 15))
+        # Stagger: 10–20s between neighborhoods
+        await asyncio.sleep(random.uniform(10, 20))
 
-    return {
-        "listings": all_listings,
-        "errors": errors,
-        "status": "error" if (not all_listings and errors) else "blocked" if (not all_listings) else "ok",
-    }
+    status = (
+        "error" if (not all_listings and errors)
+        else "blocked" if not all_listings
+        else "ok"
+    )
+    return {"listings": all_listings, "errors": errors, "status": status}
