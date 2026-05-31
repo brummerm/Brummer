@@ -49,4 +49,12 @@ window.APPS = [
     href: "/apps/osrs/",
     enabled: true,
   },
+  {
+    id: "homes",
+    title: "NYC Home Search",
+    desc: "Daily Zillow listings — Brooklyn, Queens, Manhattan under $650K.",
+    icon: "🏠",
+    href: "/apps/homes/",
+    enabled: true,
+  },
 ];

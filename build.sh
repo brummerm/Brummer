@@ -11,6 +11,9 @@ set -euo pipefail
 echo "==> Installing Python deps"
 pip install -r server/requirements.txt
 
+echo "==> Installing Playwright Chromium browser"
+playwright install --with-deps chromium
+
 echo "==> Installing Node deps for meal planner"
 cd apps/meal-planner
 npm ci
@@ -50,6 +53,13 @@ echo "==> Installing Node deps for OSRS tracker"
 cd apps/osrs
 npm ci
 echo "==> Building OSRS tracker"
+npm run build
+cd ../..
+
+echo "==> Installing Node deps for Homes app"
+cd apps/homes
+npm ci
+echo "==> Building Homes app"
 npm run build
 cd ../..
 

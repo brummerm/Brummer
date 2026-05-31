@@ -31,7 +31,9 @@ from .routers import recipes, ingredients, meal_plans, grocery, images, seed, bu
 from .routers import body_weight as body_weight_router
 from .routers import tickets as tickets_router
 from .routers import osrs as osrs_router
+from .routers import homes as homes_router
 from .crud import budget as budget_crud
+from .crud import homes as homes_crud
 from .crud import tickets as tickets_crud
 from .crud import fitness as fitness_crud
 from .auth import router as auth_router, get_current_user, is_authenticated
@@ -178,6 +180,47 @@ async def _periodic_tickets_job(interval_seconds: int = 86400):
             db.close()
 
 
+async def _run_homes_scrape():
+    """Execute a Zillow scrape and persist results."""
+    from .scrapers.zillow import run_full_scrape
+    db = SessionLocal()
+    try:
+        print("[homes-job] Starting Zillow scrape...")
+        result = await run_full_scrape()
+        listings_data = result["listings"]
+        errors = result["errors"]
+        new_count = 0
+        seen_by_neighborhood: dict[str, set] = {}
+        for data in listings_data:
+            hood = data["neighborhood"]
+            seen_by_neighborhood.setdefault(hood, set()).add(data["zillow_id"])
+            _, is_new = homes_crud.upsert_listing(db, data)
+            if is_new:
+                new_count += 1
+        for hood, seen_ids in seen_by_neighborhood.items():
+            homes_crud.mark_stale(db, hood, seen_ids)
+        status = result["status"]
+        homes_crud.log_scrape(db, len(listings_data), new_count, status,
+                              "; ".join(errors) if errors else None)
+        print(f"[homes-job] Done: {len(listings_data)} found, {new_count} new (status={status})")
+    except Exception as exc:
+        print(f"[homes-job] Error: {exc}")
+        try:
+            homes_crud.log_scrape(db, 0, 0, "error", str(exc))
+        except Exception:
+            pass
+        db.rollback()
+    finally:
+        db.close()
+
+
+async def _periodic_homes_job(interval_seconds: int = 86400):
+    """Run Zillow scrape once per day."""
+    while True:
+        await asyncio.sleep(interval_seconds)
+        await _run_homes_scrape()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = SessionLocal()
@@ -210,8 +253,12 @@ async def lifespan(app: FastAPI):
 
     # Daily background job: archive completed + send overdue notifications
     tickets_task = asyncio.create_task(_periodic_tickets_job())
+    # Daily Zillow scrape — run immediately on first startup, then every 24h
+    homes_task = asyncio.create_task(_periodic_homes_job())
+    asyncio.create_task(_run_homes_scrape())   # seed on startup
     yield
     tickets_task.cancel()
+    homes_task.cancel()
     try:
         await tickets_task
     except asyncio.CancelledError:
@@ -231,7 +278,8 @@ FITNESS_DIR        = STATIC_DIR / "fitness"
 TRAVEL_DIR         = STATIC_DIR / "travel-planner"
 TICKETS_DIR        = STATIC_DIR / "tickets"
 OSRS_DIR           = STATIC_DIR / "osrs"
-for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, TICKETS_DIR, OSRS_DIR):
+HOMES_DIR          = STATIC_DIR / "homes"
+for d in (DASHBOARD_DIR, LOGIN_DIR, MEAL_PLANNER_DIR, BUDGET_DIR, FITNESS_DIR, TRAVEL_DIR, TICKETS_DIR, OSRS_DIR, HOMES_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -288,6 +336,9 @@ app.include_router(tickets_router.router, prefix="/api/tickets", dependencies=au
 # ---- OSRS API ----
 app.include_router(osrs_router.router, prefix="/api/osrs", dependencies=auth_dep, tags=["osrs"])
 
+# ---- Homes / Real Estate API ----
+app.include_router(homes_router.router, prefix="/api/homes", dependencies=auth_dep, tags=["homes"])
+
 
 # ---- Image static mount, with auth gate ----
 # StaticFiles can't easily depend on auth, so we wrap the path with a guard endpoint
@@ -329,6 +380,7 @@ _SPA_DIRS = {
     "travel-planner": TRAVEL_DIR,
     "tickets":       TICKETS_DIR,
     "osrs":          OSRS_DIR,
+    "homes":         HOMES_DIR,
 }
 
 
