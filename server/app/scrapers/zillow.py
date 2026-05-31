@@ -415,12 +415,24 @@ async def _playwright_scrape(url: str, neighborhood: str) -> list[dict]:
 # ── Combined scrape function ──────────────────────────────────────────────────
 
 async def scrape_neighborhood(neighborhood: str, url: str) -> list[dict]:
-    """Try httpx first, fall back to Playwright if empty."""
+    """
+    Try in order:
+      1. ScraperAPI  — residential IPs, bypasses Cloudflare (needs SCRAPERAPI_KEY env var)
+      2. httpx       — fast, no browser, blocked by Cloudflare on datacenter IPs like Render
+      3. Playwright  — full headless browser with stealth, last resort
+    """
+    if os.getenv("SCRAPERAPI_KEY", "").strip():
+        listings = await _scraperapi_scrape(url, neighborhood)
+        if listings:
+            return listings
+        logger.warning("[zillow] ScraperAPI empty for %s", neighborhood)
+
     listings = await _httpx_scrape(url, neighborhood)
-    if not listings:
-        logger.info("[zillow] httpx empty for %s, trying Playwright…", neighborhood)
-        listings = await _playwright_scrape(url, neighborhood)
-    return listings
+    if listings:
+        return listings
+
+    logger.info("[zillow] Trying Playwright for %s…", neighborhood)
+    return await _playwright_scrape(url, neighborhood)
 
 
 async def run_full_scrape() -> dict:

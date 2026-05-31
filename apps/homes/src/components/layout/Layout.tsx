@@ -111,10 +111,16 @@ export function Layout() {
         <div className="px-4 py-3 border-t border-gray-100 space-y-2">
           <p className={`text-[10px] ${statusColor}`}>
             Last scraped: {lastScraped}
-            {stats?.last_scrape_status && stats.last_scrape_status !== 'ok' && (
-              <span className="ml-1">({stats.last_scrape_status})</span>
-            )}
           </p>
+
+          {stats?.last_scrape_status === 'blocked' && (
+            <div className="rounded-lg bg-amber-50 border border-amber-200 p-2 text-[10px] text-amber-800 leading-relaxed space-y-1">
+              <p className="font-bold">⚠️ Blocked by Zillow</p>
+              <p>Render's server IP is flagged as a datacenter by Cloudflare. Headers and stealth can't fix an IP block.</p>
+              <p><strong>Fix:</strong> get a free API key at <a href="https://scraperapi.com" target="_blank" rel="noopener noreferrer" className="underline">scraperapi.com</a>, then add <code className="bg-amber-100 px-0.5 rounded font-mono">SCRAPERAPI_KEY=your_key</code> to your Render environment variables.</p>
+            </div>
+          )}
+
           <button
             onClick={() => scrapeMut.mutate()}
             disabled={scrapeMut.isPending}
