@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, s
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from ..database import get_db
+from ..database import get_db, SessionLocal
 from ..models.homes import HomeListing
 from ..schemas.homes import HomeListingOut, HomesStats
 from ..crud import homes as homes_crud
@@ -87,16 +87,18 @@ def get_stats(db: Session = Depends(get_db)):
 # ── Manual scrape trigger ─────────────────────────────────────────────────────
 
 @router.post("/scrape")
-async def trigger_scrape(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def trigger_scrape(background_tasks: BackgroundTasks):
     """Kick off a scrape in the background. Returns immediately."""
     if _scrape_lock.locked():
         return {"status": "already_running"}
-    background_tasks.add_task(_do_scrape, db)
+    background_tasks.add_task(_do_scrape)
     return {"status": "started"}
 
 
-async def _do_scrape(db: Session):
-    """Run scrape and persist results."""
+async def _do_scrape():
+    """Run scrape and persist results. Opens its own DB session — never use the
+    request-scoped session here since that is closed before this task runs."""
+    db = SessionLocal()
     async with _scrape_lock:
         logger.info("[homes] Starting Zillow scrape...")
         try:
@@ -129,3 +131,6 @@ async def _do_scrape(db: Session):
                 homes_crud.log_scrape(db, 0, 0, "error", str(exc))
             except Exception:
                 pass
+            db.rollback()
+        finally:
+            db.close()
