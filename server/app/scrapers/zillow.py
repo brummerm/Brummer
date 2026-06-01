@@ -203,6 +203,36 @@ def _browser_headers(ua: str, referer: str = "") -> dict:
     return h
 
 
+async def _scraperapi_scrape(url: str, neighborhood: str) -> list[dict]:
+    """Route through ScraperAPI residential IPs to bypass Cloudflare/datacenter blocks."""
+    import urllib.parse
+    key = os.getenv("SCRAPERAPI_KEY", "").strip()
+    if not key:
+        return []
+    api_url = (
+        f"http://api.scraperapi.com"
+        f"?api_key={key}"
+        f"&url={urllib.parse.quote(url, safe='')}"
+        f"&render=true"
+        f"&country_code=us"
+    )
+    try:
+        async with httpx.AsyncClient(timeout=90.0, follow_redirects=True) as client:
+            logger.info("[zillow][scraperapi] Fetching %s…", neighborhood)
+            resp = await client.get(api_url)
+            logger.info("[zillow][scraperapi] %s → HTTP %d (%d bytes)",
+                        neighborhood, resp.status_code, len(resp.content))
+            if resp.status_code != 200:
+                logger.warning("[zillow][scraperapi] Non-200 for %s: %d", neighborhood, resp.status_code)
+                return []
+            listings = _parse_next_data_from_html(resp.text, neighborhood)
+            logger.info("[zillow][scraperapi] %s: %d listings", neighborhood, len(listings))
+            return listings
+    except Exception as exc:
+        logger.warning("[zillow][scraperapi] %s failed: %s", neighborhood, exc)
+        return []
+
+
 async def _httpx_scrape(url: str, neighborhood: str) -> list[dict]:
     """
     Attempt to get listings via plain HTTP (no browser).
