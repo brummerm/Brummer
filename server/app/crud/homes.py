@@ -2,7 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timezone, timedelta
 from typing import Optional
-from ..models.homes import HomeListing, HomeListingAction, ScrapeLog
+from ..models.homes import HomeListing, HomeListingAction, ScrapeLog, ScrapeSettings
+import json
 
 
 # ── Listings ──────────────────────────────────────────────────────────────────
@@ -174,3 +175,35 @@ def log_scrape(db: Session, listings_found: int, new_listings: int, status: str 
     )
     db.add(log)
     db.commit()
+
+
+# ── Scrape settings ───────────────────────────────────────────────────────────
+
+def get_settings(db: Session) -> ScrapeSettings:
+    """Return singleton settings row, creating defaults on first call."""
+    row = db.query(ScrapeSettings).filter(ScrapeSettings.id == 1).first()
+    if not row:
+        row = ScrapeSettings(id=1)
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+    return row
+
+
+def update_settings(db: Session, data: dict) -> ScrapeSettings:
+    row = get_settings(db)
+    for field, value in data.items():
+        if field == "neighborhoods":
+            row.neighborhoods_json = json.dumps(value)
+        elif value is not None and hasattr(row, field):
+            setattr(row, field, value)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def settings_neighborhoods(settings: ScrapeSettings) -> list[str]:
+    try:
+        return json.loads(settings.neighborhoods_json)
+    except Exception:
+        return ["Brooklyn", "Queens", "Manhattan"]

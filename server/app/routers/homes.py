@@ -6,7 +6,7 @@ from typing import Optional
 
 from ..database import get_db, SessionLocal
 from ..models.homes import HomeListing
-from ..schemas.homes import HomeListingOut, HomesStats
+from ..schemas.homes import HomeListingOut, HomesStats, ScrapeSettingsOut, ScrapeSettingsUpdate
 from ..crud import homes as homes_crud
 from ..scrapers.zillow import run_full_scrape
 
@@ -102,7 +102,8 @@ async def _do_scrape():
     async with _scrape_lock:
         logger.info("[homes] Starting Zillow scrape...")
         try:
-            result = await run_full_scrape()
+            settings = homes_crud.get_settings(db)
+            result = await run_full_scrape(settings)
             listings_data = result["listings"]
             errors = result["errors"]
 
@@ -134,3 +135,34 @@ async def _do_scrape():
             db.rollback()
         finally:
             db.close()
+
+
+# ── Scrape settings ───────────────────────────────────────────────────────────
+
+def _settings_to_out(row) -> ScrapeSettingsOut:
+    return ScrapeSettingsOut(
+        max_price=row.max_price,
+        min_beds=row.min_beds,
+        min_baths=row.min_baths,
+        no_hoa=row.no_hoa,
+        no_foreclosure=row.no_foreclosure,
+        single_family_only=row.single_family_only,
+        neighborhoods=homes_crud.settings_neighborhoods(row),
+    )
+
+
+@router.get("/settings", response_model=ScrapeSettingsOut)
+def get_scrape_settings(db: Session = Depends(get_db)):
+    return _settings_to_out(homes_crud.get_settings(db))
+
+
+@router.patch("/settings", response_model=ScrapeSettingsOut)
+def update_scrape_settings(data: ScrapeSettingsUpdate, db: Session = Depends(get_db)):
+    updated = homes_crud.update_settings(db, data.model_dump(exclude_none=True))
+    return _settings_to_out(updated)
+
+
+@router.get("/neighborhoods")
+def list_neighborhoods():
+    from ..scrapers.zillow import ALL_NEIGHBORHOODS
+    return ALL_NEIGHBORHOODS

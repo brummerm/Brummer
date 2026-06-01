@@ -186,7 +186,8 @@ async def _run_homes_scrape():
     db = SessionLocal()
     try:
         print("[homes-job] Starting Zillow scrape...")
-        result = await run_full_scrape()
+        settings = homes_crud.get_settings(db)
+        result = await run_full_scrape(settings)
         listings_data = result["listings"]
         errors = result["errors"]
         new_count = 0

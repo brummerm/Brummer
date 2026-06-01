@@ -32,41 +32,60 @@ logger = logging.getLogger(__name__)
 
 # ── Search targets ────────────────────────────────────────────────────────────
 
-SEARCH_TARGETS = [
-    {
-        "neighborhood": "Brooklyn",
-        "url": (
-            "https://www.zillow.com/brooklyn-new-york-ny/houses/3-bedrooms/"
-            "?searchQueryState=%7B%22filterState%22%3A%7B%22price%22%3A%7B%22max%22%3A650000%7D"
-            "%2C%22beds%22%3A%7B%22min%22%3A3%7D%2C%22baths%22%3A%7B%22min%22%3A2%7D"
-            "%2C%22hoa%22%3A%7B%22max%22%3A0%7D%2C%22fore%22%3A%7B%22value%22%3Afalse%7D"
-            "%2C%22con%22%3A%7B%22value%22%3Afalse%7D%2C%22sf%22%3A%7B%22value%22%3Atrue%7D"
-            "%2C%22mf%22%3A%7B%22value%22%3Afalse%7D%7D%7D"
-        ),
-    },
-    {
-        "neighborhood": "Queens",
-        "url": (
-            "https://www.zillow.com/queens-new-york-ny/houses/3-bedrooms/"
-            "?searchQueryState=%7B%22filterState%22%3A%7B%22price%22%3A%7B%22max%22%3A650000%7D"
-            "%2C%22beds%22%3A%7B%22min%22%3A3%7D%2C%22baths%22%3A%7B%22min%22%3A2%7D"
-            "%2C%22hoa%22%3A%7B%22max%22%3A0%7D%2C%22fore%22%3A%7B%22value%22%3Afalse%7D"
-            "%2C%22con%22%3A%7B%22value%22%3Afalse%7D%2C%22sf%22%3A%7B%22value%22%3Atrue%7D"
-            "%2C%22mf%22%3A%7B%22value%22%3Afalse%7D%7D%7D"
-        ),
-    },
-    {
-        "neighborhood": "Manhattan",
-        "url": (
-            "https://www.zillow.com/manhattan-new-york-ny/houses/3-bedrooms/"
-            "?searchQueryState=%7B%22filterState%22%3A%7B%22price%22%3A%7B%22max%22%3A650000%7D"
-            "%2C%22beds%22%3A%7B%22min%22%3A3%7D%2C%22baths%22%3A%7B%22min%22%3A2%7D"
-            "%2C%22hoa%22%3A%7B%22max%22%3A0%7D%2C%22fore%22%3A%7B%22value%22%3Afalse%7D"
-            "%2C%22con%22%3A%7B%22value%22%3Afalse%7D%2C%22sf%22%3A%7B%22value%22%3Atrue%7D"
-            "%2C%22mf%22%3A%7B%22value%22%3Afalse%7D%7D%7D"
-        ),
-    },
-]
+# Neighborhood display name → Zillow URL slug
+NEIGHBORHOOD_SLUGS: dict[str, str] = {
+    "Brooklyn":      "brooklyn-new-york-ny",
+    "Queens":        "queens-new-york-ny",
+    "Manhattan":     "manhattan-new-york-ny",
+    "Bronx":         "bronx-new-york-ny",
+    "Staten Island": "staten-island-new-york-ny",
+}
+
+# Available neighborhoods shown in the Settings UI
+ALL_NEIGHBORHOODS = list(NEIGHBORHOOD_SLUGS.keys())
+
+
+def build_search_targets(settings) -> list[dict]:
+    """Build the list of {neighborhood, url} dicts from current ScrapeSettings."""
+    import urllib.parse as _up
+
+    neighborhoods = []
+    try:
+        import json as _json
+        neighborhoods = _json.loads(settings.neighborhoods_json)
+    except Exception:
+        neighborhoods = ["Brooklyn", "Queens", "Manhattan"]
+
+    targets = []
+    for hood in neighborhoods:
+        slug = NEIGHBORHOOD_SLUGS.get(hood)
+        if not slug:
+            continue
+        filter_state: dict = {
+            "filterState": {
+                "price": {"max": settings.max_price},
+                "beds":  {"min": settings.min_beds},
+                "baths": {"min": settings.min_baths},
+                "fore":  {"value": False},
+                "con":   {"value": False},
+            }
+        }
+        if settings.no_hoa:
+            filter_state["filterState"]["hoa"] = {"max": 0}
+        if settings.single_family_only:
+            filter_state["filterState"]["sf"] = {"value": True}
+            filter_state["filterState"]["mf"] = {"value": False}
+
+        encoded = _up.quote(
+            json.dumps(filter_state, separators=(",", ":")), safe=""
+        )
+        beds_str = f"{settings.min_beds}-bedrooms"
+        url = (
+            f"https://www.zillow.com/{slug}/houses/{beds_str}/"
+            f"?searchQueryState={encoded}"
+        )
+        targets.append({"neighborhood": hood, "url": url})
+    return targets
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -465,12 +484,28 @@ async def scrape_neighborhood(neighborhood: str, url: str) -> list[dict]:
     return await _playwright_scrape(url, neighborhood)
 
 
-async def run_full_scrape() -> dict:
-    """Scrape all three neighborhoods with staggered delays."""
+async def run_full_scrape(settings=None) -> dict:
+    """Scrape all configured neighborhoods with staggered delays.
+    Pass a ScrapeSettings ORM object to use saved filters; omits defaults."""
+    from ..models.homes import ScrapeSettings as _SS
+
+    if settings is None:
+        # Fallback defaults when called without a DB session (e.g. from tests)
+        class _Defaults:
+            max_price = 650_000
+            min_beds = 3
+            min_baths = 2.0
+            no_hoa = True
+            no_foreclosure = True
+            single_family_only = True
+            neighborhoods_json = '["Brooklyn","Queens","Manhattan"]'
+        settings = _Defaults()
+
+    targets = build_search_targets(settings)
     all_listings: list[dict] = []
     errors: list[str] = []
 
-    for target in SEARCH_TARGETS:
+    for target in targets:
         try:
             results = await scrape_neighborhood(target["neighborhood"], target["url"])
             all_listings.extend(results)

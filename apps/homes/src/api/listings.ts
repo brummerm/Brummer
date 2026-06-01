@@ -36,3 +36,28 @@ export async function triggerScrape(): Promise<{ status: string }> {
   const { data } = await axios.post<{ status: string }>(`${BASE}/scrape`)
   return data
 }
+
+export interface ScrapeSettings {
+  max_price: number
+  min_beds: number
+  min_baths: number
+  no_hoa: boolean
+  no_foreclosure: boolean
+  single_family_only: boolean
+  neighborhoods: string[]
+}
+
+export async function fetchSettings(): Promise<ScrapeSettings> {
+  const { data } = await axios.get<ScrapeSettings>(`${BASE}/settings`)
+  return data
+}
+
+export async function updateSettings(patch: Partial<ScrapeSettings>): Promise<ScrapeSettings> {
+  const { data } = await axios.patch<ScrapeSettings>(`${BASE}/settings`, patch)
+  return data
+}
+
+export async function fetchNeighborhoods(): Promise<string[]> {
+  const { data } = await axios.get<string[]>(`${BASE}/neighborhoods`)
+  return data
+}

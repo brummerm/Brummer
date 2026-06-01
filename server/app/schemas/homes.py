@@ -39,6 +39,28 @@ class ScrapeLogOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ScrapeSettingsOut(BaseModel):
+    max_price: int
+    min_beds: int
+    min_baths: float
+    no_hoa: bool
+    no_foreclosure: bool
+    single_family_only: bool
+    neighborhoods: list[str]
+
+    model_config = {"from_attributes": True}
+
+
+class ScrapeSettingsUpdate(BaseModel):
+    max_price: Optional[int] = None
+    min_beds: Optional[int] = None
+    min_baths: Optional[float] = None
+    no_hoa: Optional[bool] = None
+    no_foreclosure: Optional[bool] = None
+    single_family_only: Optional[bool] = None
+    neighborhoods: Optional[list[str]] = None
+
+
 class HomesStats(BaseModel):
     total_active: int
     new_today: int

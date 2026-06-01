@@ -46,6 +46,23 @@ class HomeListingAction(Base):
     listing: Mapped["HomeListing"] = relationship("HomeListing", back_populates="actions")
 
 
+class ScrapeSettings(Base):
+    """Singleton row (id=1) storing the user's scrape filter preferences."""
+    __tablename__ = "home_scrape_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    max_price: Mapped[int] = mapped_column(Integer, default=650_000)
+    min_beds: Mapped[int] = mapped_column(Integer, default=3)
+    min_baths: Mapped[float] = mapped_column(Float, default=2.0)
+    no_hoa: Mapped[bool] = mapped_column(Boolean, default=True)
+    no_foreclosure: Mapped[bool] = mapped_column(Boolean, default=True)
+    single_family_only: Mapped[bool] = mapped_column(Boolean, default=True)
+    # JSON array of neighborhood names e.g. '["Brooklyn","Queens","Manhattan"]'
+    neighborhoods_json: Mapped[str] = mapped_column(
+        Text, default='["Brooklyn","Queens","Manhattan"]'
+    )
+
+
 class ScrapeLog(Base):
     """Tracks scrape runs so we can show 'last updated' and 'new today' counts."""
     __tablename__ = "home_scrape_logs"

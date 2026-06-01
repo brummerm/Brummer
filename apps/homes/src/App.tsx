@@ -3,6 +3,7 @@ import { Layout } from './components/layout/Layout'
 import { ListingsPage } from './pages/ListingsPage'
 import { FavoritesPage } from './pages/FavoritesPage'
 import { DismissedPage } from './pages/DismissedPage'
+import { SettingsPage } from './pages/SettingsPage'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
           <Route path="/listings" element={<ListingsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/dismissed" element={<DismissedPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/listings" replace />} />
         </Route>
       </Routes>

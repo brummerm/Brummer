@@ -8,6 +8,7 @@ const NAV = [
   { to: '/listings', label: 'All Listings', icon: '🏠' },
   { to: '/favorites', label: 'Favorites', icon: '⭐' },
   { to: '/dismissed', label: 'Dismissed', icon: '🚫' },
+  { to: '/settings', label: 'Settings', icon: '⚙️' },
 ]
 
 const HOOD_COLORS: Record<string, string> = {
