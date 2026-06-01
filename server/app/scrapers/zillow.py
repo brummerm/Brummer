@@ -228,12 +228,15 @@ async def _scraperapi_scrape(url: str, neighborhood: str) -> list[dict]:
     key = os.getenv("SCRAPERAPI_KEY", "").strip()
     if not key:
         return []
+    # No render=true — Zillow uses Next.js SSR so __NEXT_DATA__ is in the raw
+    # HTML without JS execution. render=true makes ScraperAPI spin up a browser
+    # which hits Zillow's Cloudflare JS challenge and returns 500.
     api_url = (
         f"http://api.scraperapi.com"
         f"?api_key={key}"
         f"&url={urllib.parse.quote(url, safe='')}"
-        f"&render=true"
         f"&country_code=us"
+        f"&keep_headers=true"
     )
     try:
         async with httpx.AsyncClient(timeout=90.0, follow_redirects=True) as client:

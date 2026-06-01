@@ -12,7 +12,7 @@ echo "==> Installing Python deps"
 pip install -r server/requirements.txt
 
 echo "==> Installing Playwright Chromium browser"
-playwright install chromium
+python -m playwright install chromium
 
 echo "==> Installing Node deps for meal planner"
 cd apps/meal-planner
