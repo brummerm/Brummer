@@ -86,6 +86,16 @@ label.fld { display: block; font-size: .72rem; color: var(--dim); font-weight: 7
 .small { font-size: .8rem; }
 
 /* ---------- today ---------- */
+.cal-strip { display: flex; gap: 5px; margin-bottom: 14px; }
+.cal-day { flex: 1; min-height: 54px; border-radius: 12px; background: var(--card); border: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.cal-day .dow { font-size: .62rem; font-weight: 800; color: var(--dim); letter-spacing: .05em; }
+.cal-day .dom { font-size: .95rem; font-weight: 700; }
+.cal-day.today .dom { color: var(--accent); }
+.cal-day.today { border-color: var(--accent-dk); }
+.cal-day.sel { background: var(--accent-dk); border-color: var(--accent-dk); }
+.cal-day.sel .dow, .cal-day.sel .dom { color: #fff; }
+
 .day-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .day-nav button { min-width: var(--tap); min-height: 44px; font-size: 1.3rem; background: var(--card); border: 1px solid var(--line); border-radius: 12px; color: var(--dim); }
 .day-nav .day-title { flex: 1; text-align: center; }

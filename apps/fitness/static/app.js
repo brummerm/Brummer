@@ -13,7 +13,7 @@ let timer = null;    // {mode:'rest'|'work', remain, total, int, next}
 
 /* ================= storage ================= */
 function loadDB() {
-  try { return JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB(); }
+  try { return Object.assign(defaultDB(), JSON.parse(localStorage.getItem(DB_KEY))); }
   catch { return defaultDB(); }
 }
 function defaultDB() {
@@ -61,21 +61,28 @@ function pullState() {
 /* ================= dates / program position ================= */
 function todayISO() { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function parseISO(s) { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function toISO(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+// Monday of the calendar week containing d. The plan's days are calendar-true:
+// its Monday column is always a real Monday, whatever date the program started.
+function mondayOf(d) {
+  const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+  return m;
+}
 function programPos(dateStr) {
-  const start = parseISO(db.startDate);
+  const anchor = mondayOf(parseISO(db.startDate));           // Monday of week 1
   const d = dateStr ? parseISO(dateStr) : parseISO(todayISO());
-  let days = Math.floor((d - start) / 86400000);
-  if (days < 0) days = 0;
-  const max = PLAN.meta.totalWeeks * 7 - 1;
-  if (days > max) days = max;
-  return { week: Math.floor(days / 7) + 1, dayIdx: days % 7 };
+  let week = Math.round((mondayOf(d) - anchor) / 604800000) + 1;
+  if (week < 1) week = 1;
+  if (week > PLAN.meta.totalWeeks) week = PLAN.meta.totalWeeks;
+  return { week, dayIdx: (d.getDay() + 6) % 7 };             // real weekday, Mon=0
 }
 function dateForPos(week, dayIdx) {
-  const start = parseISO(db.startDate);
-  const d = new Date(start.getTime() + ((week-1)*7 + dayIdx) * 86400000);
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const anchor = mondayOf(parseISO(db.startDate));
+  const d = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + (week-1)*7 + dayIdx);
+  return toISO(d);
 }
-function fmtDate(iso) { return parseISO(iso).toLocaleDateString(undefined, {month:'short', day:'numeric'}); }
+function fmtDate(iso) { return parseISO(iso).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}); }
 
 /* ================= plan resolution ================= */
 function phaseFor(week) { return PLAN.phases.find(p => week >= p.weeks[0] && week <= p.weeks[1]); }
@@ -185,6 +192,25 @@ function renderToday(main) {
   main.append(nav);
   $('#nav-prev').onclick = () => { shiftDay(-1); };
   $('#nav-next').onclick = () => { shiftDay(1); };
+
+  // week calendar strip: real dates, tap to jump
+  const todayPos = programPos();
+  let strip = '';
+  for (let d = 0; d < 7; d++) {
+    const iso = dateForPos(view.week, d);
+    const dt = parseISO(iso);
+    const cls = [
+      d === view.dayIdx ? 'sel' : '',
+      view.week === todayPos.week && d === todayPos.dayIdx ? 'today' : '',
+    ].join(' ');
+    strip += `<button class="cal-day ${cls}" data-d="${d}">
+      <span class="dow">${['M','T','W','T','F','S','S'][d]}</span>
+      <span class="dom">${dt.getDate()}</span></button>`;
+  }
+  main.append(h(`<div class="cal-strip">${strip}</div>`));
+  document.querySelectorAll('.cal-day').forEach(el => el.onclick = () => {
+    view.dayIdx = +el.dataset.d; render();
+  });
   if (!isToday) {
     const b = h(`<button class="btn ghost" style="margin-bottom:12px;color:var(--accent)">↩ Back to today</button>`);
     b.querySelector('button').onclick = () => { const p = programPos(); view.week = p.week; view.dayIdx = p.dayIdx; render(); };
