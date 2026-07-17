@@ -19,8 +19,8 @@ window.APPS = [
   },
   {
     id: "fitness",
-    title: "Fitness Tracker",
-    desc: "Training plan with workout logging.",
+    title: "Workout Tracker",
+    desc: "52-week training program with guided workouts and logging.",
     icon: "🏋️",
     href: "/apps/fitness/",
     enabled: true,

@@ -72,3 +72,13 @@ class WorkoutTemplateExercise(Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     template: Mapped["WorkoutTemplate"] = relationship("WorkoutTemplate", back_populates="exercises")
+
+
+class FitnessState(Base):
+    """Singleton blob holding the workout tracker PWA's full state (logs,
+    settings, checklists). The static app syncs its localStorage here so
+    history survives browser clears and follows across devices."""
+    __tablename__ = "fitness_state"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    data: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    updated_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

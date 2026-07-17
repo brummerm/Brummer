@@ -28,12 +28,10 @@ echo "==> Building budget tracker frontend"
 npm run build
 cd ../..
 
-echo "==> Installing Node deps for fitness tracker"
-cd apps/fitness
-npm ci
-echo "==> Building fitness tracker frontend"
-npm run build
-cd ../..
+echo "==> Copying workout tracker static app"
+rm -rf server/static/fitness
+mkdir -p server/static/fitness
+cp -r apps/fitness/static/. server/static/fitness/
 
 echo "==> Installing Node deps for travel planner"
 cd apps/travel-planner

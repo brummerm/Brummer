@@ -99,3 +99,35 @@ def delete_template(tid: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Template not found")
     crud.delete_template(db, t)
     return Response(status_code=204)
+
+
+# ── Workout tracker PWA state sync ────────────────────────────────────────────
+# The static app at /apps/fitness/ stores everything client-side and mirrors it
+# here so data survives browser clears and syncs across devices.
+
+from fastapi import Body
+from ..models.fitness import FitnessState
+
+
+@router.get("/state")
+def get_state(db: Session = Depends(get_db)):
+    row = db.query(FitnessState).filter(FitnessState.id == 1).first()
+    if not row:
+        return {"data": None, "updated_at": None}
+    return {"data": row.data, "updated_at": row.updated_at.isoformat() if row.updated_at else None}
+
+
+@router.put("/state")
+def put_state(payload: dict = Body(...), db: Session = Depends(get_db)):
+    data = payload.get("data")
+    if not isinstance(data, str) or len(data) > 5_000_000:
+        raise HTTPException(status_code=422, detail="data must be a JSON string under 5 MB")
+    row = db.query(FitnessState).filter(FitnessState.id == 1).first()
+    if not row:
+        row = FitnessState(id=1, data=data)
+        db.add(row)
+    else:
+        row.data = data
+    db.commit()
+    db.refresh(row)
+    return {"ok": True, "updated_at": row.updated_at.isoformat() if row.updated_at else None}

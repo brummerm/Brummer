@@ -396,7 +396,12 @@ def serve_spa(app_name: str, full_path: str = ""):
     if str(target).startswith(str(base)) and target.is_file():
         # Hashed assets (e.g. index-Dj3BY-gT.js) can be cached forever —
         # their filename changes with every build so stale content is impossible.
-        headers = {"Cache-Control": "public, max-age=31536000, immutable"}
+        # The fitness app's files are NOT content-hashed (plain PWA with its own
+        # service worker), so they must revalidate on every load.
+        if app_name == "fitness":
+            headers = {"Cache-Control": "no-cache, must-revalidate"}
+        else:
+            headers = {"Cache-Control": "public, max-age=31536000, immutable"}
         return FileResponse(target, headers=headers)
     # index.html must never be cached — it references the current asset hashes.
     # no-store prevents any storage; Pragma: no-cache covers HTTP/1.0 proxies.

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0d1210">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout Tracker">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>Workout Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="setup" class="screen hidden">
+  <div class="setup-inner">
+    <h1>WORKOUT TRACKER</h1>
+    <p>52-week program. Set the date of Week 1, Day 1 (a Monday).</p>
+    <input type="date" id="setup-date">
+    <button class="btn primary big" id="setup-go">Start Program</button>
+  </div>
+</div>
+
+<header id="topbar">
+  <div id="week-label">—</div>
+  <button id="btn-settings" aria-label="Settings">⚙︎</button>
+</header>
+
+<main id="main"></main>
+
+<nav id="tabbar">
+  <button data-tab="today" class="tab active"><span class="ico">▶</span>Today</button>
+  <button data-tab="plan" class="tab"><span class="ico">▤</span>Plan</button>
+  <button data-tab="food" class="tab"><span class="ico">◉</span>Fuel</button>
+  <button data-tab="history" class="tab"><span class="ico">↗</span>History</button>
+</nav>
+
+<!-- guided player overlay -->
+<div id="player" class="overlay hidden"></div>
+<!-- rest / work timer overlay -->
+<div id="timer-overlay" class="overlay hidden"></div>
+<!-- settings sheet -->
+<div id="settings-sheet" class="overlay hidden"></div>
+
+<input type="file" id="import-file" accept="application/json" class="hidden">
+
+<script src="app.js"></script>
+</body>
+</html>

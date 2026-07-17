@@ -1,0 +1,2730 @@
+{
+ "meta": {
+  "title": "TRAINING PROGRAM - 12 MONTHS",
+  "subtitle": "52-week plan in four phases, built for 6 training days per week at about 60 minutes per session (a few short second sessions are marked as optional or PM add-ons). A full year is the right runway: it buys a real muscle-building block up front and a long, gradual endurance ramp that keeps you healthy.",
+  "totalWeeks": 52,
+  "source": "Workout_Plan.xlsx"
+ },
+ "overview": [
+  {
+   "heading": "TRAINING PROGRAM - 12 MONTHS",
+   "entries": []
+  },
+  {
+   "heading": "52-week plan in four phases, built for 6 training days per week at about 60 minutes per session (a few short second sessions are marked as optional or PM add-ons). A full year is the right runway: it buys a real muscle-building block up front and a long, gradual endurance ramp that keeps you healthy.",
+   "entries": []
+  },
+  {
+   "heading": "THE FOUR PHASES",
+   "entries": [
+    {
+     "label": "Phase 1 - Foundation (Months 1-3, Wk 1-12)",
+     "text": "Muscle gain is the priority: this is where most of your 10-20 lb goal gets built. Hypertrophy lifting, short easy runs, light rucks. Boring on purpose; do not rush it."
+    },
+    {
+     "label": "Phase 2 - Strength (Months 4-6, Wk 13-24)",
+     "text": "Main lifts go heavy (5x5, weighted pull-ups), running intervals begin, rucks build to 6 miles at 40 lb."
+    },
+    {
+     "label": "Phase 3 - Engine (Months 7-9, Wk 25-36)",
+     "text": "Endurance takes the lead: mileage peaks near 28/week, threshold running, rucks to 8-9 miles at 45 lb, monthly Saturday long rucks. Strength shifts to heavy-but-brief maintenance. Week 36: 2-mile time trial."
+    },
+    {
+     "label": "Phase 4 - Peak & Taper (Months 10-12, Wk 37-52)",
+     "text": "event-specific: two rucks per week, event-style carries under fatigue, 12-mile ruck assessments at Weeks 44 and 49, then a 3-week taper (Wk 50-52) so you arrive fresh."
+    }
+   ]
+  },
+  {
+   "heading": "WEEKLY TEMPLATE (ALL PHASES)",
+   "entries": [
+    {
+     "label": "Monday",
+     "text": "Lower body strength (full-body maintenance in Phase 4). PM: 15 min mobility."
+    },
+    {
+     "label": "Tuesday",
+     "text": "Run (easy in Phase 1, intervals after) + pull-up maintenance."
+    },
+    {
+     "label": "Wednesday",
+     "text": "Upper body strength. Phase 4 swaps this day to the midweek ruck."
+    },
+    {
+     "label": "Thursday",
+     "text": "Ruck (Phases 1-3). Phase 4: easy run + light upper body."
+    },
+    {
+     "label": "Friday",
+     "text": "Full-body work capacity: kettlebell work, loaded carries, rower intervals, incline hikes."
+    },
+    {
+     "label": "Saturday",
+     "text": "Long run. Monthly long ruck in Phase 3; alternating long ruck/run in Phase 4."
+    },
+    {
+     "label": "Sunday",
+     "text": "Full rest + 30 min flexibility session (Mobility & Flexibility tab)."
+    }
+   ]
+  },
+  {
+   "heading": "PROGRESSION RULES",
+   "entries": [
+    {
+     "label": "Lifting",
+     "text": "When you hit the top of the rep range on every set with good form, add 5 lb (upper body) or 10 lb (lower body) next session. Leave 1-3 reps in the tank on every set. Grinding maximal reps is how you get hurt."
+    },
+    {
+     "label": "Running",
+     "text": "Weekly mileage climbs roughly 10% per week with a deload every 4th week. Easy runs must be conversational. Exact weekly targets: Run & Ruck Progression tab."
+    },
+    {
+     "label": "Rucking",
+     "text": "Start at 25 lb dry (without water and food), add roughly 5 lb every month, cap at 55 lb. Never add distance and weight in the same week. Walk fast (goal under 15 min/mile); shuffle-jogging flats is allowed from Phase 2 if joints tolerate it."
+    },
+    {
+     "label": "Flexibility",
+     "text": "10 minutes daily after training plus the Sunday session. Consistency beats duration."
+    }
+   ]
+  },
+  {
+   "heading": "INJURY GUARDRAILS BUILT INTO THIS PLAN",
+   "entries": [
+    {
+     "label": "Back",
+     "text": "Trap-bar deadlift instead of conventional; chest-supported and braced rows; anti-extension and anti-rotation core work (planks, Pallof press) rather than sit-up volume."
+    },
+    {
+     "label": "Shoulders",
+     "text": "Landmine and neutral-grip pressing instead of straight barbell overhead work; face pulls and band pull-aparts every upper day. If a press hurts, lower the incline or go single-arm."
+    },
+    {
+     "label": "Knees, ankles, hips",
+     "text": "A year-long gradual volume ramp with deloads every 4th week; rucks start light and short; calf and ankle work weekly. Sharp joint pain means stop the session, not push through it."
+    }
+   ]
+  },
+  {
+   "heading": "BENCHMARKS ON THE CALENDAR",
+   "entries": [
+    {
+     "label": "Week 36",
+     "text": "2-mile time trial. Target sub-14:00."
+    },
+    {
+     "label": "Week 44",
+     "text": "12-mile ruck at 45 lb dry. Target sub-3:15. A rehearsal, not a max effort."
+    },
+    {
+     "label": "Week 49",
+     "text": "12-mile ruck at 45 lb dry. Target sub-3:00, goal 2:45. Your green light for selection."
+    },
+    {
+     "label": "Weeks 50-52",
+     "text": "Taper. Volume drops ~40-60%. Fitness is already built; the taper lets it show up on day one."
+    },
+    {
+     "label": "Feet",
+     "text": "Break in the boots you will wear at selection during every ruck, all year. Tape hot spots early. Foot failure ends more selection attempts than fitness does."
+    }
+   ]
+  },
+  {
+   "heading": "RECOVERY NON-NEGOTIABLES",
+   "entries": [
+    {
+     "label": "Sleep",
+     "text": "7-9 hours. You cannot out-train a sleep deficit at this volume."
+    },
+    {
+     "label": "Food",
+     "text": "See the Nutrition tabs. Calorie surplus through Phase 2, performance-first from Phase 3 on."
+    },
+    {
+     "label": "Missed days",
+     "text": "Skip it and continue the plan as written. Never stack two missed sessions into one day."
+    }
+   ]
+  }
+ ],
+ "phases": [
+  {
+   "phase": 1,
+   "name": "PHASE 1 - FOUNDATION & MUSCLE: WEEKS 1-12",
+   "description": "Priority: muscle gain and aerobic base. Deload every 4th week (Wk 4, 8, 12): drop a set from each lift, cut run mileage ~25%, keep the ruck short.",
+   "weeks": [
+    1,
+    12
+   ],
+   "days": [
+    {
+     "day": "Monday",
+     "title": "LOWER BODY STRENGTH",
+     "duration": "~65 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Trap-bar deadlift",
+       "raw": "4 x 8",
+       "sets": 4,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Leg press",
+       "raw": "3 x 10-12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 10,
+       "repsHigh": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Goblet Bulgarian split squat",
+       "raw": "3 x 10/leg",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Lying leg curl",
+       "raw": "3 x 12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Barbell hip thrust",
+       "raw": "3 x 10",
+       "sets": 3,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Standing calf raise (machine)",
+       "raw": "4 x 15",
+       "sets": 4,
+       "type": "reps",
+       "reps": 15
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted plank",
+       "raw": "3 x 45 sec",
+       "sets": 3,
+       "type": "time",
+       "seconds": 45
+      },
+      {
+       "kind": "note",
+       "raw": "PM: 15 min mobility (Mobility tab)"
+      }
+     ],
+     "notes": "Hypertrophy block: RPE 7, full range, controlled lowering. Add 10 lb when all sets are clean. This phase is where the muscle gets built."
+    },
+    {
+     "day": "Tuesday",
+     "title": "EASY RUN + PULL-UP MAINTENANCE",
+     "duration": "~45 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Easy run",
+       "raw": "20-35 min, Zone 2"
+      },
+      {
+       "kind": "exercise",
+       "name": "Pull-ups",
+       "raw": "4 x (max minus 1)",
+       "sets": 4,
+       "type": "max",
+       "target": "(max minus 1)"
+      },
+      {
+       "kind": "exercise",
+       "name": "Hanging knee raise",
+       "raw": "3 x 10",
+       "sets": 3,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Dead hang",
+       "raw": "2 x 30 sec",
+       "sets": 2,
+       "type": "time",
+       "seconds": 30
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Conversational pace; walk breaks fine the first month. From Wk 9, finish runs with 4 x 20-sec relaxed strides. Band-assist pull-ups if under 5 reps."
+    },
+    {
+     "day": "Wednesday",
+     "title": "UPPER BODY STRENGTH",
+     "duration": "~70 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Neutral-grip DB bench press",
+       "raw": "4 x 8",
+       "sets": 4,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Strict pull-up",
+       "raw": "4 x 6-8",
+       "sets": 4,
+       "type": "reps",
+       "reps": 6,
+       "repsHigh": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Landmine press",
+       "raw": "3 x 8/arm",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Chest-supported row",
+       "raw": "3 x 10",
+       "sets": 3,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Lat pulldown",
+       "raw": "3 x 12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Face pull",
+       "raw": "3 x 15",
+       "sets": 3,
+       "type": "reps",
+       "reps": 15
+      },
+      {
+       "kind": "exercise",
+       "name": "Hammer curl + triceps pushdown",
+       "raw": "2 x 12 each",
+       "sets": 2,
+       "perSide": true,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Farmer carry",
+       "raw": "3 x 40 yd",
+       "sets": 3,
+       "type": "distance",
+       "distance": 40,
+       "unit": "yd"
+      }
+     ],
+     "notes": "Neutral-grip and landmine pressing protect the shoulders. Face pulls every upper day, no exceptions. Arm work is for mass; drop it first if short on time."
+    },
+    {
+     "day": "Thursday",
+     "title": "RUCK",
+     "duration": "~40-70 min",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          1,
+          4
+         ],
+         "text": "2 mi @ 25 lb dry"
+        },
+        {
+         "weeks": [
+          5,
+          8
+         ],
+         "text": "3 mi @ 25-30 lb"
+        },
+        {
+         "weeks": [
+          9,
+          12
+         ],
+         "text": "4 mi @ 30 lb"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "Foot check + 10 min mobility after"
+      }
+     ],
+     "notes": "Brisk walk only, mostly flat. Wear the boots you'll take to selection, starting now. Tape hot spots the moment they appear."
+    },
+    {
+     "day": "Friday",
+     "title": "FULL-BODY CONDITIONING",
+     "duration": "~55 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "DB push press",
+       "raw": "4 x 6",
+       "sets": 4,
+       "type": "reps",
+       "reps": 6
+      },
+      {
+       "kind": "exercise",
+       "name": "Kettlebell swing",
+       "raw": "4 x 12",
+       "sets": 4,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted step-up",
+       "raw": "3 x 10/leg",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Seated cable row",
+       "raw": "3 x 12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Incline treadmill hike",
+       "raw": "10 min (10-15% grade, brisk)"
+      },
+      {
+       "kind": "exercise",
+       "name": "Suitcase carry",
+       "raw": "3 x 40 yd/side",
+       "sets": 3,
+       "perSide": true,
+       "type": "distance",
+       "distance": 40,
+       "unit": "yd"
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Circuit style, 60-90 sec rests. KB swings are a hinge, not a squat: hips snap, arms just hold on. The incline hike is ruck-legs without the ruck."
+    },
+    {
+     "day": "Saturday",
+     "title": "LONG RUN",
+     "duration": "Zone 2",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          1,
+          4
+         ],
+         "text": "3 mi"
+        },
+        {
+         "weeks": [
+          5,
+          8
+         ],
+         "text": "4-5 mi"
+        },
+        {
+         "weeks": [
+          9,
+          12
+         ],
+         "text": "5-6 mi"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Entirely conversational. This builds the aerobic base everything at selection sits on."
+    },
+    {
+     "day": "Sunday",
+     "title": "REST + FLEXIBILITY",
+     "duration": "30 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Couch stretch",
+       "raw": "2 x 60 sec/side",
+       "sets": 2,
+       "perSide": true,
+       "type": "time",
+       "seconds": 60
+      },
+      {
+       "kind": "exercise",
+       "name": "Pigeon",
+       "raw": "2 x 90 sec/side",
+       "sets": 2,
+       "perSide": true,
+       "type": "time",
+       "seconds": 90
+      },
+      {
+       "kind": "exercise",
+       "name": "90/90 hip switch",
+       "raw": "2 x 60 sec/side",
+       "sets": 2,
+       "perSide": true,
+       "type": "time",
+       "seconds": 60
+      },
+      {
+       "kind": "note",
+       "raw": "Hamstring + calf stretches"
+      },
+      {
+       "kind": "note",
+       "raw": "Pec stretch + open-book rotation"
+      },
+      {
+       "kind": "exercise",
+       "name": "Deep squat hold",
+       "raw": "2 x 60 sec",
+       "sets": 2,
+       "type": "time",
+       "seconds": 60
+      },
+      {
+       "kind": "note",
+       "raw": "(Full list on Mobility tab)"
+      }
+     ],
+     "notes": "Complete rest otherwise. The adaptation happens today. Stretch to mild tension, never pain."
+    }
+   ]
+  },
+  {
+   "phase": 2,
+   "name": "PHASE 2 - STRENGTH: WEEKS 13-24",
+   "description": "Priority: heavy strength on the muscle built in Phase 1; intervals begin. Deload every 4th week.",
+   "weeks": [
+    13,
+    24
+   ],
+   "days": [
+    {
+     "day": "Monday",
+     "title": "LOWER BODY STRENGTH",
+     "duration": "~70 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Trap-bar deadlift",
+       "raw": "5 x 5",
+       "sets": 5,
+       "type": "reps",
+       "reps": 5
+      },
+      {
+       "kind": "exercise",
+       "name": "Front squat (or safety-bar)",
+       "raw": "4 x 6",
+       "sets": 4,
+       "type": "reps",
+       "reps": 6
+      },
+      {
+       "kind": "exercise",
+       "name": "Barbell hip thrust",
+       "raw": "3 x 8",
+       "sets": 3,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "DB walking lunge",
+       "raw": "3 x 10/leg",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Nordic curl or heavy leg curl",
+       "raw": "3 x 8",
+       "sets": 3,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted calf raise",
+       "raw": "4 x 12",
+       "sets": 4,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Pallof press",
+       "raw": "3 x 12/side",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "note",
+       "raw": "PM: 15 min mobility"
+      }
+     ],
+     "notes": "Main lifts at RPE 8. Work to a top set of 5 on trap-bar; add 10 lb when all fives are crisp. Front-loaded squatting spares the lower back."
+    },
+    {
+     "day": "Tuesday",
+     "title": "RUN INTERVALS + PULL-UPS",
+     "duration": "~55 min",
+     "items": [
+      {
+       "kind": "note",
+       "raw": "Warm-up 10 min, then:"
+      },
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          13,
+          16
+         ],
+         "text": "6 x 400 m @ 5k effort (90-sec jog)"
+        },
+        {
+         "weeks": [
+          17,
+          20
+         ],
+         "text": "8 x 400 m"
+        },
+        {
+         "weeks": [
+          21,
+          24
+         ],
+         "text": "5 x 800 m"
+        }
+       ]
+      },
+      {
+       "kind": "exercise",
+       "name": "Pull-up pyramid",
+       "raw": "1-2-3-4-3-2-1"
+      },
+      {
+       "kind": "exercise",
+       "name": "Hanging leg raise",
+       "raw": "3 x 12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Intervals are where the speed comes from; even pacing beats a fast first rep. Extend the pyramid peak as you get stronger. Deload weeks: easy running only."
+    },
+    {
+     "day": "Wednesday",
+     "title": "UPPER BODY STRENGTH",
+     "duration": "~70 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Weighted pull-up",
+       "raw": "4 x 5",
+       "sets": 4,
+       "type": "reps",
+       "reps": 5
+      },
+      {
+       "kind": "exercise",
+       "name": "Incline neutral-grip DB press",
+       "raw": "4 x 8",
+       "sets": 4,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Landmine press",
+       "raw": "4 x 6/arm",
+       "sets": 4,
+       "perSide": true,
+       "type": "reps",
+       "reps": 6
+      },
+      {
+       "kind": "exercise",
+       "name": "One-arm DB row",
+       "raw": "4 x 8/arm",
+       "sets": 4,
+       "perSide": true,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Lat pulldown",
+       "raw": "3 x 10",
+       "sets": 3,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Face pull + band pull-apart",
+       "raw": "3 x 15+15",
+       "sets": 3,
+       "type": "reps",
+       "reps": 15
+      },
+      {
+       "kind": "exercise",
+       "name": "Hammer curl + triceps pushdown",
+       "raw": "2 x 12 each",
+       "sets": 2,
+       "perSide": true,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Heavy farmer carry",
+       "raw": "4 x 40 yd",
+       "sets": 4,
+       "type": "distance",
+       "distance": 40,
+       "unit": "yd"
+      },
+      {
+       "kind": "note",
+       "raw": "Optional PM: easy run 20-25 min"
+      }
+     ],
+     "notes": "Weighted pull-ups are the highest-value upper lift for selection. No straps on carries; grip is a limiter at selection. Skip the PM run if joints are cranky."
+    },
+    {
+     "day": "Thursday",
+     "title": "RUCK",
+     "duration": "~60-90 min",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          13,
+          16
+         ],
+         "text": "4 mi @ 35 lb"
+        },
+        {
+         "weeks": [
+          17,
+          20
+         ],
+         "text": "5 mi @ 35-40 lb"
+        },
+        {
+         "weeks": [
+          21,
+          24
+         ],
+         "text": "6 mi @ 40 lb"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "Foot check + 10 min mobility after"
+      }
+     ],
+     "notes": "Target pace under 15 min/mile. Shuffle-jog flats if joints tolerate it. Add moderate hills from Wk 17. Never add distance and weight the same week."
+    },
+    {
+     "day": "Friday",
+     "title": "WORK CAPACITY",
+     "duration": "~55 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Kettlebell swing",
+       "raw": "5 x 10 (heavy)",
+       "sets": 5,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "DB thruster",
+       "raw": "4 x 10",
+       "sets": 4,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Rower",
+       "raw": "5 x 250 m hard (1:1 rest)",
+       "sets": 5,
+       "type": "interval",
+       "distance": 250,
+       "unit": "m"
+      },
+      {
+       "kind": "exercise",
+       "name": "Pull-up EMOM",
+       "raw": "8 min x 4-6 reps"
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted step-up",
+       "raw": "3 x 10/leg (25-35 lb)",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Bear crawl",
+       "raw": "3 x 25 yd",
+       "sets": 3,
+       "type": "distance",
+       "distance": 25,
+       "unit": "yd"
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "EMOM = every minute on the minute; quality reps under fatigue. Step-ups carry straight over to rucking hills."
+    },
+    {
+     "day": "Saturday",
+     "title": "LONG RUN",
+     "duration": "Zone 2",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          13,
+          16
+         ],
+         "text": "6 mi"
+        },
+        {
+         "weeks": [
+          17,
+          20
+         ],
+         "text": "7 mi"
+        },
+        {
+         "weeks": [
+          21,
+          24
+         ],
+         "text": "8 mi"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "Deload weeks: 5 mi easy"
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Last 10 minutes at moderate (not hard) effort, except deload weeks."
+    },
+    {
+     "day": "Sunday",
+     "title": "REST + FLEXIBILITY",
+     "duration": "30-40 min",
+     "items": [
+      {
+       "kind": "note",
+       "raw": "Full Sunday routine (Mobility tab)"
+      },
+      {
+       "kind": "note",
+       "raw": "Priority: hips and calves"
+      },
+      {
+       "kind": "note",
+       "raw": "as ruck volume climbs"
+      }
+     ],
+     "notes": "Deloads Wk 16 and 20 and 24: cut mileage ~25%, drop a set from each lift, keep the ruck short."
+    }
+   ]
+  },
+  {
+   "phase": 3,
+   "name": "PHASE 3 - ENGINE: WEEKS 25-36",
+   "description": "Priority: endurance. Mileage peaks near 28/week, rucks reach 9 miles, strength holds on brief heavy work. Week 36: 2-mile time trial.",
+   "weeks": [
+    25,
+    36
+   ],
+   "days": [
+    {
+     "day": "Monday",
+     "title": "LOWER BODY STRENGTH",
+     "duration": "~55 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Trap-bar deadlift",
+       "raw": "4 x 4 (heavy, crisp)",
+       "sets": 4,
+       "type": "reps",
+       "reps": 4
+      },
+      {
+       "kind": "exercise",
+       "name": "Front squat",
+       "raw": "3 x 5",
+       "sets": 3,
+       "type": "reps",
+       "reps": 5
+      },
+      {
+       "kind": "exercise",
+       "name": "Barbell hip thrust",
+       "raw": "3 x 8",
+       "sets": 3,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted step-up",
+       "raw": "3 x 8/leg",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Nordic curl or leg curl",
+       "raw": "3 x 8",
+       "sets": 3,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted calf raise",
+       "raw": "3 x 12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "note",
+       "raw": "PM: 15 min mobility"
+      }
+     ],
+     "notes": "Heavy but brief: strength holds on lower volume while the endurance work grows. Nothing to failure."
+    },
+    {
+     "day": "Tuesday",
+     "title": "RUN INTERVALS + PULL-UPS",
+     "duration": "~55 min",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          25,
+          28
+         ],
+         "text": "5 x 800 m @ 5k effort"
+        },
+        {
+         "weeks": [
+          29,
+          32
+         ],
+         "text": "3 x 1 mile @ threshold"
+        },
+        {
+         "weeks": [
+          33,
+          35
+         ],
+         "text": "4 x 1 mile @ threshold"
+        },
+        {
+         "weeks": [
+          36,
+          36
+         ],
+         "text": "2-MILE TIME TRIAL (target sub-14:00)"
+        }
+       ]
+      },
+      {
+       "kind": "exercise",
+       "name": "Pull-ups",
+       "raw": "4 x (max minus 1)",
+       "sets": 4,
+       "type": "max",
+       "target": "(max minus 1)"
+      },
+      {
+       "kind": "exercise",
+       "name": "Hanging leg raise",
+       "raw": "3 x 12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Threshold = comfortably hard, about the pace you could hold for an hour race. The time trial is a benchmark, not a race; run it fresh after a deload."
+    },
+    {
+     "day": "Wednesday",
+     "title": "UPPER BODY STRENGTH",
+     "duration": "~60 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Weighted pull-up",
+       "raw": "5 x 3-5",
+       "sets": 5,
+       "type": "reps",
+       "reps": 3,
+       "repsHigh": 5
+      },
+      {
+       "kind": "exercise",
+       "name": "Neutral-grip DB bench press",
+       "raw": "4 x 6",
+       "sets": 4,
+       "type": "reps",
+       "reps": 6
+      },
+      {
+       "kind": "exercise",
+       "name": "Landmine press",
+       "raw": "4 x 6/arm",
+       "sets": 4,
+       "perSide": true,
+       "type": "reps",
+       "reps": 6
+      },
+      {
+       "kind": "exercise",
+       "name": "One-arm DB row",
+       "raw": "4 x 8/arm",
+       "sets": 4,
+       "perSide": true,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Face pull + band pull-apart",
+       "raw": "3 x 15+15",
+       "sets": 3,
+       "type": "reps",
+       "reps": 15
+      },
+      {
+       "kind": "exercise",
+       "name": "Heavy farmer carry",
+       "raw": "4 x 40 yd",
+       "sets": 4,
+       "type": "distance",
+       "distance": 40,
+       "unit": "yd"
+      },
+      {
+       "kind": "note",
+       "raw": "Optional PM: easy run 20-30 min"
+      }
+     ],
+     "notes": "The optional PM run adds aerobic volume cheaply; take it most weeks in this phase unless joints complain."
+    },
+    {
+     "day": "Thursday",
+     "title": "RUCK",
+     "duration": "~90-140 min",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          25,
+          28
+         ],
+         "text": "6-7 mi @ 40 lb"
+        },
+        {
+         "weeks": [
+          29,
+          32
+         ],
+         "text": "7-8 mi @ 40-45 lb"
+        },
+        {
+         "weeks": [
+          33,
+          36
+         ],
+         "text": "8-9 mi @ 45 lb"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "Hills every week from here on"
+      },
+      {
+       "kind": "note",
+       "raw": "Foot check + 10 min mobility after"
+      }
+     ],
+     "notes": "Pace under 15 min/mile on rolling terrain. Deload weeks: 5 mi at 35 lb."
+    },
+    {
+     "day": "Friday",
+     "title": "WORK CAPACITY",
+     "duration": "~55 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Kettlebell swing",
+       "raw": "5 x 10",
+       "sets": 5,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "KB front-rack carry",
+       "raw": "4 x 40 yd",
+       "sets": 4,
+       "type": "distance",
+       "distance": 40,
+       "unit": "yd"
+      },
+      {
+       "kind": "exercise",
+       "name": "Rower",
+       "raw": "4 x 500 m hard (1:1 rest)",
+       "sets": 4,
+       "type": "interval",
+       "distance": 500,
+       "unit": "m"
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted-vest incline hike",
+       "raw": "3 x 8 min (10-15% grade)",
+       "sets": 3,
+       "type": "time",
+       "seconds": 480
+      },
+      {
+       "kind": "exercise",
+       "name": "Pull-up EMOM",
+       "raw": "10 min x 4-6 reps"
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Front-rack carries brace the trunk the way awkward team-event loads do. Vest hike at 25-35 lb; it's extra ruck-legs without extra foot pounding."
+    },
+    {
+     "day": "Saturday",
+     "title": "LONG RUN / MONTHLY LONG RUCK",
+     "duration": null,
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "parity": "default",
+         "text": "long run 8-10 mi Zone 2"
+        },
+        {
+         "weeks": [
+          28,
+          28
+         ],
+         "text": "long ruck 8 mi @ 40 lb instead"
+        },
+        {
+         "weeks": [
+          32,
+          32
+         ],
+         "text": "long ruck 9 mi @ 45 lb instead"
+        },
+        {
+         "weeks": [
+          36,
+          36
+         ],
+         "text": "long ruck 10 mi @ 45 lb instead"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "The monthly Saturday long ruck starts rehearsing Phase 4. Full foot care after every event."
+    },
+    {
+     "day": "Sunday",
+     "title": "REST + FLEXIBILITY",
+     "duration": "30-40 min",
+     "items": [
+      {
+       "kind": "note",
+       "raw": "Full Sunday routine (Mobility tab)"
+      },
+      {
+       "kind": "note",
+       "raw": "Priority: hips, calves, ankles"
+      }
+     ],
+     "notes": "Deloads Wk 28, 32, 36 (run mileage only; those weeks' Saturday rucks stay). If you feel run down two weeks straight, take a full extra rest day."
+    }
+   ]
+  },
+  {
+   "phase": 4,
+   "name": "PHASE 4 - PEAK AND TAPER: WEEKS 37-52",
+   "description": "Priority: event-specific readiness. Two rucks per week, assessments Wk 44 and 49, 3-week taper Wk 50-52.",
+   "weeks": [
+    37,
+    52
+   ],
+   "days": [
+    {
+     "day": "Monday",
+     "title": "FULL-BODY STRENGTH (MAINTENANCE)",
+     "duration": "~55 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Trap-bar deadlift",
+       "raw": "3 x 5 (~80% of best)",
+       "sets": 3,
+       "type": "reps",
+       "reps": 5
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted pull-up",
+       "raw": "3 x 5",
+       "sets": 3,
+       "type": "reps",
+       "reps": 5
+      },
+      {
+       "kind": "exercise",
+       "name": "Landmine press",
+       "raw": "3 x 6/arm",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 6
+      },
+      {
+       "kind": "exercise",
+       "name": "Front squat",
+       "raw": "3 x 5 (moderate)",
+       "sets": 3,
+       "type": "reps",
+       "reps": 5
+      },
+      {
+       "kind": "exercise",
+       "name": "Goblet split squat",
+       "raw": "2 x 8/leg",
+       "sets": 2,
+       "perSide": true,
+       "type": "reps",
+       "reps": 8
+      },
+      {
+       "kind": "exercise",
+       "name": "Plank + Pallof circuit",
+       "raw": "2 rounds"
+      },
+      {
+       "kind": "note",
+       "raw": "PM: 15 min mobility"
+      }
+     ],
+     "notes": "Maintain, don't chase PRs in the final months. Bodyweight pull-ups only in Weeks 50-52."
+    },
+    {
+     "day": "Tuesday",
+     "title": "RUN INTERVALS + PULL-UPS",
+     "duration": "~50 min",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          37,
+          40
+         ],
+         "text": "5 x 800 m @ 2-mile effort"
+        },
+        {
+         "weeks": [
+          41,
+          44
+         ],
+         "text": "3 x 1 mile @ threshold"
+        },
+        {
+         "weeks": [
+          45,
+          48
+         ],
+         "text": "5 x 800 m"
+        },
+        {
+         "weeks": [
+          49,
+          49
+         ],
+         "text": "4 x 400 m relaxed"
+        },
+        {
+         "weeks": [
+          50,
+          52
+         ],
+         "text": "strides only"
+        }
+       ]
+      },
+      {
+       "kind": "exercise",
+       "name": "Pull-ups",
+       "raw": "4 x (max minus 1)",
+       "sets": 4,
+       "type": "max",
+       "target": "(max minus 1)"
+      },
+      {
+       "kind": "exercise",
+       "name": "Hanging leg raise",
+       "raw": "3 x 12",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      }
+     ],
+     "notes": "Nothing to failure after Week 48. Taper weeks keep the legs quick without digging a hole."
+    },
+    {
+     "day": "Wednesday",
+     "title": "MIDWEEK RUCK",
+     "duration": "60-100 min",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "weeks": [
+          37,
+          40
+         ],
+         "text": "4 mi @ 50 lb"
+        },
+        {
+         "weeks": [
+          41,
+          48
+         ],
+         "text": "5-6 mi @ 50-55 lb"
+        },
+        {
+         "weeks": [
+          49,
+          49
+         ],
+         "text": "4 mi @ 40 lb"
+        },
+        {
+         "weeks": [
+          50,
+          52
+         ],
+         "text": "2-3 mi @ 25-30 lb"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "Hills when available"
+      },
+      {
+       "kind": "note",
+       "raw": "PM: 15 min mobility"
+      }
+     ],
+     "notes": "Short but heavy. Never exceed 55 lb dry in training; heavier grinds joints and teaches bad movement before selection."
+    },
+    {
+     "day": "Thursday",
+     "title": "EASY RUN + LIGHT UPPER",
+     "duration": "~45 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Easy run",
+       "raw": "3-5 mi Zone 2 (Wk 50-52: 2-3 mi)"
+      },
+      {
+       "kind": "exercise",
+       "name": "Lat pulldown",
+       "raw": "3 x 12 (light)",
+       "sets": 3,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "DB curl + pushdown",
+       "raw": "2 x 12 each",
+       "sets": 2,
+       "perSide": true,
+       "type": "reps",
+       "reps": 12
+      },
+      {
+       "kind": "exercise",
+       "name": "Dead hang",
+       "raw": "3 x 45 sec",
+       "sets": 3,
+       "type": "time",
+       "seconds": 45
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Recovery pace between hard days. The gym work here is light pump volume, well short of failure."
+    },
+    {
+     "day": "Friday",
+     "title": "EVENT SIMULATION / WORK CAPACITY",
+     "duration": "~60 min",
+     "items": [
+      {
+       "kind": "exercise",
+       "name": "Trap-bar carry",
+       "raw": "4 x 40 yd (heavy)",
+       "sets": 4,
+       "type": "distance",
+       "distance": 40,
+       "unit": "yd"
+      },
+      {
+       "kind": "exercise",
+       "name": "KB front-rack carry",
+       "raw": "4 x 50 yd",
+       "sets": 4,
+       "type": "distance",
+       "distance": 50,
+       "unit": "yd"
+      },
+      {
+       "kind": "exercise",
+       "name": "Weighted step-up",
+       "raw": "3 x 10/leg (35-45 lb)",
+       "sets": 3,
+       "perSide": true,
+       "type": "reps",
+       "reps": 10
+      },
+      {
+       "kind": "exercise",
+       "name": "Bear crawl",
+       "raw": "3 x 25 yd",
+       "sets": 3,
+       "type": "distance",
+       "distance": 25,
+       "unit": "yd"
+      },
+      {
+       "kind": "exercise",
+       "name": "Rower",
+       "raw": "4 x 500 m moderate-hard",
+       "sets": 4,
+       "type": "interval",
+       "distance": 500,
+       "unit": "m"
+      },
+      {
+       "kind": "exercise",
+       "name": "Pull-up EMOM",
+       "raw": "8 min x 4-6 reps"
+      },
+      {
+       "kind": "note",
+       "raw": "10 min mobility after"
+      }
+     ],
+     "notes": "Heavy carries under fatigue simulate team events and log PT. Weeks 50-52: cut to 2 light rounds of carries only. Taper means taper."
+    },
+    {
+     "day": "Saturday",
+     "title": "LONG EVENT DAY",
+     "duration": "alternates ruck / run",
+     "items": [
+      {
+       "kind": "weekly",
+       "variants": [
+        {
+         "parity": "odd",
+         "text": "long ruck (build 8 -> 12 mi @ 45-50 lb)"
+        },
+        {
+         "parity": "even",
+         "text": "long run 8-10 mi easy"
+        },
+        {
+         "weeks": [
+          44,
+          44
+         ],
+         "text": "12-MI RUCK ASSESSMENT @ 45 lb (target sub-3:15)"
+        },
+        {
+         "weeks": [
+          49,
+          49
+         ],
+         "text": "12-MI RUCK ASSESSMENT @ 45 lb (target sub-3:00, goal 2:45)"
+        },
+        {
+         "weeks": [
+          50,
+          52
+         ],
+         "text": "taper (6 mi @ 35 -> 3 mi easy run)"
+        }
+       ]
+      },
+      {
+       "kind": "note",
+       "raw": "Full foot care after every event"
+      }
+     ],
+     "notes": "Week 49 is the green light. If it's slower than 3:15, the fix is more Saturday rucks at 45 lb, not more weight."
+    },
+    {
+     "day": "Sunday",
+     "title": "REST + FLEXIBILITY",
+     "duration": "30 min",
+     "items": [
+      {
+       "kind": "note",
+       "raw": "Full Sunday routine (Mobility tab)"
+      },
+      {
+       "kind": "note",
+       "raw": "In Weeks 50-52 this is the most"
+      },
+      {
+       "kind": "note",
+       "raw": "important session of the week"
+      }
+     ],
+     "notes": "Fitness is built by Week 49; the taper lets it show up on day one."
+    }
+   ]
+  }
+ ],
+ "runRuck": [
+  {
+   "week": 1,
+   "phaseName": "Foundation",
+   "runMiles": 5.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "2.0",
+   "ruckWeight": "25",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 2,
+   "phaseName": "Foundation",
+   "runMiles": 6.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "2.0",
+   "ruckWeight": "25",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 3,
+   "phaseName": "Foundation",
+   "runMiles": 7.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "2.0",
+   "ruckWeight": "25",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 4,
+   "phaseName": "Foundation",
+   "runMiles": 5.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "2.0",
+   "ruckWeight": "25",
+   "notes": "DELOAD",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 5,
+   "phaseName": "Foundation",
+   "runMiles": 8.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "3.0",
+   "ruckWeight": "25-30",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 6,
+   "phaseName": "Foundation",
+   "runMiles": 9.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "3.0",
+   "ruckWeight": "25-30",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 7,
+   "phaseName": "Foundation",
+   "runMiles": 10.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "3.0",
+   "ruckWeight": "25-30",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 8,
+   "phaseName": "Foundation",
+   "runMiles": 7.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "3.0",
+   "ruckWeight": "30",
+   "notes": "DELOAD",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 9,
+   "phaseName": "Foundation",
+   "runMiles": 11.0,
+   "keyRun": "Easy + strides",
+   "ruckMiles": "4.0",
+   "ruckWeight": "30",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 10,
+   "phaseName": "Foundation",
+   "runMiles": 12.0,
+   "keyRun": "Easy + strides",
+   "ruckMiles": "4.0",
+   "ruckWeight": "30",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 11,
+   "phaseName": "Foundation",
+   "runMiles": 13.0,
+   "keyRun": "Easy + strides",
+   "ruckMiles": "4.0",
+   "ruckWeight": "30",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 12,
+   "phaseName": "Foundation",
+   "runMiles": 9.0,
+   "keyRun": "Easy + strides",
+   "ruckMiles": "4.0",
+   "ruckWeight": "30",
+   "notes": "DELOAD - end of Phase 1",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 13,
+   "phaseName": "Strength",
+   "runMiles": 14.0,
+   "keyRun": "6 x 400 m @ 5k effort",
+   "ruckMiles": "4.0",
+   "ruckWeight": "35",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 14,
+   "phaseName": "Strength",
+   "runMiles": 15.0,
+   "keyRun": "6 x 400 m @ 5k effort",
+   "ruckMiles": "4.0",
+   "ruckWeight": "35",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 15,
+   "phaseName": "Strength",
+   "runMiles": 16.0,
+   "keyRun": "6 x 400 m @ 5k effort",
+   "ruckMiles": "4.0",
+   "ruckWeight": "35",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 16,
+   "phaseName": "Strength",
+   "runMiles": 11.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "4.0",
+   "ruckWeight": "35",
+   "notes": "DELOAD",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 17,
+   "phaseName": "Strength",
+   "runMiles": 16.0,
+   "keyRun": "8 x 400 m",
+   "ruckMiles": "5.0",
+   "ruckWeight": "35-40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 18,
+   "phaseName": "Strength",
+   "runMiles": 17.0,
+   "keyRun": "8 x 400 m",
+   "ruckMiles": "5.0",
+   "ruckWeight": "35-40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 19,
+   "phaseName": "Strength",
+   "runMiles": 18.0,
+   "keyRun": "8 x 400 m",
+   "ruckMiles": "5.0",
+   "ruckWeight": "35-40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 20,
+   "phaseName": "Strength",
+   "runMiles": 13.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "5.0",
+   "ruckWeight": "35",
+   "notes": "DELOAD",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 21,
+   "phaseName": "Strength",
+   "runMiles": 19.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "6.0",
+   "ruckWeight": "40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 22,
+   "phaseName": "Strength",
+   "runMiles": 20.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "6.0",
+   "ruckWeight": "40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 23,
+   "phaseName": "Strength",
+   "runMiles": 21.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "6.0",
+   "ruckWeight": "40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 24,
+   "phaseName": "Strength",
+   "runMiles": 15.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "6.0",
+   "ruckWeight": "40",
+   "notes": "DELOAD - end of Phase 2",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 25,
+   "phaseName": "Engine",
+   "runMiles": 22.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "6-7",
+   "ruckWeight": "40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 26,
+   "phaseName": "Engine",
+   "runMiles": 23.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "6-7",
+   "ruckWeight": "40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 27,
+   "phaseName": "Engine",
+   "runMiles": 24.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "6-7",
+   "ruckWeight": "40",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 28,
+   "phaseName": "Engine",
+   "runMiles": 17.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "8.0",
+   "ruckWeight": "40",
+   "notes": "DELOAD run mileage. Saturday: 8-mi long ruck",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 29,
+   "phaseName": "Engine",
+   "runMiles": 24.0,
+   "keyRun": "3 x 1 mi @ threshold",
+   "ruckMiles": "7-8",
+   "ruckWeight": "40-45",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 30,
+   "phaseName": "Engine",
+   "runMiles": 25.0,
+   "keyRun": "3 x 1 mi @ threshold",
+   "ruckMiles": "7-8",
+   "ruckWeight": "40-45",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 31,
+   "phaseName": "Engine",
+   "runMiles": 26.0,
+   "keyRun": "3 x 1 mi @ threshold",
+   "ruckMiles": "7-8",
+   "ruckWeight": "40-45",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 32,
+   "phaseName": "Engine",
+   "runMiles": 19.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "9.0",
+   "ruckWeight": "45",
+   "notes": "DELOAD run mileage. Saturday: 9-mi long ruck",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 33,
+   "phaseName": "Engine",
+   "runMiles": 26.0,
+   "keyRun": "4 x 1 mi @ threshold",
+   "ruckMiles": "8-9",
+   "ruckWeight": "45",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 34,
+   "phaseName": "Engine",
+   "runMiles": 27.0,
+   "keyRun": "4 x 1 mi @ threshold",
+   "ruckMiles": "8-9",
+   "ruckWeight": "45",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 35,
+   "phaseName": "Engine",
+   "runMiles": 28.0,
+   "keyRun": "4 x 1 mi @ threshold",
+   "ruckMiles": "8-9",
+   "ruckWeight": "45",
+   "notes": "",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 36,
+   "phaseName": "Engine",
+   "runMiles": 20.0,
+   "keyRun": "2-MILE TIME TRIAL",
+   "ruckMiles": "10.0",
+   "ruckWeight": "45",
+   "notes": "BENCHMARK: 2-mi TT (sub-14:00). Saturday: 10-mi long ruck",
+   "deload": false,
+   "benchmark": true,
+   "taper": false
+  },
+  {
+   "week": 37,
+   "phaseName": "Peak",
+   "runMiles": 24.0,
+   "keyRun": "5 x 800 m @ 2-mi effort",
+   "ruckMiles": "4-6 + Sat",
+   "ruckWeight": "50 / 45",
+   "notes": "Two rucks/week: Wed short-heavy, Sat alternates ruck/run",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 38,
+   "phaseName": "Peak",
+   "runMiles": 25.0,
+   "keyRun": "5 x 800 m @ 2-mi effort",
+   "ruckMiles": "4-6 + Sat",
+   "ruckWeight": "50 / 45",
+   "notes": "Two rucks/week: Wed short-heavy, Sat alternates ruck/run",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 39,
+   "phaseName": "Peak",
+   "runMiles": 26.0,
+   "keyRun": "5 x 800 m @ 2-mi effort",
+   "ruckMiles": "4-6 + Sat",
+   "ruckWeight": "50 / 45",
+   "notes": "Two rucks/week: Wed short-heavy, Sat alternates ruck/run",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 40,
+   "phaseName": "Peak",
+   "runMiles": 19.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "4 + 8",
+   "ruckWeight": "50 / 45",
+   "notes": "DELOAD",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 41,
+   "phaseName": "Peak",
+   "runMiles": 24.0,
+   "keyRun": "3 x 1 mi @ threshold",
+   "ruckMiles": "5-6 + Sat",
+   "ruckWeight": "50-55 / 45",
+   "notes": "Saturday long rucks build 10 -> 11 mi",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 42,
+   "phaseName": "Peak",
+   "runMiles": 25.0,
+   "keyRun": "3 x 1 mi @ threshold",
+   "ruckMiles": "5-6 + Sat",
+   "ruckWeight": "50-55 / 45",
+   "notes": "Saturday long rucks build 10 -> 11 mi",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 43,
+   "phaseName": "Peak",
+   "runMiles": 24.0,
+   "keyRun": "3 x 1 mi @ threshold",
+   "ruckMiles": "5-6 + Sat",
+   "ruckWeight": "50-55 / 45",
+   "notes": "Saturday long rucks build 10 -> 11 mi",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 44,
+   "phaseName": "Peak",
+   "runMiles": 16.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "5 + 12",
+   "ruckWeight": "50 / 45",
+   "notes": "BENCHMARK: 12-mi ruck @ 45 lb, target sub-3:15",
+   "deload": false,
+   "benchmark": true,
+   "taper": false
+  },
+  {
+   "week": 45,
+   "phaseName": "Peak",
+   "runMiles": 22.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "5-6 + Sat",
+   "ruckWeight": "50-55 / 45",
+   "notes": "Recover a week, then two more long-ruck Saturdays",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 46,
+   "phaseName": "Peak",
+   "runMiles": 24.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "5-6 + Sat",
+   "ruckWeight": "50-55 / 45",
+   "notes": "Recover a week, then two more long-ruck Saturdays",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 47,
+   "phaseName": "Peak",
+   "runMiles": 24.0,
+   "keyRun": "5 x 800 m",
+   "ruckMiles": "5-6 + Sat",
+   "ruckWeight": "50-55 / 45",
+   "notes": "Recover a week, then two more long-ruck Saturdays",
+   "deload": false,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 48,
+   "phaseName": "Peak",
+   "runMiles": 18.0,
+   "keyRun": "Easy runs only",
+   "ruckMiles": "5 + 10",
+   "ruckWeight": "50 / 45",
+   "notes": "DELOAD before the assessment",
+   "deload": true,
+   "benchmark": false,
+   "taper": false
+  },
+  {
+   "week": 49,
+   "phaseName": "Peak",
+   "runMiles": 14.0,
+   "keyRun": "4 x 400 m relaxed",
+   "ruckMiles": "4 + 12",
+   "ruckWeight": "40 / 45",
+   "notes": "BENCHMARK: 12-mi ruck @ 45 lb, target sub-3:00 (goal 2:45)",
+   "deload": false,
+   "benchmark": true,
+   "taper": false
+  },
+  {
+   "week": 50,
+   "phaseName": "Taper",
+   "runMiles": 10.0,
+   "keyRun": "Strides only",
+   "ruckMiles": "3 + 6",
+   "ruckWeight": "30 / 35",
+   "notes": "TAPER",
+   "deload": false,
+   "benchmark": false,
+   "taper": true
+  },
+  {
+   "week": 51,
+   "phaseName": "Taper",
+   "runMiles": 7.0,
+   "keyRun": "Strides only",
+   "ruckMiles": "2-3",
+   "ruckWeight": "25-30",
+   "notes": "TAPER",
+   "deload": false,
+   "benchmark": false,
+   "taper": true
+  },
+  {
+   "week": 52,
+   "phaseName": "Taper",
+   "runMiles": 5.0,
+   "keyRun": "Strides only",
+   "ruckMiles": "2",
+   "ruckWeight": "25",
+   "notes": "TAPER - selection week ready. Trust the work.",
+   "deload": false,
+   "benchmark": false,
+   "taper": true
+  }
+ ],
+ "mobility": [
+  {
+   "name": "Daily (10 min, post-training)",
+   "exercises": [
+    {
+     "name": "Couch stretch",
+     "sets": "1 / side",
+     "duration": "60 sec",
+     "notes": "Hip flexors take a beating from rucking and running."
+    },
+    {
+     "name": "Standing hamstring stretch",
+     "sets": "1 / side",
+     "duration": "60 sec",
+     "notes": "Slight knee bend, hinge from the hips."
+    },
+    {
+     "name": "Wall calf stretch (straight + bent knee)",
+     "sets": "1 / side",
+     "duration": "30 sec each",
+     "notes": "Both versions hit gastroc and soleus. Ankle mobility protects the knees on rucks."
+    },
+    {
+     "name": "Doorway pec stretch",
+     "sets": "1 / side",
+     "duration": "45 sec",
+     "notes": "Counters pressing volume; helps shoulder health."
+    },
+    {
+     "name": "Cat-cow",
+     "sets": "1",
+     "duration": "10 reps",
+     "notes": "Gentle spinal movement, especially after deadlift days."
+    }
+   ]
+  },
+  {
+   "name": "Sunday session (30-40 min)",
+   "exercises": [
+    {
+     "name": "Full daily routine above",
+     "sets": "-",
+     "duration": "Double the holds",
+     "notes": "Then add everything below."
+    },
+    {
+     "name": "90/90 hip switch",
+     "sets": "2 / side",
+     "duration": "60 sec holds",
+     "notes": "Internal and external hip rotation."
+    },
+    {
+     "name": "Pigeon stretch",
+     "sets": "2 / side",
+     "duration": "90 sec",
+     "notes": "Glutes and deep hip rotators."
+    },
+    {
+     "name": "Down-dog to cobra flow",
+     "sets": "2",
+     "duration": "8 slow reps",
+     "notes": "Whole posterior chain plus gentle spinal extension."
+    },
+    {
+     "name": "Open-book thoracic rotation",
+     "sets": "2 / side",
+     "duration": "10 reps",
+     "notes": "Upper-back rotation spares the lower back."
+    },
+    {
+     "name": "Banded shoulder distraction",
+     "sets": "1 / side",
+     "duration": "60 sec",
+     "notes": "Light band, overhead and across. Skip any position that pinches."
+    },
+    {
+     "name": "Ankle rocks against wall",
+     "sets": "2 / side",
+     "duration": "15 reps",
+     "notes": "Knee drives past the toes, heel stays down."
+    },
+    {
+     "name": "Deep squat hold",
+     "sets": "2",
+     "duration": "60 sec",
+     "notes": "Hold a support if needed. This is a position for field life."
+    }
+   ]
+  }
+ ],
+ "nutrition": {
+  "overview": [
+   {
+    "heading": "NUTRITION PLAN",
+    "entries": []
+   },
+   {
+    "heading": "Built for: 160 lb, 5'11\", 6 training days/week with climbing run and ruck volume. Dinners are excluded (you plan those with your partner); this plan covers everything else and tells you what dinner needs to contribute.",
+    "entries": []
+   },
+   {
+    "heading": "DAILY TARGETS",
+    "entries": [
+     {
+      "label": "Training days (Mon-Sat)",
+      "text": "3,300-3,500 kcal. Protein 160 g minimum. Carbs 380-450 g (fuel for the running and rucking). Fat 90-110 g. The meal plan tab covers ~2,770 kcal and ~180 g protein at the default options; dinner needs to add roughly 550-750 kcal, and protein is already covered before dinner."
+     },
+     {
+      "label": "Rest day (Sunday)",
+      "text": "2,800-3,000 kcal. Skip the pre- and post-workout entries; everything else stays the same. Keep protein at 160 g; recovery is when the muscle actually gets built."
+     },
+     {
+      "label": "Taper (Wk 50-52)",
+      "text": "Drop to roughly maintenance (2,900-3,100) as training volume falls in the final three weeks. Do not show up at selection mid-bulk; show up light, fueled, and fast."
+     }
+    ]
+   },
+   {
+    "heading": "THE ADJUSTMENT RULE (this is the whole system)",
+    "entries": [
+     {
+      "label": "Weigh-in protocol",
+      "text": "Weigh yourself every morning after the bathroom, before food, and take the weekly average. Log it in the Training Log tab."
+     },
+     {
+      "label": "If the average is flat 2 weeks",
+      "text": "Add 200 kcal/day (easiest: 1 extra tbsp peanut butter and 1 cup of milk)."
+     },
+     {
+      "label": "If gaining over 1 lb/week",
+      "text": "Subtract 200 kcal/day. Faster than 1 lb/week at your size is mostly fat."
+     }
+    ]
+   },
+   {
+    "heading": "SUPPLEMENTS",
+    "entries": [
+     {
+      "label": "Creatine monohydrate",
+      "text": "5 g every day, training or not. Timing doesn't matter; consistency does. Mix it into the post-workout shake or morning drink. No loading phase needed; it saturates in 3-4 weeks. Expect 2-4 lb of quick water weight in muscle: that's normal and useful. Drink more water and it plays fine with ruck training."
+     },
+     {
+      "label": "Whey protein",
+      "text": "1-2 scoops/day as written in the meal plan. It's food in convenient form, nothing magic. Any third-party tested brand (NSF Certified for Sport or Informed Sport) is fine."
+     },
+     {
+      "label": "Skip everything else",
+      "text": "Pre-workouts, mass gainers, BCAAs: not worth the money at your stage. Caffeine before hard sessions is effective; since you don't drink coffee, 100-200 mg via caffeine pill or a sugar-free energy drink does the same job."
+     }
+    ]
+   },
+   {
+    "heading": "FUELING LONG RUCKS AND RUNS",
+    "entries": [
+     {
+      "label": "Over 75 minutes",
+      "text": "30-60 g carbs per hour during: gels, chews, dried fruit, or a sports drink. Practice this on training rucks; selection is fueled the same way and race-day-new food is how you end up sick on a ruck."
+     },
+     {
+      "label": "Hydration + sodium",
+      "text": "Half your bodyweight in oz of water daily as a floor (~80 oz), more on ruck days. For rucks over 90 min or hot days, add electrolytes (500-700 mg sodium/hour). Salty sweater signs: white crust on your hat, cramping."
+     },
+     {
+      "label": "Post-session window",
+      "text": "Within about an hour of hard sessions: 30-40 g protein + 60-100 g carbs. The post-workout shake in the plan handles it."
+     }
+    ]
+   },
+   {
+    "heading": "TWO-A-DAY NOTE",
+    "entries": [
+     {
+      "label": "PM sessions",
+      "text": "On days with a PM run or mobility work, no extra meal is needed; the plan's snacks already cover it. If a PM run leaves you hollow, add a glass of milk before bed."
+     }
+    ]
+   }
+  ],
+  "grocery": [
+   {
+    "category": "Protein",
+    "item": "Eggs",
+    "amount": "2.5 dozen",
+    "notes": "Scrambled breakfasts."
+   },
+   {
+    "category": "Protein",
+    "item": "Chicken thighs",
+    "amount": "2.5-3 lb",
+    "notes": "Sunday meal prep for lunch bowls. Thighs survive reheating better than breast."
+   },
+   {
+    "category": "Protein",
+    "item": "String cheese",
+    "amount": "1 bag",
+    "notes": "Evening no-blender option."
+   },
+   {
+    "category": "Protein",
+    "item": "Whey protein",
+    "amount": "~14 scoops/week (1 tub/3 weeks)",
+    "notes": "Third-party tested brand. Breakfast shakes, post-workout, and evening."
+   },
+   {
+    "category": "Protein",
+    "item": "Whole milk",
+    "amount": "2-3 gallons",
+    "notes": "Cheapest calories in the store; it's now in breakfast, post-workout, and evening."
+   },
+   {
+    "category": "Carbs",
+    "item": "Rice",
+    "amount": "3-4 cups dry",
+    "notes": "Cook the week's batch on Sunday."
+   },
+   {
+    "category": "Carbs",
+    "item": "Oats",
+    "amount": "1 canister (if choosing Option B breakfasts)",
+    "notes": null
+   },
+   {
+    "category": "Carbs",
+    "item": "Whole-wheat bread",
+    "amount": "1-2 loaves",
+    "notes": null
+   },
+   {
+    "category": "Carbs",
+    "item": "Bananas",
+    "amount": "7-10",
+    "notes": "Pre-workout + shakes."
+   },
+   {
+    "category": "Carbs",
+    "item": "Apples / oranges",
+    "amount": "5-6",
+    "notes": "Snacks."
+   },
+   {
+    "category": "Carbs",
+    "item": "Granola bars",
+    "amount": "1 box",
+    "notes": "Pre-workout option B."
+   },
+   {
+    "category": "Carbs",
+    "item": "Honey",
+    "amount": "1 bottle (lasts a month)",
+    "notes": null
+   },
+   {
+    "category": "Fats",
+    "item": "Peanut butter",
+    "amount": "1 large jar",
+    "notes": "Also the +200 kcal adjustment lever."
+   },
+   {
+    "category": "Fats",
+    "item": "Olive oil",
+    "amount": "On hand",
+    "notes": "Meal prep bowls."
+   },
+   {
+    "category": "Fats",
+    "item": "Trail mix / nuts",
+    "amount": "1 lb",
+    "notes": "Desk drawer."
+   },
+   {
+    "category": "Produce",
+    "item": "Frozen mixed vegetables",
+    "amount": "2-3 bags",
+    "notes": "Frozen is fine; roast fresh when you have time."
+   },
+   {
+    "category": "Produce",
+    "item": "Berries (frozen OK)",
+    "amount": "1 bag",
+    "notes": "Overnight oats."
+   },
+   {
+    "category": "Supplements",
+    "item": "Creatine monohydrate",
+    "amount": "5 g/day (1 tub lasts ~3 months)",
+    "notes": "Plain monohydrate; ignore fancy versions."
+   },
+   {
+    "category": "Ruck fuel",
+    "item": "Gels / chews / dried fruit",
+    "amount": "For sessions over 75 min",
+    "notes": "Practice selection fueling in training."
+   },
+   {
+    "category": "Ruck fuel",
+    "item": "Electrolyte packets",
+    "amount": "For rucks over 90 min or heat",
+    "notes": "500-700 mg sodium per hour."
+   }
+  ],
+  "meals": [
+   {
+    "slot": "Breakfast (~6:00-6:45 AM)",
+    "options": [
+     {
+      "option": "A",
+      "foods": "4 whole eggs scrambled + 2 slices whole-wheat toast w/ butter + 1 banana + 1 cup whole milk",
+      "protein": 42.0,
+      "carbs": 66.0,
+      "fat": 32.0,
+      "calories": 720.0,
+      "notes": "The default. 10 minutes including cooking."
+     },
+     {
+      "option": "B - rushed morning",
+      "foods": "Overnight oats: 1 cup oats + 1 scoop whey + 1 cup whole milk + 2 tbsp peanut butter + handful of berries (made the night before)",
+      "protein": 48.0,
+      "carbs": 78.0,
+      "fat": 26.0,
+      "calories": 740.0,
+      "notes": "Zero morning prep. Make 3 jars on Sunday."
+     },
+     {
+      "option": "C",
+      "foods": "Bagel w/ 2 tbsp peanut butter + shake (1 scoop whey in 1 cup whole milk)",
+      "protein": 48.0,
+      "carbs": 70.0,
+      "fat": 26.0,
+      "calories": 700.0,
+      "notes": "Grab-and-go; shake mixes in 30 seconds."
+     }
+    ]
+   },
+   {
+    "slot": "Mid-morning snack (~9:30-10:30 AM, between classes)",
+    "options": [
+     {
+      "option": "A",
+      "foods": "2 oz trail mix (nuts + dried fruit) + 1 apple",
+      "protein": 8.0,
+      "carbs": 40.0,
+      "fat": 20.0,
+      "calories": 380.0,
+      "notes": "Desk drawer food. No fridge needed."
+     },
+     {
+      "option": "B",
+      "foods": "Peanut butter & honey sandwich + 1 cup whole milk",
+      "protein": 24.0,
+      "carbs": 57.0,
+      "fat": 24.0,
+      "calories": 560.0,
+      "notes": "The bigger option; use it on heavy training days or when weight gain stalls."
+     },
+     {
+      "option": "C",
+      "foods": "Protein bar + 1 banana",
+      "protein": 22.0,
+      "carbs": 45.0,
+      "fat": 10.0,
+      "calories": 350.0,
+      "notes": "Emergency option; real food beats bars most days."
+     }
+    ]
+   },
+   {
+    "slot": "Lunch (~12:00-1:00 PM)",
+    "options": [
+     {
+      "option": "A - meal prep bowl",
+      "foods": "6 oz grilled chicken thigh + 1.5 cups cooked rice + roasted vegetables + 1 tbsp olive oil (prepped Sunday, 4-5 containers)",
+      "protein": 48.0,
+      "carbs": 72.0,
+      "fat": 22.0,
+      "calories": 700.0,
+      "notes": "The backbone of the plan. One hour of Sunday cooking covers the week."
+     },
+     {
+      "option": "B",
+      "foods": "2 turkey + cheese sandwiches on whole wheat w/ mayo + 1 orange",
+      "protein": 42.0,
+      "carbs": 70.0,
+      "fat": 24.0,
+      "calories": 680.0,
+      "notes": "For weeks when meal prep didn't happen."
+     },
+     {
+      "option": "C",
+      "foods": "Leftovers from dinner (aim for a fist of protein, two fists of carbs)",
+      "protein": 45.0,
+      "carbs": 70.0,
+      "fat": 20.0,
+      "calories": 680.0,
+      "notes": "Cook extra at dinner on purpose."
+     }
+    ]
+   },
+   {
+    "slot": "Pre-workout (~30-60 min before, ~3:30 PM)",
+    "options": [
+     {
+      "option": "A",
+      "foods": "1 banana + 1 tbsp peanut butter",
+      "protein": 5.0,
+      "carbs": 30.0,
+      "fat": 9.0,
+      "calories": 220.0,
+      "notes": "Light on purpose; you're running or lifting on it."
+     },
+     {
+      "option": "B",
+      "foods": "Granola bar + 1 orange",
+      "protein": 5.0,
+      "carbs": 50.0,
+      "fat": 8.0,
+      "calories": 270.0,
+      "notes": "For caffeine before hard sessions without coffee: 100-200 mg via caffeine pill or a sugar-free energy drink works the same."
+     }
+    ]
+   },
+   {
+    "slot": "Post-workout (within ~1 hr)",
+    "options": [
+     {
+      "option": "A",
+      "foods": "Shake: 1.5 scoops whey + 12 oz whole milk + 1 banana + 5 g creatine",
+      "protein": 48.0,
+      "carbs": 45.0,
+      "fat": 12.0,
+      "calories": 480.0,
+      "notes": "Creatine goes here daily. On rest days take creatine with breakfast instead."
+     },
+     {
+      "option": "B",
+      "foods": "1 pint chocolate milk + 1 scoop whey",
+      "protein": 45.0,
+      "carbs": 55.0,
+      "fat": 16.0,
+      "calories": 540.0,
+      "notes": "Cheap and proven."
+     }
+    ]
+   },
+   {
+    "slot": "Evening (after dinner, optional but default ON)",
+    "options": [
+     {
+      "option": "A",
+      "foods": "Shake: 1 scoop whey + 1 cup whole milk",
+      "protein": 32.0,
+      "carbs": 17.0,
+      "fat": 10.0,
+      "calories": 270.0,
+      "notes": "Protein before bed. Skip only if gaining faster than 1 lb/week."
+     },
+     {
+      "option": "B",
+      "foods": "2 string cheese + 1 oz almonds + 1 apple",
+      "protein": 22.0,
+      "carbs": 33.0,
+      "fat": 26.0,
+      "calories": 425.0,
+      "notes": "No-blender option."
+     }
+    ]
+   }
+  ],
+  "mealTotals": [
+   {
+    "label": "PLAN TOTAL (all Option A)",
+    "protein": "183.0",
+    "carbs": "270.0",
+    "fat": "105.0",
+    "calories": "2770.0"
+   },
+   {
+    "label": "DAILY TARGET (training day)",
+    "protein": "160.0",
+    "carbs": "400-450",
+    "fat": "80-90",
+    "calories": "3,300-3,500"
+   }
+  ]
+ }
+}
