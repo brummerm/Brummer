@@ -181,6 +181,17 @@ canvas.chart { width: 100%; height: 190px; margin-top: 6px; }
 .hist-row:last-child { border: none; }
 .hist-row span { color: var(--dim); }
 
+/* ---------- day editor ---------- */
+.card-head { display: flex; justify-content: space-between; align-items: center; }
+.card-head h3 { margin-bottom: 10px; }
+.mini-btn { padding: 7px 12px; min-height: 38px; border-radius: 10px; background: var(--card2); border: 1px solid var(--line); font-size: .8rem; font-weight: 700; color: var(--dim); }
+.mini-btn.danger { color: var(--red); }
+.ed-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.ed-info { flex: 1; min-width: 0; }
+.ed-info b { display: block; font-size: .95rem; }
+.ed-info span { font-size: .78rem; color: var(--dim); }
+.ed-form { flex: 1; }
+
 /* ---------- settings ---------- */
 .sheet-inner { max-width: 560px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 18px 40px; }
 .sheet-inner h2 { margin-bottom: 18px; }

@@ -18,7 +18,7 @@ function loadDB() {
 }
 function defaultDB() {
   return { startDate: null, lifts: {}, endurance: [], meals: {}, bodyweight: [],
-           restOverrides: {}, doneSets: {}, sessionsDone: {} };
+           restOverrides: {}, doneSets: {}, sessionsDone: {}, dayEdits: {} };
 }
 function save() {
   db._updated = new Date().toISOString();
@@ -105,6 +105,18 @@ function sessionFor(week, dayIdx) {
       if (v) items.push({ kind: 'target', text: v.text });
     } else items.push(it);
   }
+  // per-day user edits: remove / edit / add exercises for this specific day
+  const edits = db.dayEdits[week + ':' + dayIdx];
+  if (edits) {
+    let finalItems = items.filter(i => !(i.kind === 'exercise' && (edits.removed || []).includes(i.name)));
+    finalItems = finalItems.map(i => {
+      const e = i.kind === 'exercise' && edits.edited && edits.edited[i.name];
+      return e ? Object.assign({}, i, e, { origName: i.name }) : i;
+    });
+    for (const a of (edits.added || [])) finalItems.push(a);
+    items.length = 0; items.push(...finalItems);
+  }
+
   const t = (day.title || '').toUpperCase();
   let type = 'lift';
   if (dayIdx === 6) type = 'rest';
@@ -243,8 +255,10 @@ function renderToday(main) {
         listHTML += `<div class="ex-item"><span class="nm muted">${esc(it.raw)}</span></div>`;
       }
     }
-    const card = h(`<div class="card"><h3>Session</h3>${listHTML}</div>`);
+    const edited = !!db.dayEdits[setDoneKey(view.week, view.dayIdx)];
+    const card = h(`<div class="card"><div class="card-head"><h3>Session${edited ? ' · edited' : ''}</h3><button class="mini-btn" id="edit-day">Edit day</button></div>${listHTML}</div>`);
     main.append(card);
+    $('#edit-day').onclick = () => openDayEditor(sess);
   }
 
   if (lifts.length && sess.type !== 'rest') {
@@ -759,6 +773,113 @@ function drawChart(canvas, pts, unit, invert) {
   ctx.fillText(fmtDate(pts[0].x), pad.l, H - 6);
   const lastLbl = fmtDate(pts[pts.length-1].x);
   ctx.fillText(lastLbl, W - pad.r - ctx.measureText(lastLbl).width, H - 6);
+}
+
+/* ================= DAY EDITOR ================= */
+function dayEditsFor(key) {
+  if (!db.dayEdits[key]) db.dayEdits[key] = { removed: [], edited: {}, added: [] };
+  const e = db.dayEdits[key];
+  e.removed = e.removed || []; e.edited = e.edited || {}; e.added = e.added || [];
+  return e;
+}
+function pruneDayEdits(key) {
+  const e = db.dayEdits[key];
+  if (e && !e.removed.length && !Object.keys(e.edited).length && !e.added.length)
+    delete db.dayEdits[key];
+}
+function mkExercise(name, sets, kind, value) {
+  const it = { kind: 'exercise', name, sets, custom: true };
+  if (kind === 'time') { it.type = 'time'; it.seconds = value; it.raw = sets + ' x ' + value + ' sec'; }
+  else { it.type = 'reps'; it.reps = value; it.raw = sets + ' x ' + value; }
+  return it;
+}
+
+function openDayEditor(sess) {
+  const key = setDoneKey(sess.week, sess.dayIdx);
+  const s = $('#settings-sheet');
+  s.classList.remove('hidden');
+
+  const draw = () => {
+    const cur = sessionFor(sess.week, sess.dayIdx);   // re-resolve with edits applied
+    const exs = cur.items.filter(i => i.kind === 'exercise');
+    let rows = '';
+    exs.forEach((ex, i) => {
+      rows += `<div class="ed-row" data-i="${i}">
+        <div class="ed-info"><b>${esc(ex.name)}</b><span>${esc(ex.raw || '')}${ex.custom ? ' · added' : ''}</span></div>
+        <button class="mini-btn" data-edit="${i}">Edit</button>
+        <button class="mini-btn danger" data-del="${i}">✕</button>
+      </div>`;
+    });
+    s.innerHTML = `<div class="sheet-inner">
+      <div class="player-top"><button id="ed-close">✕ Done</button></div>
+      <h2>${esc(sess.day.day)} · Week ${sess.week}</h2>
+      <p class="muted small" style="margin-bottom:14px">Changes apply to this day only and sync with the rest of your data.</p>
+      ${rows || '<p class="muted">No exercises on this day.</p>'}
+      <div class="card" style="margin-top:16px"><h3>Add exercise</h3>
+        <div style="margin-bottom:10px"><label class="fld">Name</label><input type="text" id="ad-name" placeholder="e.g. Barbell curl"></div>
+        <div class="row" style="margin-bottom:10px">
+          <div><label class="fld">Sets</label><input type="number" inputmode="numeric" id="ad-sets" value="3"></div>
+          <div><label class="fld">Type</label><select id="ad-kind"><option value="reps">Reps</option><option value="time">Timed (sec)</option></select></div>
+          <div><label class="fld" id="ad-val-lbl">Reps</label><input type="number" inputmode="numeric" id="ad-val" value="10"></div>
+        </div>
+        <button class="btn primary" id="ad-go">Add to this day</button>
+      </div>
+      ${db.dayEdits[key] ? '<button class="btn ghost" id="ed-reset" style="color:var(--red)">Reset day to plan</button>' : ''}
+    </div>`;
+
+    $('#ed-close').onclick = () => { s.classList.add('hidden'); render(); };
+    $('#ad-kind').onchange = e => { $('#ad-val-lbl').textContent = e.target.value === 'time' ? 'Seconds' : 'Reps'; };
+    $('#ad-go').onclick = () => {
+      const name = $('#ad-name').value.trim();
+      const sets = parseInt($('#ad-sets').value), val = parseInt($('#ad-val').value);
+      if (!name || !sets || !val) return;
+      dayEditsFor(key).added.push(mkExercise(name, sets, $('#ad-kind').value, val));
+      save(); draw();
+    };
+    if ($('#ed-reset')) $('#ed-reset').onclick = () => {
+      if (confirm('Remove all changes to this day and restore the plan?')) {
+        delete db.dayEdits[key]; save(); draw();
+      }
+    };
+    document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+      const ex = exs[+b.dataset.del];
+      const e = dayEditsFor(key);
+      const orig = ex.origName || ex.name;
+      if (ex.custom) e.added = e.added.filter(a => a !== ex && a.name !== ex.name);
+      else { e.removed.push(orig); delete e.edited[orig]; }
+      pruneDayEdits(key); save(); draw();
+    });
+    document.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
+      const ex = exs[+b.dataset.edit];
+      const row = b.closest('.ed-row');
+      const isTime = ex.type === 'time';
+      row.innerHTML = `<div class="ed-form">
+        <input type="text" id="ef-name" value="${esc(ex.name)}" style="margin-bottom:8px">
+        <div class="row">
+          <div><label class="fld">Sets</label><input type="number" inputmode="numeric" id="ef-sets" value="${ex.sets || 3}"></div>
+          <div><label class="fld">${isTime ? 'Seconds' : 'Reps'}</label><input type="number" inputmode="numeric" id="ef-val" value="${isTime ? (ex.seconds || 30) : (ex.reps || 10)}"></div>
+          <button class="btn primary" id="ef-save" style="align-self:end;flex:0 0 90px">Save</button>
+        </div>
+      </div>`;
+      $('#ef-save').onclick = () => {
+        const name = $('#ef-name').value.trim() || ex.name;
+        const sets = parseInt($('#ef-sets').value) || ex.sets;
+        const val = parseInt($('#ef-val').value);
+        const e = dayEditsFor(key);
+        if (ex.custom) {
+          const a = e.added.find(a2 => a2.name === ex.name);
+          if (a) Object.assign(a, mkExercise(name, sets, isTime ? 'time' : 'reps', val));
+        } else {
+          const patch = { name, sets };
+          if (isTime) { patch.seconds = val; patch.raw = sets + ' x ' + val + ' sec'; }
+          else { patch.type = 'reps'; patch.reps = val; patch.repsHigh = undefined; patch.raw = sets + ' x ' + val; }
+          e.edited[ex.origName || ex.name] = patch;
+        }
+        save(); draw();
+      };
+    });
+  };
+  draw();
 }
 
 /* ================= SETTINGS ================= */
